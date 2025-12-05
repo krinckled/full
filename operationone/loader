@@ -1,0 +1,3221 @@
+-- alot of this is the keysystem, by changing it to "false" you can get around all of it lol
+
+local v0 = loadstring(game:HttpGet("https://pastebin.com/raw/vufU8Z8h"))();
+local v1 = "https://workink.net/24Rr/sz2i1euj";
+local v2 = 980093;
+local l_HttpService_0 = game:GetService("HttpService");
+local l_TweenService_0 = game:GetService("TweenService");
+local l_CoreGui_0 = game:GetService("CoreGui");
+local v6 = {};
+v6.__index = v6;
+v6.endpoint_base = "https://work.ink/_api/v2/token/isValid/";
+local function v19(v7, v8) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_HttpService_0 (ref)
+    if not v8 then
+        v8 = {};
+    end;
+    if syn and syn.request then
+        local l_status_0, l_result_0 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v7 (ref), v8 (ref)
+            return syn.request({
+                Url = v7, 
+                Method = "GET", 
+                Headers = v8
+            });
+        end);
+        if not l_status_0 or not l_result_0 then
+            return nil, nil;
+        else
+            return l_result_0.Body, l_result_0.StatusCode;
+        end;
+    elseif http_request then
+        local l_status_1, l_result_1 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v7 (ref), v8 (ref)
+            return http_request({
+                Url = v7, 
+                Method = "GET", 
+                Headers = v8
+            });
+        end);
+        if not l_status_1 or not l_result_1 then
+            return nil, nil;
+        else
+            return l_result_1.Body, l_result_1.StatusCode;
+        end;
+    elseif request then
+        local l_status_2, l_result_2 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v7 (ref), v8 (ref)
+            return request({
+                Url = v7, 
+                Method = "GET", 
+                Headers = v8
+            });
+        end);
+        if not l_status_2 or not l_result_2 then
+            return nil, nil;
+        else
+            return l_result_2.Body, l_result_2.StatusCode;
+        end;
+    elseif http and http.request then
+        local l_status_3, l_result_3 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v7 (ref), v8 (ref)
+            return http.request({
+                Url = v7, 
+                Method = "GET", 
+                Headers = v8
+            });
+        end);
+        if not l_status_3 or not l_result_3 then
+            return nil, nil;
+        elseif type(l_result_3) == "table" and l_result_3.Body then
+            return l_result_3.Body, l_result_3.StatusCode or l_result_3.Status and tonumber(l_result_3.Status);
+        else
+            return l_result_3, 200;
+        end;
+    else
+        local l_status_4, l_result_4 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_HttpService_0 (ref), v7 (ref)
+            return l_HttpService_0:GetAsync(v7, true);
+        end);
+        if l_status_4 and l_result_4 then
+            return l_result_4, 200;
+        else
+            return nil, nil;
+        end;
+    end;
+end;
+v6.verifyToken = function(v20, v21) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v6 (ref), v19 (ref), l_HttpService_0 (ref), v2 (ref)
+    if not v20 or v20 == "" then
+        return false, "empty token";
+    else
+        local v22 = v6.endpoint_base .. v20;
+        if v21 then
+            v22 = v22 .. "?deleteToken=1";
+        end;
+        local v23, _ = v19(v22);
+        if not v23 then
+            return false, "request failed";
+        else
+            local l_status_5, l_result_5 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_HttpService_0 (ref), v23 (ref)
+                return l_HttpService_0:JSONDecode(v23);
+            end);
+            if not l_status_5 then
+                return false, "invalid json response";
+            elseif type(l_result_5) == "table" and l_result_5.valid ~= nil and l_result_5.info.linkId == v2 then
+                return l_result_5.valid == true, l_result_5;
+            else
+                return false, l_result_5;
+            end;
+        end;
+    end;
+end;
+Settings = {
+    KeySystem = false, 
+    KeySettings = {
+        Title = "Key System", 
+        Subtitle = v1, 
+        Note = "The Key link has been copied to the clipboard", 
+        FileName = "KeyOperationOne", 
+        SaveKey = true, 
+        SingleUse = false, 
+        MaxAttempts = 5
+    }
+};
+local v27 = "Rayfield";
+local v28 = ".rfld";
+local function v29() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v1 (ref)
+    pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v1 (ref)
+        setclipboard(v1);
+    end);
+end;
+if Settings.KeySystem then
+    if not Settings.KeySettings then
+        Passthrough = true;
+        return;
+    else
+        if isfolder and not isfolder(v27 .. "/Key System") then
+            makefolder(v27 .. "/Key System");
+        end;
+        local v40, _ = (function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v27 (ref), v28 (ref), v6 (ref)
+            if isfile then
+                local v30 = v27 .. "/Key System" .. "/" .. Settings.KeySettings.FileName .. v28;
+                do
+                    local l_v30_0 = v30;
+                    if isfile(l_v30_0) then
+                        local l_status_6, l_result_6 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                            -- upvalues: l_v30_0 (ref)
+                            return readfile(l_v30_0);
+                        end);
+                        if l_status_6 and l_result_6 and #l_result_6 > 0 then
+                            local v34, v35, v36 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                -- upvalues: v6 (ref), l_result_6 (ref)
+                                return v6.verifyToken(l_result_6, Settings.KeySettings.SingleUse == true);
+                            end);
+                            if not v34 then
+                                return false, "executor error";
+                            else
+                                local l_v35_0 = v35;
+                                local l_v36_0 = v36;
+                                if l_v35_0 == true then
+                                    if type(l_v36_0) == "table" and l_v36_0.info and l_v36_0.info.expiresAfter then
+                                        local v39 = tonumber(l_v36_0.info.expiresAfter) or tonumber(l_v36_0.info.expiresafter) or tonumber(l_v36_0.expiresAfter);
+                                        if v39 and v39 < os.time() * 1000 then
+                                            return false, "expired";
+                                        end;
+                                    end;
+                                    Passthrough = true;
+                                    return true, "valid";
+                                else
+                                    return false, tostring(l_v36_0 or "invalid");
+                                end;
+                            end;
+                        else
+                            --[[ close >= 1 ]]
+                        end;
+                    end;
+                end;
+            end;
+            return false, "no saved key";
+        end)();
+        if not v40 then
+            v29();
+            local l_MaxAttempts_0 = Settings.KeySettings.MaxAttempts;
+            local v43 = useStudio and script.Parent:FindFirstChild("Key") or game:GetObjects("rbxassetid://11380036235")[1];
+            v43.Enabled = true;
+            if gethui then
+                v43.Parent = gethui();
+            elseif syn and syn.protect_gui then
+                syn.protect_gui(v43);
+                v43.Parent = l_CoreGui_0;
+            elseif not useStudio and l_CoreGui_0:FindFirstChild("RobloxGui") then
+                v43.Parent = l_CoreGui_0:FindFirstChild("RobloxGui");
+            elseif not useStudio then
+                v43.Parent = l_CoreGui_0;
+            end;
+            if gethui then
+                for _, v45 in ipairs(gethui():GetChildren()) do
+                    if v45.Name == v43.Name and v45 ~= v43 then
+                        v45.Enabled = false;
+                        v45.Name = "KeyUI-Old";
+                    end;
+                end;
+            elseif not useStudio then
+                for _, v47 in ipairs(l_CoreGui_0:GetChildren()) do
+                    if v47.Name == v43.Name and v47 ~= v43 then
+                        v47.Enabled = false;
+                        v47.Name = "KeyUI-Old";
+                    end;
+                end;
+            end;
+            local l_Main_0 = v43.Main;
+            l_Main_0.Title.Text = Settings.KeySettings.Title;
+            l_Main_0.Subtitle.Text = Settings.KeySettings.Subtitle;
+            l_Main_0.NoteMessage.Text = Settings.KeySettings.Note;
+            l_Main_0.Size = UDim2.new(0, 467, 0, 175);
+            l_Main_0.BackgroundTransparency = 1;
+            l_Main_0.Shadow.Image.ImageTransparency = 1;
+            l_Main_0.Title.TextTransparency = 1;
+            l_Main_0.Subtitle.TextTransparency = 1;
+            l_Main_0.KeyNote.TextTransparency = 1;
+            l_Main_0.Input.BackgroundTransparency = 1;
+            l_Main_0.Input.UIStroke.Transparency = 1;
+            l_Main_0.Input.InputBox.TextTransparency = 1;
+            l_Main_0.NoteTitle.TextTransparency = 1;
+            l_Main_0.NoteMessage.TextTransparency = 1;
+            l_Main_0.Hide.ImageTransparency = 1;
+            l_TweenService_0:Create(l_Main_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                BackgroundTransparency = 0
+            }):Play();
+            l_TweenService_0:Create(l_Main_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                Size = UDim2.new(0, 500, 0, 187)
+            }):Play();
+            l_TweenService_0:Create(l_Main_0.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                ImageTransparency = 0.5
+            }):Play();
+            task.wait(0.05);
+            l_TweenService_0:Create(l_Main_0.Title, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                TextTransparency = 0
+            }):Play();
+            l_TweenService_0:Create(l_Main_0.Subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                TextTransparency = 0
+            }):Play();
+            task.wait(0.05);
+            l_TweenService_0:Create(l_Main_0.KeyNote, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                TextTransparency = 0
+            }):Play();
+            l_TweenService_0:Create(l_Main_0.Input, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                BackgroundTransparency = 0
+            }):Play();
+            l_TweenService_0:Create(l_Main_0.Input.UIStroke, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                Transparency = 0
+            }):Play();
+            l_TweenService_0:Create(l_Main_0.Input.InputBox, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                TextTransparency = 0
+            }):Play();
+            task.wait(0.05);
+            l_TweenService_0:Create(l_Main_0.NoteTitle, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                TextTransparency = 0
+            }):Play();
+            l_TweenService_0:Create(l_Main_0.NoteMessage, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                TextTransparency = 0
+            }):Play();
+            task.wait(0.15);
+            l_TweenService_0:Create(l_Main_0.Hide, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                ImageTransparency = 0.3
+            }):Play();
+            do
+                local l_l_MaxAttempts_0_0, l_v43_0, l_l_Main_0_0 = l_MaxAttempts_0, v43, l_Main_0;
+                local function v55(v52) --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_TweenService_0 (ref), l_l_Main_0_0 (ref), v27 (ref), v28 (ref)
+                    l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                        BackgroundTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                        Size = UDim2.new(0, 467, 0, 175)
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        ImageTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Title, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.KeyNote, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Input, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        BackgroundTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Input.UIStroke, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        Transparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Input.InputBox, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.NoteTitle, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.NoteMessage, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Hide, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                        ImageTransparency = 1
+                    }):Play();
+                    task.wait(0.51);
+                    Passthrough = true;
+                    l_l_Main_0_0.Visible = false;
+                    if Settings.KeySettings.SaveKey then
+                        local v53 = v27 .. "/Key System" .. "/" .. Settings.KeySettings.FileName .. v28;
+                        do
+                            local l_v53_0 = v53;
+                            if writefile then
+                                pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                    -- upvalues: l_v53_0 (ref), v52 (ref)
+                                    writefile(l_v53_0, v52);
+                                end);
+                            end;
+                            if RayfieldLibrary and RayfieldLibrary.Notify then
+                                RayfieldLibrary:Notify({
+                                    Title = "Key System", 
+                                    Content = "Key saved.", 
+                                    Image = 3605522284
+                                });
+                            end;
+                        end;
+                    end;
+                end;
+                local function v56() --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_l_MaxAttempts_0_0 (ref), l_TweenService_0 (ref), l_l_Main_0_0 (ref)
+                    if l_l_MaxAttempts_0_0 <= 0 then
+                        l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                            BackgroundTransparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                            Size = UDim2.new(0, 467, 0, 175)
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                            ImageTransparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.Title, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                            TextTransparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.Subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                            TextTransparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.KeyNote, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                            TextTransparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.Input, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                            BackgroundTransparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.Input.UIStroke, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                            Transparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.Input.InputBox, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                            TextTransparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.NoteTitle, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                            TextTransparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.NoteMessage, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                            TextTransparency = 1
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0.Hide, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                            ImageTransparency = 1
+                        }):Play();
+                        task.wait(0.45);
+                        error("No Attempts Remaining", 2);
+                    else
+                        l_l_Main_0_0.Input.InputBox.Text = "";
+                        l_l_MaxAttempts_0_0 = l_l_MaxAttempts_0_0 - 1;
+                        l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                            Size = UDim2.new(0, 467, 0, 175)
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.4, Enum.EasingStyle.Elastic), {
+                            Position = UDim2.new(0.495, 0, 0.5, 0)
+                        }):Play();
+                        task.wait(0.1);
+                        l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.4, Enum.EasingStyle.Elastic), {
+                            Position = UDim2.new(0.505, 0, 0.5, 0)
+                        }):Play();
+                        task.wait(0.1);
+                        l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                            Position = UDim2.new(0.5, 0, 0.5, 0)
+                        }):Play();
+                        l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                            Size = UDim2.new(0, 500, 0, 187)
+                        }):Play();
+                    end;
+                end;
+                l_l_Main_0_0.Input.InputBox.FocusLost:Connect(function(_) --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_l_Main_0_0 (ref), v6 (ref), v56 (ref), v55 (ref)
+                    if #l_l_Main_0_0.Input.InputBox.Text == 0 then
+                        return;
+                    else
+                        local l_Text_0 = l_l_Main_0_0.Input.InputBox.Text;
+                        task.spawn(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                            -- upvalues: v6 (ref), l_Text_0 (ref), v56 (ref), v55 (ref)
+                            if RayfieldLibrary and RayfieldLibrary.Notify then
+                                RayfieldLibrary:Notify({
+                                    Title = "Key System", 
+                                    Content = "Checking key...", 
+                                    Duration = 3
+                                });
+                            end;
+                            local v59, v60, v61 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                -- upvalues: v6 (ref), l_Text_0 (ref)
+                                return v6.verifyToken(l_Text_0, Settings.KeySettings.SingleUse == true);
+                            end);
+                            if not v59 then
+                                if RayfieldLibrary and RayfieldLibrary.Notify then
+                                    RayfieldLibrary:Notify({
+                                        Title = "Key System", 
+                                        Content = "Network / executor error when checking key.", 
+                                        Duration = 4
+                                    });
+                                end;
+                                v56();
+                                return;
+                            else
+                                local l_v60_0 = v60;
+                                local l_v61_0 = v61;
+                                if l_v60_0 == true then
+                                    local v64 = nil;
+                                    if type(l_v61_0) == "table" then
+                                        if l_v61_0.info and l_v61_0.info.expiresAfter then
+                                            v64 = tonumber(l_v61_0.info.expiresAfter);
+                                        elseif l_v61_0.expiresAfter then
+                                            v64 = tonumber(l_v61_0.expiresAfter);
+                                        end;
+                                    end;
+                                    if v64 and v64 < os.time() * 1000 then
+                                        if RayfieldLibrary and RayfieldLibrary.Notify then
+                                            RayfieldLibrary:Notify({
+                                                Title = "Key System", 
+                                                Content = "Key expired.", 
+                                                Duration = 4
+                                            });
+                                        end;
+                                        v56();
+                                        return;
+                                    else
+                                        if RayfieldLibrary and RayfieldLibrary.Notify then
+                                            RayfieldLibrary:Notify({
+                                                Title = "Key System", 
+                                                Content = "Key valid \226\128\148 launching.", 
+                                                Duration = 4
+                                            });
+                                        end;
+                                        v55(l_Text_0);
+                                        return;
+                                    end;
+                                else
+                                    local v65 = tostring(l_v61_0 or "Invalid key");
+                                    if RayfieldLibrary and RayfieldLibrary.Notify then
+                                        RayfieldLibrary:Notify({
+                                            Title = "Key System", 
+                                            Content = "Invalid key: " .. v65, 
+                                            Duration = 4
+                                        });
+                                    end;
+                                    v56();
+                                    return;
+                                end;
+                            end;
+                        end);
+                        return;
+                    end;
+                end);
+                l_l_Main_0_0.Hide.MouseButton1Click:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_TweenService_0 (ref), l_l_Main_0_0 (ref), l_v43_0 (ref)
+                    l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                        BackgroundTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+                        Size = UDim2.new(0, 467, 0, 175)
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        ImageTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Title, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.KeyNote, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Input, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        BackgroundTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Input.UIStroke, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        Transparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Input.InputBox, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.NoteTitle, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.NoteMessage, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                        TextTransparency = 1
+                    }):Play();
+                    l_TweenService_0:Create(l_l_Main_0_0.Hide, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
+                        ImageTransparency = 1
+                    }):Play();
+                    task.wait(0.51);
+                    if RayfieldLibrary and RayfieldLibrary.Destroy then
+                        pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                            RayfieldLibrary:Destroy();
+                        end);
+                    end;
+                    pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                        -- upvalues: l_v43_0 (ref)
+                        l_v43_0:Destroy();
+                    end);
+                end);
+            end;
+        end;
+    end;
+end;
+if Settings.KeySystem then
+    repeat
+        task.wait();
+    until Passthrough;
+end;
+local v66 = {};
+v66.__index = v66;
+local l_Players_0 = game:GetService("Players");
+local l_RunService_0 = game:GetService("RunService");
+local l_Workspace_0 = game:GetService("Workspace");
+local l_LocalPlayer_0 = l_Players_0.LocalPlayer;
+local l_CurrentCamera_0 = l_Workspace_0.CurrentCamera;
+local v72 = {
+    position = Vector3.new(), 
+    cframe = CFrame.new(), 
+    fieldOfView = 70, 
+    lastUpdate = 0
+};
+local v73 = {
+    R15 = {
+        {
+            "Head", 
+            "UpperTorso"
+        }, 
+        {
+            "UpperTorso", 
+            "LowerTorso"
+        }, 
+        {
+            "UpperTorso", 
+            "LeftUpperArm"
+        }, 
+        {
+            "LeftUpperArm", 
+            "LeftLowerArm"
+        }, 
+        {
+            "LeftLowerArm", 
+            "LeftHand"
+        }, 
+        {
+            "UpperTorso", 
+            "RightUpperArm"
+        }, 
+        {
+            "RightUpperArm", 
+            "RightLowerArm"
+        }, 
+        {
+            "RightLowerArm", 
+            "RightHand"
+        }, 
+        {
+            "LowerTorso", 
+            "LeftUpperLeg"
+        }, 
+        {
+            "LeftUpperLeg", 
+            "LeftLowerLeg"
+        }, 
+        {
+            "LeftLowerLeg", 
+            "LeftFoot"
+        }, 
+        {
+            "LowerTorso", 
+            "RightUpperLeg"
+        }, 
+        {
+            "RightUpperLeg", 
+            "RightLowerLeg"
+        }, 
+        {
+            "RightLowerLeg", 
+            "RightFoot"
+        }
+    }, 
+    R6 = {
+        {
+            "Head", 
+            "Torso"
+        }, 
+        {
+            "Torso", 
+            "Left Arm"
+        }, 
+        {
+            "Torso", 
+            "Right Arm"
+        }, 
+        {
+            "Torso", 
+            "Left Leg"
+        }, 
+        {
+            "Torso", 
+            "Right Leg"
+        }
+    }, 
+    viewmodel = {
+        {
+            "head", 
+            "torso"
+        }, 
+        {
+            "torso", 
+            "shoulder1"
+        }, 
+        {
+            "torso", 
+            "shoulder2"
+        }, 
+        {
+            "shoulder1", 
+            "arm1"
+        }, 
+        {
+            "shoulder2", 
+            "arm2"
+        }, 
+        {
+            "torso", 
+            "hip1"
+        }, 
+        {
+            "torso", 
+            "hip2"
+        }, 
+        {
+            "hip1", 
+            "leg1"
+        }, 
+        {
+            "hip2", 
+            "leg2"
+        }
+    }
+};
+local v74 = {
+    HIGH = {
+        distance = 150, 
+        updateRate = 1, 
+        features = {
+            box = true, 
+            healthBar = true, 
+            nickname = true, 
+            skeleton = true, 
+            chams = true
+        }
+    }, 
+    MEDIUM = {
+        distance = 250, 
+        updateRate = 1, 
+        features = {
+            box = true, 
+            healthBar = true, 
+            nickname = true, 
+            skeleton = false, 
+            chams = true
+        }
+    }, 
+    LOW = {
+        distance = 400, 
+        updateRate = 2, 
+        features = {
+            box = true, 
+            healthBar = false, 
+            nickname = true, 
+            skeleton = false, 
+            chams = false
+        }
+    }
+};
+local v75 = {
+    Enabled = true, 
+    BoxEnable = true, 
+    HealthBar = true, 
+    Nickname = true, 
+    Skeleton = true, 
+    ChamsEnable = false, 
+    NicknameColor = Color3.new(1, 1, 1), 
+    SkeletonColor = Color3.new(1, 1, 1), 
+    BoxColor = Color3.new(1, 1, 1), 
+    ChamsColor = Color3.new(1, 1, 1), 
+    ChamsOutlineColor = Color3.new(1, 1, 1), 
+    OutlineColor = Color3.fromRGB(0, 0, 0), 
+    HealthBarColor = Color3.fromRGB(0, 255, 0), 
+    HealthBarOutlineColor = Color3.fromRGB(0, 0, 0), 
+    BoxThickness = 2, 
+    LineThickness = 2, 
+    HealthBarlineThickness = 2, 
+    HealthBarOutlineThickness = 3, 
+    TextSize = 17, 
+    RenderDistance = 650, 
+    MaxCacheSize = 20, 
+    CleanupInterval = 20, 
+    MaxSkeletonParts = 20, 
+    CacheUpdateInterval = 0.016, 
+    UseLOD = true, 
+    DeveloperMode = false
+};
+local v76 = {
+    available = {}, 
+    inUse = {}, 
+    lastCleanup = 0, 
+    creationTimes = {}
+};
+local v77 = {
+    frameCount = 0, 
+    lastFPSCheck = 0, 
+    currentFPS = 60, 
+    adaptiveLOD = false
+};
+local v78 = nil;
+local function v81() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_CurrentCamera_0 (ref), v72 (ref), v75 (ref), v78 (ref)
+    local v79 = tick();
+    local l_CFrame_0 = l_CurrentCamera_0.CFrame;
+    if v79 - v72.lastUpdate >= v75.CacheUpdateInterval and l_CFrame_0 ~= v78 then
+        v72.position = l_CurrentCamera_0.CFrame.Position;
+        v72.cframe = l_CFrame_0;
+        v72.fieldOfView = l_CurrentCamera_0.FieldOfView;
+        v72.lastUpdate = v79;
+    end;
+end;
+local function v85(v82) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_CurrentCamera_0 (ref)
+    local v83, v84 = l_CurrentCamera_0:WorldToViewportPoint(v82);
+    return Vector2.new(v83.X, v83.Y), v84;
+end;
+local function v88(v86) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v72 (ref)
+    local v87 = v86 - v72.position;
+    return v87.X * v87.X + v87.Y * v87.Y + v87.Z * v87.Z;
+end;
+local function v94(v89, v90) --[[ Line: 0 ]] --[[ Name:  ]]
+    local v91 = Drawing.new(v89);
+    for v92, v93 in pairs(v90) do
+        v91[v92] = v93;
+    end;
+    return v91;
+end;
+local function v96(v95) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v74 (ref)
+    if v95 <= v74.HIGH.distance * v74.HIGH.distance then
+        return v74.HIGH, "HIGH";
+    elseif v95 <= v74.MEDIUM.distance * v74.MEDIUM.distance then
+        return v74.MEDIUM, "MEDIUM";
+    elseif v95 <= v74.LOW.distance * v74.LOW.distance then
+        return v74.LOW, "LOW";
+    else
+        return nil, "OUT_OF_RANGE";
+    end;
+end;
+local function v98() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v77 (ref)
+    v77.frameCount = v77.frameCount + 1;
+    local v97 = tick();
+    if v97 - v77.lastFPSCheck >= 1 then
+        v77.currentFPS = v77.frameCount / (v97 - v77.lastFPSCheck);
+        v77.frameCount = 0;
+        v77.lastFPSCheck = v97;
+        v77.adaptiveLOD = v77.currentFPS < 30;
+    end;
+end;
+v76.Output = function(_, v100) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v75 (ref)
+    if v75.DeveloperMode then
+        warn(v100);
+    end;
+end;
+v76.GetDrawing = function(v101, v102, v103, v104) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v75 (ref), v94 (ref)
+    local l_v102_0 = v102;
+    if not v104 then
+        v104 = v75.MaxCacheSize;
+    end;
+    if not v101.available[l_v102_0] then
+        v101.available[l_v102_0] = {};
+    end;
+    local v106 = table.remove(v101.available[l_v102_0]);
+    if not v106 then
+        v106 = v94(v102, v103);
+        v101.creationTimes[v106] = tick();
+    else
+        for v107, v108 in pairs(v103) do
+            v106[v107] = v108;
+        end;
+    end;
+    if not v101.inUse[l_v102_0] then
+        v101.inUse[l_v102_0] = {};
+    end;
+    table.insert(v101.inUse[l_v102_0], v106);
+    return v106;
+end;
+v76.ReturnDrawing = function(v109, v110, v111) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v75 (ref)
+    if not v111 then
+        return;
+    else
+        v111.Visible = false;
+        local l_v110_0 = v110;
+        if not v109.available[l_v110_0] then
+            v109.available[l_v110_0] = {};
+        end;
+        if v109.inUse[l_v110_0] then
+            for v113, v114 in ipairs(v109.inUse[l_v110_0]) do
+                if v114 == v111 then
+                    table.remove(v109.inUse[l_v110_0], v113);
+                    break;
+                end;
+            end;
+        end;
+        if #v109.available[l_v110_0] >= v75.MaxCacheSize then
+            if v109.creationTimes[v111] then
+                v109.creationTimes[v111] = nil;
+            end;
+            v111:Destroy();
+        else
+            table.insert(v109.available[l_v110_0], v111);
+        end;
+        return;
+    end;
+end;
+v76.ForceCleanup = function(v115) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v75 (ref)
+    v115:Output("[ESP Periodic Cleanup] ForceCleanup begin!");
+    local v116 = tick();
+    for _, v118 in pairs(v115.available) do
+        if #v118 > v75.MaxCacheSize then
+            local v119 = {};
+            for v120, v121 in ipairs(v118) do
+                local v122 = v116 - (v115.creationTimes[v121] or 0);
+                table.insert(v119, {
+                    drawing = v121, 
+                    priority = v122, 
+                    index = v120
+                });
+            end;
+            table.sort(v119, function(v123, v124) --[[ Line: 0 ]] --[[ Name:  ]]
+                return v123.priority > v124.priority;
+            end);
+            local v125 = #v118 - v75.MaxCacheSize;
+            for v126 = 1, math.min(v125, #v119) do
+                local l_drawing_0 = v119[v126].drawing;
+                v115.creationTimes[l_drawing_0] = nil;
+                for v128 = #v118, 1, -1 do
+                    if v118[v128] == l_drawing_0 then
+                        table.remove(v118, v128);
+                        break;
+                    end;
+                end;
+                l_drawing_0:Destroy();
+            end;
+        end;
+    end;
+    v115.lastCleanup = v116;
+end;
+v76.PeriodicCleanup = function(v129) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v75 (ref)
+    if tick() - v129.lastCleanup > v75.CleanupInterval then
+        v129:Output("[ESP Periodic Cleanup] Starting scheduled cleanup...");
+        v129:ForceCleanup();
+    end;
+end;
+v66.new = function(v130) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v66 (ref), v75 (ref)
+    local v131 = setmetatable({}, v66);
+    v131.Settings = {};
+    for v132, v133 in pairs(v75) do
+        v131.Settings[v132] = v130 and v130[v132] ~= nil and v130[v132] or v133;
+    end;
+    v131.ESPObjects = {};
+    v131.UpdateConnection = nil;
+    v131.CleanupConnection = nil;
+    v131.PlayerRemovingConnection = nil;
+    v131.IsRunning = false;
+    v131.LastPlayerCount = 0;
+    v131.FrameCounter = 0;
+    return v131;
+end;
+v66.CreateESPObject = function(v134, v135) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref), v76 (ref)
+    if v135 == l_LocalPlayer_0 then
+        return;
+    elseif v135.Team and v135.Team == l_LocalPlayer_0.Team then
+        return;
+    else
+        local v136 = {
+            Player = v135, 
+            LODLevel = "HIGH", 
+            SquaredDistance = 0, 
+            Box = v76:GetDrawing("Square", {
+                Thickness = v134.Settings.BoxThickness, 
+                Color = v134.Settings.BoxColor, 
+                Transparency = 1, 
+                Filled = false, 
+                ZIndex = 2
+            }), 
+            BoxOutline = v76:GetDrawing("Square", {
+                Thickness = v134.Settings.BoxThickness + 2, 
+                Color = v134.Settings.OutlineColor, 
+                Transparency = 1, 
+                Filled = false, 
+                ZIndex = 1
+            }), 
+            HealthBar = v76:GetDrawing("Square", {
+                Thickness = v134.Settings.HealthBarlineThickness, 
+                Color = v134.Settings.HealthBarColor, 
+                Transparency = 1, 
+                Filled = true, 
+                ZIndex = 2
+            }), 
+            HealthBarOutline = v76:GetDrawing("Square", {
+                Thickness = v134.Settings.HealthBarOutlineThickness, 
+                Color = v134.Settings.HealthBarOutlineColor, 
+                Filled = true, 
+                Transparency = 1, 
+                ZIndex = 1
+            }), 
+            Nickname = v76:GetDrawing("Text", {
+                Size = v134.Settings.TextSize, 
+                Color = v134.Settings.NicknameColor, 
+                Center = true, 
+                Outline = true, 
+                ZIndex = 3
+            }), 
+            Skeleton = {}, 
+            Chams = nil
+        };
+        if v134.Settings.ChamsEnable then
+            v136.Chams = v134:CreateChams(v135);
+        end;
+        return v136;
+    end;
+end;
+v66.CreateChams = function(v137, v138) --[[ Line: 0 ]] --[[ Name:  ]]
+    if not v137.Settings.ChamsEnable then
+        return nil;
+    else
+        local v139 = v138.Character or v138.CharacterAdded:Wait();
+        if not v139:WaitForChild("HumanoidRootPart", 10) then
+            return nil;
+        else
+            local v140 = v137.Settings.ChamsColor or v138.TeamColor and v138.TeamColor.Color or Color3.new(1, 1, 1);
+            local l_Highlight_0 = Instance.new("Highlight");
+            l_Highlight_0.FillColor = v140;
+            l_Highlight_0.OutlineColor = v137.Settings.ChamsOutlineColor or Color3.new(0, 0, 0);
+            l_Highlight_0.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop;
+            l_Highlight_0.Parent = v139;
+            return l_Highlight_0;
+        end;
+    end;
+end;
+v66.GetHealthPercent = function(_, _, v144) --[[ Line: 0 ]] --[[ Name:  ]]
+    return math.clamp(v144.Health / v144.MaxHealth, 0, 1);
+end;
+v66.CleanupSkeletonESP = function(_, v146) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v76 (ref)
+    for v147 = 1, #v146.Skeleton do
+        local v148 = v146.Skeleton[v147];
+        if v148 then
+            v148.Visible = false;
+            v148.Transparency = 0;
+            v76:ReturnDrawing("Line", v148);
+        end;
+    end;
+    v146.Skeleton = {};
+end;
+v66.UpdateSkeletonESP = function(v149, v150, v151, _, v153) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v73 (ref), v76 (ref), v85 (ref)
+    if not v153.skeleton then
+        if #v150.Skeleton > 0 then
+            v149:CleanupSkeletonESP(v150);
+        end;
+        return;
+    else
+        local l_viewmodel_0 = v73.viewmodel;
+        local v155 = math.min(#l_viewmodel_0, v149.Settings.MaxSkeletonParts);
+        for v156 = v155 + 1, #v150.Skeleton do
+            if v150.Skeleton[v156] then
+                v150.Skeleton[v156].Visible = false;
+                v150.Skeleton[v156].Transparency = 0;
+                v76:ReturnDrawing("Line", v150.Skeleton[v156]);
+                v150.Skeleton[v156] = nil;
+            end;
+        end;
+        for v157 = 1, v155 do
+            local v158 = l_viewmodel_0[v157];
+            if v158 then
+                local l_v151_FirstChild_0 = v151:FindFirstChild(v158[1]);
+                local l_v151_FirstChild_1 = v151:FindFirstChild(v158[2]);
+                if l_v151_FirstChild_0 and l_v151_FirstChild_1 then
+                    local v161, v162 = v85(l_v151_FirstChild_0.Position);
+                    local v163, v164 = v85(l_v151_FirstChild_1.Position);
+                    if v162 and v164 then
+                        if not v150.Skeleton[v157] then
+                            v150.Skeleton[v157] = v76:GetDrawing("Line", {
+                                Thickness = v149.Settings.LineThickness, 
+                                Color = v149.Settings.SkeletonColor, 
+                                Transparency = 1, 
+                                Visible = false
+                            });
+                        end;
+                        local v165 = v150.Skeleton[v157];
+                        v165.From = v161;
+                        v165.To = v163;
+                        v165.Color = v149.Settings.SkeletonColor;
+                        v165.Thickness = v149.Settings.LineThickness;
+                        v165.Transparency = 1;
+                        v165.Visible = true;
+                    elseif v150.Skeleton[v157] and v150.Skeleton[v157].Visible then
+                        v150.Skeleton[v157].Visible = false;
+                    end;
+                elseif v150.Skeleton[v157] and v150.Skeleton[v157].Visible then
+                    v150.Skeleton[v157].Visible = false;
+                end;
+            else
+                break;
+            end;
+        end;
+        return;
+    end;
+end;
+local function v167(v166) --[[ Line: 0 ]] --[[ Name:  ]]
+    return game.Workspace.Viewmodels:FindFirstChild("Viewmodels/" .. v166.Name);
+end;
+v66.UpdatePlayerESP = function(v168, v169) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v167 (ref), v88 (ref), v96 (ref), v77 (ref), v74 (ref), v85 (ref)
+    local l_Character_0 = v169.Character;
+    if not l_Character_0 then
+        v168:RemoveESP(v169);
+        return;
+    else
+        local l_HumanoidRootPart_0 = l_Character_0:FindFirstChild("HumanoidRootPart");
+        local l_Humanoid_0 = l_Character_0:FindFirstChildOfClass("Humanoid");
+        local v173 = v167(v169);
+        if not l_HumanoidRootPart_0 or not l_Humanoid_0 or not v173 then
+            v168:RemoveESP(v169);
+            return;
+        else
+            local l_head_0 = v173:WaitForChild("head");
+            if not l_head_0 then
+                v168:RemoveESP(v169);
+                return;
+            else
+                local v175 = v88(l_head_0.Position);
+                if v168.Settings.RenderDistance * v168.Settings.RenderDistance < v175 then
+                    v168:RemoveESP(v169);
+                    return;
+                else
+                    if not v168.ESPObjects[v169] then
+                        v168.ESPObjects[v169] = v168:CreateESPObject(v169);
+                    end;
+                    if not v168.ESPObjects[v169] then
+                        return;
+                    else
+                        local v176 = v168.ESPObjects[v169];
+                        v176.SquaredDistance = v175;
+                        local v177 = nil;
+                        local v178 = "OUT_OF_RANGE";
+                        if v168.Settings.UseLOD then
+                            local v179, v180 = v96(v175);
+                            v178 = v180;
+                            v177 = v179;
+                            if not v177 then
+                                v168:RemoveESP(v169);
+                                return;
+                            else
+                                if v77.adaptiveLOD then
+                                    if v178 == "HIGH" then
+                                        v177 = v74.MEDIUM;
+                                        v178 = "MEDIUM (ADAPTIVE)";
+                                    elseif v178 == "MEDIUM" then
+                                        v177 = v74.LOW;
+                                        v178 = "LOW (ADAPTIVE)";
+                                    end;
+                                end;
+                                v176.LODLevel = v178;
+                                v176.UpdateRate = v177.updateRate;
+                            end;
+                        else
+                            v177 = v74.HIGH;
+                            v178 = "HIGH";
+                            v176.UpdateRate = 1;
+                        end;
+                        if v168.FrameCounter % v176.UpdateRate ~= 0 then
+                            return;
+                        else
+                            local v181, v182 = v85(l_HumanoidRootPart_0.Position);
+                            if v182 and v168.Settings.Enabled then
+                                local v183 = v85(l_head_0.Position + Vector3.new(0, 0.5, 0));
+                                local v184 = v85(l_HumanoidRootPart_0.Position - Vector3.new(0, 3, 0));
+                                local v185 = math.abs(v183.Y - v184.Y);
+                                local v186 = v185 / 2;
+                                local v187 = Vector2.new(v181.X - v186 / 2, v183.Y);
+                                if v168.Settings.BoxEnable and v177.features.box then
+                                    v176.BoxOutline.Size = Vector2.new(v186, v185);
+                                    v176.BoxOutline.Position = v187;
+                                    v176.BoxOutline.Visible = true;
+                                    v176.Box.Size = Vector2.new(v186, v185);
+                                    v176.Box.Position = v187;
+                                    v176.Box.Color = v168.Settings.BoxColor;
+                                    v176.Box.Visible = true;
+                                else
+                                    v176.Box.Visible = false;
+                                    v176.BoxOutline.Visible = false;
+                                end;
+                                if v168.Settings.HealthBar and v177.features.healthBar then
+                                    local l_v168_HealthPercent_0 = v168:GetHealthPercent(v169, l_Humanoid_0);
+                                    local v189 = Vector2.new(v181.X - v186 / 2 - 8, v183.Y);
+                                    v176.HealthBarOutline.Size = Vector2.new(5, v185);
+                                    v176.HealthBarOutline.Position = v189;
+                                    v176.HealthBarOutline.Visible = true;
+                                    v176.HealthBar.Size = Vector2.new(5, v185 * l_v168_HealthPercent_0);
+                                    v176.HealthBar.Position = Vector2.new(v189.X, v183.Y + v185 * (1 - l_v168_HealthPercent_0));
+                                    v176.HealthBar.Color = Color3.fromHSV(l_v168_HealthPercent_0 * 0.33, 1, 1);
+                                    v176.HealthBar.Visible = true;
+                                else
+                                    v176.HealthBar.Visible = false;
+                                    v176.HealthBarOutline.Visible = false;
+                                end;
+                                if v168.Settings.Nickname and v177.features.nickname then
+                                    v176.Nickname.Text = v169.Name;
+                                    v176.Nickname.Position = Vector2.new(v181.X, v183.Y - 20);
+                                    v176.Nickname.Color = v168.Settings.NicknameColor;
+                                    v176.Nickname.Visible = true;
+                                else
+                                    v176.Nickname.Visible = false;
+                                end;
+                                if v176.Chams and v168.Settings.ChamsEnable and v177.features.chams then
+                                    v176.Chams.FillTransparency = 0;
+                                    v176.Chams.OutlineTransparency = 0;
+                                elseif v176.Chams then
+                                    v176.Chams.FillTransparency = 1;
+                                    v176.Chams.OutlineTransparency = 1;
+                                end;
+                                if v168.Settings.Skeleton then
+                                    v168:UpdateSkeletonESP(v176, v173, l_Humanoid_0.RigType == Enum.HumanoidRigType.R15, v177.features);
+                                elseif #v176.Skeleton > 0 then
+                                    v168:CleanupSkeletonESP(v176);
+                                end;
+                                v176.LastUpdate = tick();
+                            else
+                                v168:HideESPElements(v176);
+                            end;
+                            return;
+                        end;
+                    end;
+                end;
+            end;
+        end;
+    end;
+end;
+v66.HideESPElements = function(_, v191) --[[ Line: 0 ]] --[[ Name:  ]]
+    v191.Box.Visible = false;
+    v191.BoxOutline.Visible = false;
+    v191.HealthBar.Visible = false;
+    v191.HealthBarOutline.Visible = false;
+    v191.Nickname.Visible = false;
+    for v192 = 1, #v191.Skeleton do
+        local v193 = v191.Skeleton[v192];
+        if v193 then
+            v193.Visible = false;
+            v193.Transparency = 0;
+        end;
+    end;
+end;
+v66.RemoveESP = function(v194, v195) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v76 (ref)
+    local v196 = v194.ESPObjects[v195];
+    if not v196 then
+        return;
+    else
+        v76:ReturnDrawing("Square", v196.Box);
+        v76:ReturnDrawing("Square", v196.BoxOutline);
+        v76:ReturnDrawing("Square", v196.HealthBar);
+        v76:ReturnDrawing("Square", v196.HealthBarOutline);
+        v76:ReturnDrawing("Text", v196.Nickname);
+        for _, v198 in pairs(v196.Skeleton) do
+            if v198 then
+                v76:ReturnDrawing("Line", v198);
+            end;
+        end;
+        if v196.Chams then
+            v196.Chams:Destroy();
+        end;
+        v194.ESPObjects[v195] = nil;
+        return;
+    end;
+end;
+v66.UpdateAllESP = function(v199) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v81 (ref), v98 (ref), v76 (ref), l_Players_0 (ref), l_LocalPlayer_0 (ref)
+    v81();
+    v98();
+    v199.FrameCounter = v199.FrameCounter + 1;
+    v76:PeriodicCleanup();
+    local v200 = #l_Players_0:GetPlayers();
+    if math.abs(v200 - v199.LastPlayerCount) > 5 then
+        v76:Output(string.format("[ESP Player Count Change] Player count changed from %d to %d, triggering cleanup...", v199.LastPlayerCount, v200));
+        v76:ForceCleanup();
+        v199.LastPlayerCount = v200;
+    end;
+    for _, v202 in ipairs(l_Players_0:GetPlayers()) do
+        if v202 ~= l_LocalPlayer_0 and v202.Character and v202.Character:FindFirstChild("HumanoidRootPart") then
+            v199:UpdatePlayerESP(v202);
+        else
+            v199:RemoveESP(v202);
+        end;
+    end;
+end;
+v66.Start = function(v203) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_Players_0 (ref), l_RunService_0 (ref), v76 (ref)
+    if v203.IsRunning then
+        return;
+    else
+        v203.IsRunning = true;
+        v203.PlayerRemovingConnection = l_Players_0.PlayerRemoving:Connect(function(v204) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v203 (ref)
+            v203:RemoveESP(v204);
+        end);
+        v203.UpdateConnection = l_RunService_0.Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v203 (ref)
+            v203:UpdateAllESP();
+        end);
+        v203.CleanupConnection = l_RunService_0.Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v76 (ref)
+            if tick() - v76.lastCleanup > 30 then
+                v76:ForceCleanup();
+            end;
+        end);
+        return;
+    end;
+end;
+v66.Stop = function(v205) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v76 (ref)
+    if not v205.IsRunning then
+        return;
+    else
+        v205.IsRunning = false;
+        if v205.UpdateConnection then
+            v205.UpdateConnection:Disconnect();
+            v205.UpdateConnection = nil;
+        end;
+        if v205.CleanupConnection then
+            v205.CleanupConnection:Disconnect();
+            v205.CleanupConnection = nil;
+        end;
+        if v205.PlayerRemovingConnection then
+            v205.PlayerRemovingConnection:Disconnect();
+            v205.PlayerRemovingConnection = nil;
+        end;
+        for v206, _ in pairs(v205.ESPObjects) do
+            v205:RemoveESP(v206);
+        end;
+        v76:ForceCleanup();
+        return;
+    end;
+end;
+v66.UpdateSettings = function(v208, v209) --[[ Line: 0 ]] --[[ Name:  ]]
+    for v210, v211 in pairs(v209) do
+        if v208.Settings[v210] ~= nil then
+            v208.Settings[v210] = v211;
+        end;
+    end;
+end;
+v66.ForceCleanup = function(_) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v76 (ref)
+    v76:ForceCleanup();
+end;
+local l_workspace_0 = game.workspace;
+local _ = game:GetService("RunService");
+local l_Players_1 = game:GetService("Players");
+local l_LocalPlayer_1 = l_Players_1.LocalPlayer;
+local l_Viewmodels_0 = l_workspace_0:WaitForChild("Viewmodels");
+local v218 = "Viewmodels/" .. l_LocalPlayer_1.Name;
+local l_v0_Window_0 = v0:CreateWindow({
+    Name = "ROLOHUB", 
+    Icon = 0, 
+    LoadingTitle = "ROLOHUB", 
+    LoadingSubtitle = "V1.09", 
+    Theme = "Ocean", 
+    ConfigurationSaving = {
+        Enabled = true, 
+        FolderName = "OPFolder", 
+        FileName = "OPConfig"
+    }, 
+    Discord = {
+        Enabled = false, 
+        Invite = "noinvitelink", 
+        RememberJoins = true
+    }, 
+    KeySystem = false
+});
+local _ = true;
+local v221 = {
+    ESP = nil, 
+    DoorsWH = nil, 
+    Wallhack = nil, 
+    Claymore = nil, 
+    Drone = nil, 
+    FOV = nil, 
+    AntiFlash = nil, 
+    RemoveLight = nil, 
+    HP = nil
+};
+local v222 = {
+    Claymore = {}, 
+    Drone = {}
+};
+local function v223(v224) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v223 (ref)
+    if not v224 then
+        return "";
+    else
+        return v223(v224.Parent) .. "/" .. v224.Name;
+    end;
+end;
+local function v229(v225) --[[ Line: 0 ]] --[[ Name:  ]]
+    local v226 = string.gsub(v225, "Viewmodels/", "");
+    for _, v228 in ipairs(game.Players:GetPlayers()) do
+        if v228.Name == v226 then
+            return v228;
+        end;
+    end;
+    return nil;
+end;
+local function v232(v230) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v229 (ref), l_LocalPlayer_1 (ref)
+    local v231 = v229(v230);
+    if not v231 then
+        return false;
+    else
+        return v231.Team ~= l_LocalPlayer_1.Team;
+    end;
+end;
+local l_l_v0_Window_0_Tab_0 = l_v0_Window_0:CreateTab("ESP Players");
+local l_l_v0_Window_0_Tab_1 = l_v0_Window_0:CreateTab("Combat");
+local l_l_v0_Window_0_Tab_2 = l_v0_Window_0:CreateTab("Visuals");
+local l_l_v0_Window_0_Tab_3 = l_v0_Window_0:CreateTab("Hitbox");
+local l_l_v0_Window_0_Tab_4 = l_v0_Window_0:CreateTab("Sound");
+local l_l_v0_Window_0_Tab_5 = l_v0_Window_0:CreateTab("Other");
+local v239 = false;
+local v240 = Color3.fromRGB(150, 50, 200);
+local v241 = {};
+local v242 = {};
+local function v245(v243) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v240 (ref), v242 (ref)
+    if not v243:IsA("Model") then
+        return;
+    elseif v243:GetAttribute("key") ~= "primary" and v243:GetAttribute("key") ~= "secondary" then
+        return;
+    elseif v243:FindFirstChild("GunHighlight") then
+        return;
+    else
+        local l_Highlight_1 = Instance.new("Highlight");
+        l_Highlight_1.Name = "GunHighlight";
+        l_Highlight_1.FillColor = v240;
+        l_Highlight_1.OutlineColor = v240;
+        l_Highlight_1.DepthMode = Enum.HighlightDepthMode.Occluded;
+        l_Highlight_1.FillTransparency = 0.5;
+        l_Highlight_1.OutlineTransparency = 0;
+        l_Highlight_1.Parent = v243;
+        table.insert(v242, l_Highlight_1);
+        return;
+    end;
+end;
+local function v251(v246) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v218 (ref), v245 (ref), v241 (ref)
+    if v246.Name ~= v218 then
+        return;
+    else
+        local v248 = v246.ChildAdded:Connect(function(v247) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v245 (ref)
+            v245(v247);
+        end);
+        table.insert(v241, v248);
+        for _, v250 in ipairs(v246:GetChildren()) do
+            v245(v250);
+        end;
+        return;
+    end;
+end;
+local function v256() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_Viewmodels_0 (ref), v251 (ref), v241 (ref)
+    local v253 = l_Viewmodels_0.ChildAdded:Connect(function(v252) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v251 (ref)
+        v251(v252);
+    end);
+    table.insert(v241, v253);
+    for _, v255 in ipairs(l_Viewmodels_0:GetChildren()) do
+        v251(v255);
+    end;
+end;
+local function v261() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v241 (ref), v242 (ref)
+    for _, v258 in pairs(v241) do
+        v258:Disconnect();
+    end;
+    v241 = {};
+    for _, v260 in pairs(v242) do
+        if v260 then
+            v260:Destroy();
+        end;
+    end;
+    v242 = {};
+end;
+local _ = l_l_v0_Window_0_Tab_2:CreateToggle({
+    Name = "Gun Chams", 
+    CurrentValue = false, 
+    Flag = "GunChamsEnabled", 
+    Callback = function(v262) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v239 (ref), v256 (ref), v261 (ref)
+        v239 = v262;
+        if v262 then
+            v256();
+        else
+            v261();
+        end;
+    end
+});
+local function v266() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v242 (ref), v240 (ref)
+    for _, v265 in pairs(v242) do
+        if v265 then
+            v265.FillColor = v240;
+            v265.OutlineColor = v240;
+        end;
+    end;
+end;
+local _ = l_l_v0_Window_0_Tab_2:CreateColorPicker({
+    Name = "Gun Chams Color", 
+    Color = v240, 
+    Flag = "GunChamsColor", 
+    Callback = function(v267) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v240 (ref), v266 (ref)
+        v240 = v267;
+        v266();
+    end
+});
+l_l_v0_Window_0_Tab_2:CreateSection("ESP");
+local v269 = false;
+local function v276() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v222 (ref), v221 (ref), l_workspace_0 (ref)
+    local function v272(v270) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v222 (ref)
+        if v270.Name == "Claymore" then
+            local l_Highlight_2 = Instance.new("Highlight");
+            l_Highlight_2.Name = "ClaymoreHighlight";
+            l_Highlight_2.FillColor = Color3.fromRGB(255, 0, 0);
+            l_Highlight_2.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop;
+            l_Highlight_2.Parent = v270;
+            v222.Claymore[v270] = l_Highlight_2;
+        end;
+    end;
+    v221.Claymore = l_workspace_0.ChildAdded:Connect(function(v273) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v272 (ref)
+        task.delay(0.1, function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v273 (ref), v272 (ref)
+            if v273:IsA("Model") then
+                v272(v273);
+            end;
+        end);
+    end);
+    for _, v275 in ipairs(l_workspace_0:GetChildren()) do
+        if v275:IsA("Model") then
+            v272(v275);
+        end;
+    end;
+end;
+local function v279() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), v222 (ref)
+    if v221.Claymore then
+        v221.Claymore:Disconnect();
+        v221.Claymore = nil;
+    end;
+    for _, v278 in pairs(v222.Claymore) do
+        if v278 and v278.Parent then
+            v278:Destroy();
+        end;
+    end;
+    v222.Claymore = {};
+end;
+local _ = l_l_v0_Window_0_Tab_2:CreateToggle({
+    Name = "ESP Claymore", 
+    CurrentValue = false, 
+    Flag = "ClaymoreESPEnabled", 
+    Callback = function(v280) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v269 (ref), v276 (ref), v279 (ref)
+        v269 = v280;
+        if v280 then
+            v276();
+        else
+            v279();
+        end;
+    end
+});
+local v282 = false;
+local function v289() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v222 (ref), v221 (ref), l_workspace_0 (ref)
+    local function v285(v283) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v222 (ref)
+        if v283.Name == "Drone" then
+            local l_Highlight_3 = Instance.new("Highlight");
+            l_Highlight_3.Name = "DroneHighlight";
+            l_Highlight_3.FillColor = Color3.fromRGB(0, 218, 191);
+            l_Highlight_3.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop;
+            l_Highlight_3.Parent = v283;
+            v222.Drone[v283] = l_Highlight_3;
+        end;
+    end;
+    v221.Drone = l_workspace_0.ChildAdded:Connect(function(v286) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v285 (ref)
+        task.delay(0.1, function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v286 (ref), v285 (ref)
+            if v286:IsA("Model") then
+                v285(v286);
+            end;
+        end);
+    end);
+    for _, v288 in ipairs(l_workspace_0:GetChildren()) do
+        if v288:IsA("Model") then
+            v285(v288);
+        end;
+    end;
+end;
+local function v292() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), v222 (ref)
+    if v221.Drone then
+        v221.Drone:Disconnect();
+        v221.Drone = nil;
+    end;
+    for _, v291 in pairs(v222.Drone) do
+        if v291 and v291.Parent then
+            v291:Destroy();
+        end;
+    end;
+    v222.Drone = {};
+end;
+local _ = l_l_v0_Window_0_Tab_2:CreateToggle({
+    Name = "ESP Drone", 
+    CurrentValue = false, 
+    Flag = "DroneESPEnabled", 
+    Callback = function(v293) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v282 (ref), v289 (ref), v292 (ref)
+        v282 = v293;
+        if v293 then
+            v289();
+        else
+            v292();
+        end;
+    end
+});
+l_l_v0_Window_0_Tab_2:CreateSection("TRANSPARENCY");
+local v295 = false;
+local v296 = {};
+local function v302(v297, v298) --[[ Line: 0 ]] --[[ Name:  ]]
+    if not v297:IsA("BasePart") then
+        return;
+    else
+        local v299 = false;
+        for _, v301 in ipairs({
+            "DoorPlank", 
+            "MetalRoll", 
+            "SolidDoorPlank"
+        }) do
+            if v297.Name == v301 then
+                v299 = true;
+            end;
+        end;
+        if not v299 then
+            return;
+        elseif v297.Transparency == 1 then
+            return;
+        else
+            v297.Transparency = v298;
+            return;
+        end;
+    end;
+end;
+local function v306() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), l_workspace_0 (ref), v302 (ref)
+    v221.DoorsWH = l_workspace_0.DescendantAdded:Connect(function(v303) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v302 (ref)
+        task.delay(0.1, function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v302 (ref), v303 (ref)
+            v302(v303, 0.4);
+        end);
+    end);
+    for _, v305 in ipairs(l_workspace_0:GetDescendants()) do
+        v302(v305, 0.4);
+    end;
+end;
+local function v311() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), v296 (ref), l_workspace_0 (ref), v302 (ref)
+    if v221.DoorsWH then
+        v221.DoorsWH:Disconnect();
+        v221.DoorsWH = nil;
+    end;
+    for _, v308 in pairs(v296) do
+        v308:Disconnect();
+    end;
+    v296 = {};
+    for _, v310 in ipairs(l_workspace_0:GetDescendants()) do
+        v302(v310, 0);
+    end;
+end;
+local _ = l_l_v0_Window_0_Tab_2:CreateToggle({
+    Name = "Transparent Doors", 
+    CurrentValue = false, 
+    Flag = "DoorsWHEnabled", 
+    Callback = function(v312) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v295 (ref), v306 (ref), v311 (ref)
+        v295 = v312;
+        if v312 then
+            v306();
+        else
+            v311();
+        end;
+    end
+});
+local v314 = false;
+local v315 = {};
+local function v322(v316, v317) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v315 (ref)
+    if not v316:IsA("BasePart") then
+        return;
+    else
+        local v318 = false;
+        for _, v320 in ipairs({
+            "Plywood", 
+            "Plank", 
+            "Drywall", 
+            "Shutter", 
+            "Shutter3"
+        }) do
+            if v316.Name == v320 then
+                v318 = true;
+            end;
+        end;
+        if not v318 then
+            return;
+        else
+            if v317 > 0 then
+                local v321 = v316:GetPropertyChangedSignal("Transparency"):Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: v316 (ref), v317 (ref)
+                    if v316 and v316.Parent and v316.Transparency == 0 then
+                        v316.Transparency = v317;
+                    end;
+                end);
+                table.insert(v315, v321);
+            end;
+            if v316.Transparency == 1 then
+                return;
+            else
+                v316.Transparency = v317;
+                return;
+            end;
+        end;
+    end;
+end;
+local function v326() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), l_workspace_0 (ref), v322 (ref)
+    v221.Wallhack = l_workspace_0.DescendantAdded:Connect(function(v323) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v322 (ref)
+        task.delay(0.1, function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v322 (ref), v323 (ref)
+            v322(v323, 0.4);
+        end);
+    end);
+    for _, v325 in ipairs(l_workspace_0:GetDescendants()) do
+        v322(v325, 0.4);
+    end;
+end;
+local function v331() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), v315 (ref), l_workspace_0 (ref), v322 (ref)
+    if v221.Wallhack then
+        v221.Wallhack:Disconnect();
+        v221.Wallhack = nil;
+    end;
+    for _, v328 in pairs(v315) do
+        v328:Disconnect();
+    end;
+    v315 = {};
+    for _, v330 in ipairs(l_workspace_0:GetDescendants()) do
+        v322(v330, 0);
+    end;
+end;
+local _ = l_l_v0_Window_0_Tab_2:CreateToggle({
+    Name = "Transparent Walls", 
+    CurrentValue = false, 
+    Flag = "WallhackEnabled", 
+    Callback = function(v332) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v314 (ref), v326 (ref), v331 (ref)
+        v314 = v332;
+        if v332 then
+            v326();
+        else
+            v331();
+        end;
+    end
+});
+local v334 = false;
+local v335 = {
+    "PointLight", 
+    "SpotLight", 
+    "SurfaceLight", 
+    "SunRaysEffect", 
+    "BloomEffect", 
+    "BlurEffect", 
+    "ColorCorrectionEffect"
+};
+local v336 = {};
+local function v340(v337) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v335 (ref), v336 (ref)
+    for _, v339 in ipairs(v335) do
+        if v337:IsA(v339) and v337.Enabled == true then
+            v337.Enabled = false;
+            table.insert(v336, v337);
+        end;
+    end;
+end;
+local function v344() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), l_workspace_0 (ref), v340 (ref)
+    v221.RemoveLight = l_workspace_0.DescendantAdded:Connect(function(v341) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v340 (ref)
+        v340(v341);
+    end);
+    for _, v343 in ipairs(l_workspace_0:GetDescendants()) do
+        v340(v343);
+    end;
+end;
+local function v347() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), v336 (ref)
+    if v221.RemoveLight then
+        v221.RemoveLight:Disconnect();
+        v221.RemoveLight = nil;
+    end;
+    for _, v346 in ipairs(v336) do
+        if v346 and v346.Parent then
+            v346.Enabled = true;
+        end;
+    end;
+    v336 = {};
+end;
+local _ = l_l_v0_Window_0_Tab_2:CreateToggle({
+    Name = "Remove Light (increases fps)", 
+    CurrentValue = false, 
+    Flag = "RemoveLightEnabled", 
+    Callback = function(v348) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v334 (ref), v344 (ref), v347 (ref)
+        v334 = v348;
+        if v348 then
+            v344();
+        else
+            v347();
+        end;
+    end
+});
+local l_Lighting_0 = game:GetService("Lighting");
+local v351 = {
+    Brightness = l_Lighting_0.Brightness, 
+    ClockTime = l_Lighting_0.ClockTime, 
+    FogEnd = l_Lighting_0.FogEnd, 
+    GlobalShadows = l_Lighting_0.GlobalShadows, 
+    Ambient = l_Lighting_0.Ambient
+};
+local function v354() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v351 (ref), l_Lighting_0 (ref)
+    for v352, v353 in pairs(v351) do
+        l_Lighting_0[v352] = v353;
+    end;
+end;
+l_l_v0_Window_0_Tab_2:CreateToggle({
+    Name = "Fullbright", 
+    CurrentValue = false, 
+    Flag = "FullbrightEnabled", 
+    Callback = function(v355) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: l_Lighting_0 (ref), v354 (ref)
+        if v355 then
+            l_Lighting_0.Brightness = 1;
+            l_Lighting_0.ClockTime = 12;
+            l_Lighting_0.FogEnd = 999999;
+            l_Lighting_0.GlobalShadows = false;
+            l_Lighting_0.Ambient = Color3.fromRGB(178, 178, 178);
+        else
+            v354();
+        end;
+    end
+});
+l_l_v0_Window_0_Tab_2:CreateSection("Other");
+local v356 = false;
+local l_CurrentCamera_1 = l_workspace_0.CurrentCamera;
+local v358 = 90;
+local function v359() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), l_CurrentCamera_1 (ref), v356 (ref), v358 (ref)
+    if not v221.FOV then
+        v221.FOV = l_CurrentCamera_1:GetPropertyChangedSignal("FieldOfView"):Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v356 (ref), l_CurrentCamera_1 (ref), v358 (ref)
+            if v356 and l_CurrentCamera_1.DiagonalFieldOfView >= 120 then
+                l_CurrentCamera_1.FieldOfView = v358;
+            end;
+        end);
+    end;
+    l_CurrentCamera_1.FieldOfView = v358;
+end;
+local function v360() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), l_CurrentCamera_1 (ref)
+    if v221.FOV then
+        v221.FOV:Disconnect();
+        v221.FOV = nil;
+    end;
+    l_CurrentCamera_1.FieldOfView = 90;
+end;
+local _ = l_l_v0_Window_0_Tab_2:CreateToggle({
+    Name = "Enable FOV", 
+    CurrentValue = false, 
+    Flag = "FOVEnabled", 
+    Callback = function(v361) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v356 (ref), v359 (ref), v360 (ref)
+        v356 = v361;
+        if v361 then
+            v359();
+        else
+            v360();
+        end;
+    end
+});
+local _ = l_l_v0_Window_0_Tab_2:CreateSlider({
+    Name = "FOV", 
+    Range = {
+        0, 
+        120
+    }, 
+    Increment = 5, 
+    Suffix = "FOV", 
+    CurrentValue = v358, 
+    Flag = "FOVvalue", 
+    Callback = function(v363) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v358 (ref), v356 (ref), v359 (ref)
+        v358 = v363;
+        if v356 then
+            v359();
+        end;
+    end
+});
+local v365 = false;
+local l_Frame_0 = l_Players_1.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Flash"):WaitForChild("Frame");
+local function v367() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), l_Frame_0 (ref)
+    v221.AntiFlash = l_Frame_0:GetPropertyChangedSignal("Visible"):Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: l_Frame_0 (ref)
+        if l_Frame_0.Visible == true then
+            l_Frame_0.Visible = false;
+        end;
+    end);
+    l_Frame_0.Visible = false;
+end;
+local function v368() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), l_Frame_0 (ref)
+    if v221.AntiFlash then
+        v221.AntiFlash:Disconnect();
+        v221.AntiFlash = nil;
+    end;
+    l_Frame_0.Visible = true;
+end;
+local _ = l_l_v0_Window_0_Tab_2:CreateToggle({
+    Name = "AntiFlash", 
+    CurrentValue = false, 
+    Flag = "AntiFlashEnabled", 
+    Callback = function(v369) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v365 (ref), v367 (ref), v368 (ref)
+        v365 = v369;
+        if v369 then
+            v367();
+        else
+            v368();
+        end;
+    end
+});
+l_l_v0_Window_0_Tab_1:CreateSection("combat functions start working only after respawn");
+local v371 = false;
+local v372 = 1200;
+local v373 = {};
+local v374 = {};
+local function v376(v375) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v374 (ref), v372 (ref)
+    if not v375:IsA("NumberValue") or v375.Name ~= "firerate" then
+        return;
+    else
+        if v374[v375] == nil then
+            v374[v375] = v375.Value;
+            v375.Value = v372;
+        end;
+        return;
+    end;
+end;
+local _ = function(v377) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v218 (ref), v373 (ref), v376 (ref)
+    if v377.Name ~= v218 or v373[v377] then
+        return;
+    else
+        v373[v377] = v377.DescendantAdded:Connect(function(v378) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v376 (ref)
+            v376(v378);
+        end);
+        for _, v380 in pairs(v377:GetDescendants()) do
+            v376(v380);
+        end;
+        return;
+    end;
+end;
+local function v386() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v376 (ref), v373 (ref)
+    local v383 = game.DescendantAdded:Connect(function(v382) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v376 (ref)
+        v376(v382);
+    end);
+    table.insert(v373, v383);
+    for _, v385 in pairs(game:GetDescendants()) do
+        v376(v385);
+    end;
+end;
+local function v391() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v373 (ref), v374 (ref)
+    for _, v388 in pairs(v373) do
+        v388:Disconnect();
+    end;
+    v373 = {};
+    for v389, v390 in pairs(v374) do
+        v389.Value = v390;
+    end;
+    v374 = {};
+end;
+local _ = l_l_v0_Window_0_Tab_1:CreateToggle({
+    Name = "Enable Firerate", 
+    CurrentValue = false, 
+    Flag = "FirerateEnabled", 
+    Callback = function(v392) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v371 (ref), v386 (ref), v391 (ref)
+        v371 = v392;
+        if v392 then
+            v386();
+        else
+            v391();
+        end;
+    end
+});
+local function v397(v394) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v374 (ref)
+    for v395, _ in pairs(v374) do
+        v395.Value = v394;
+    end;
+end;
+local _ = l_l_v0_Window_0_Tab_1:CreateSlider({
+    Name = "Firerate", 
+    Range = {
+        50, 
+        1500
+    }, 
+    Increment = 50, 
+    Suffix = "Firerate", 
+    CurrentValue = v372, 
+    Flag = "FirerateValue", 
+    Callback = function(v398) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v372 (ref), v371 (ref), v397 (ref)
+        v372 = v398;
+        if v371 then
+            v397(v398);
+        end;
+    end
+});
+local v400 = false;
+local v401 = {};
+local v402 = {};
+local function v404(v403) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v402 (ref)
+    if not v403:IsA("NumberValue") then
+        return;
+    elseif v403.Name ~= "recoil_up" and v403.Name ~= "recoil_side" then
+        return;
+    else
+        if v402[v403] == nil then
+            v402[v403] = v403.Value;
+            v403.Value = 0;
+        end;
+        return;
+    end;
+end;
+local _ = function(v405) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v218 (ref), v401 (ref), v404 (ref)
+    if v405.Name ~= v218 or v401[v405] then
+        return;
+    else
+        v401[v405] = v405.DescendantAdded:Connect(function(v406) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v404 (ref)
+            v404(v406);
+        end);
+        for _, v408 in pairs(v405:GetDescendants()) do
+            v404(v408);
+        end;
+        return;
+    end;
+end;
+local function v414() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v404 (ref), v401 (ref)
+    local v411 = game.DescendantAdded:Connect(function(v410) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v404 (ref)
+        v404(v410);
+    end);
+    table.insert(v401, v411);
+    for _, v413 in pairs(game:GetDescendants()) do
+        v404(v413);
+    end;
+end;
+local function v419() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v401 (ref), v402 (ref)
+    for _, v416 in pairs(v401) do
+        v416:Disconnect();
+    end;
+    v401 = {};
+    for v417, v418 in pairs(v402) do
+        v417.Value = v418;
+    end;
+    v402 = {};
+end;
+local _ = l_l_v0_Window_0_Tab_1:CreateToggle({
+    Name = "NoRecoil", 
+    CurrentValue = false, 
+    Flag = "NoRecoilEnabled", 
+    Callback = function(v420) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v400 (ref), v414 (ref), v419 (ref)
+        v400 = v420;
+        if v420 then
+            v414();
+        else
+            v419();
+        end;
+    end
+});
+local v422 = false;
+local v423 = {};
+local v424 = {};
+local function v426(v425) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v424 (ref)
+    if not v425:IsA("NumberValue") or v424[v425] then
+        return;
+    else
+        v424[v425] = v425.Value;
+        if v425.Name == "spread" then
+            v425.Value = 0;
+        elseif v425.Name == "accuracy" then
+            v425.Value = 0.5;
+        end;
+        return;
+    end;
+end;
+local _ = function(v427) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v218 (ref), v423 (ref), v426 (ref)
+    if v427.Name ~= v218 or v423[v427] then
+        return;
+    else
+        v423[v427] = v427.DescendantAdded:Connect(function(v428) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v426 (ref)
+            v426(v428);
+        end);
+        for _, v430 in pairs(v427:GetDescendants()) do
+            v426(v430);
+        end;
+        return;
+    end;
+end;
+local function v436() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v426 (ref), v423 (ref)
+    local v433 = game.DescendantAdded:Connect(function(v432) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v426 (ref)
+        v426(v432);
+    end);
+    table.insert(v423, v433);
+    for _, v435 in pairs(game:GetDescendants()) do
+        v426(v435);
+    end;
+end;
+local function v441() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v423 (ref), v424 (ref)
+    for _, v438 in pairs(v423) do
+        v438:Disconnect();
+    end;
+    v423 = {};
+    for v439, v440 in pairs(v424) do
+        v439.Value = v440;
+    end;
+    v424 = {};
+end;
+local _ = l_l_v0_Window_0_Tab_1:CreateToggle({
+    Name = "NoSpread", 
+    CurrentValue = false, 
+    Flag = "NoSpreadEnabled", 
+    Callback = function(v442) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v422 (ref), v436 (ref), v441 (ref)
+        v422 = v442;
+        if v442 then
+            v436();
+        else
+            v441();
+        end;
+    end
+});
+l_l_v0_Window_0_Tab_1:CreateSection("Zoom settings (not visible to others)");
+local v444 = false;
+local v445 = {};
+local v446 = {};
+local function v448(v447) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v446 (ref)
+    if not v447:IsA("NumberValue") or v447.Name ~= "ads" then
+        return;
+    else
+        if v446[v447] == nil then
+            v446[v447] = v447.Value;
+            v447.Value = 0.1;
+        end;
+        return;
+    end;
+end;
+local _ = function(v449) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v218 (ref), v445 (ref), v448 (ref)
+    if v449.Name ~= v218 or v445[v449] then
+        return;
+    else
+        v445[v449] = v449.DescendantAdded:Connect(function(v450) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v448 (ref)
+            v448(v450);
+        end);
+        for _, v452 in pairs(v449:GetDescendants()) do
+            v448(v452);
+        end;
+        return;
+    end;
+end;
+local function v458() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v448 (ref), v445 (ref)
+    local v455 = game.DescendantAdded:Connect(function(v454) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v448 (ref)
+        v448(v454);
+    end);
+    table.insert(v445, v455);
+    for _, v457 in pairs(game:GetDescendants()) do
+        v448(v457);
+    end;
+end;
+local function v463() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v445 (ref), v446 (ref)
+    for _, v460 in pairs(v445) do
+        v460:Disconnect();
+    end;
+    v445 = {};
+    for v461, v462 in pairs(v446) do
+        v461.Value = v462;
+    end;
+    v446 = {};
+end;
+local _ = l_l_v0_Window_0_Tab_1:CreateToggle({
+    Name = "FastZoom", 
+    CurrentValue = false, 
+    Flag = "FastZoomEnabled", 
+    Callback = function(v464) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v444 (ref), v458 (ref), v463 (ref)
+        v444 = v464;
+        if v464 then
+            v458();
+        else
+            v463();
+        end;
+    end
+});
+local v466 = false;
+local v467 = 1;
+local v468 = {};
+local v469 = {};
+local function v471(v470) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v469 (ref), v467 (ref)
+    if not v470:IsA("NumberValue") or v470.Name ~= "zoom" then
+        return;
+    else
+        if v469[v470] == nil then
+            v469[v470] = v470.Value;
+            v470.Value = v467;
+        end;
+        return;
+    end;
+end;
+local _ = function(v472) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v218 (ref), v468 (ref), v471 (ref)
+    if v472.Name ~= v218 or v468[v472] then
+        return;
+    else
+        v468[v472] = v472.DescendantAdded:Connect(function(v473) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v471 (ref)
+            v471(v473);
+        end);
+        for _, v475 in pairs(v472:GetDescendants()) do
+            v471(v475);
+        end;
+        return;
+    end;
+end;
+local function v481() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v471 (ref), v468 (ref)
+    local v478 = game.DescendantAdded:Connect(function(v477) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v471 (ref)
+        v471(v477);
+    end);
+    table.insert(v468, v478);
+    for _, v480 in pairs(game:GetDescendants()) do
+        v471(v480);
+    end;
+end;
+local function v486() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v468 (ref), v469 (ref)
+    for _, v483 in pairs(v468) do
+        v483:Disconnect();
+    end;
+    v468 = {};
+    for v484, v485 in pairs(v469) do
+        v484.Value = v485;
+    end;
+    v469 = {};
+end;
+local _ = l_l_v0_Window_0_Tab_1:CreateToggle({
+    Name = "Enable CustomZoom", 
+    CurrentValue = false, 
+    Flag = "CustomZoomEnabled", 
+    Callback = function(v487) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v466 (ref), v481 (ref), v486 (ref)
+        v466 = v487;
+        if v487 then
+            v481();
+        else
+            v486();
+        end;
+    end
+});
+local function v492(v489) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v469 (ref)
+    for v490, _ in pairs(v469) do
+        v490.Value = v489;
+    end;
+end;
+local _ = l_l_v0_Window_0_Tab_1:CreateSlider({
+    Name = "CustomZoom", 
+    Range = {
+        0, 
+        10
+    }, 
+    Increment = 0.5, 
+    Suffix = "X", 
+    CurrentValue = v467, 
+    Flag = "CustomZoomValue", 
+    Callback = function(v493) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v467 (ref), v466 (ref), v492 (ref)
+        v467 = v493;
+        if v466 then
+            v492(v493);
+        end;
+    end
+});
+l_l_v0_Window_0_Tab_3:CreateSection("Hitbox");
+local v495 = false;
+local _ = false;
+local v497 = 0.7;
+local v498 = 2;
+local v499 = Color3.fromRGB(150, 0, 0);
+local v500 = {};
+local v501 = {};
+local function v504(v502) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v232 (ref), v497 (ref), v499 (ref), v498 (ref), v501 (ref)
+    if not v232(v502.Name) then
+        return;
+    else
+        print("enabled");
+        local l_head_1 = v502:FindFirstChild("head");
+        if l_head_1 then
+            l_head_1.Transparency = v497;
+            l_head_1.Color = v499;
+            l_head_1.Size = Vector3.new(v498, v498, v498);
+            table.insert(v501, l_head_1);
+        end;
+        return;
+    end;
+end;
+local function v506(v505) --[[ Line: 0 ]] --[[ Name:  ]]
+    if v505 then
+        v505.Size = Vector3.new(1, 1, 1);
+        v505.Transparency = 0;
+    end;
+end;
+local function v512() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_Viewmodels_0 (ref), v504 (ref), v500 (ref), l_workspace_0 (ref), v506 (ref)
+    local v508 = l_Viewmodels_0.ChildAdded:Connect(function(v507) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v504 (ref)
+        task.delay(0.1, function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v504 (ref), v507 (ref)
+            v504(v507);
+        end);
+    end);
+    table.insert(v500, v508);
+    for _, v510 in ipairs(l_Viewmodels_0:GetChildren()) do
+        v504(v510);
+    end;
+    v508 = l_workspace_0.ChildAdded:Connect(function(v511) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v506 (ref)
+        if v511:IsA("Part") and v511.Name == "head" then
+            v506(v511);
+        end;
+    end);
+    table.insert(v500, v508);
+end;
+local function v517() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v500 (ref), v501 (ref), v506 (ref)
+    for _, v514 in pairs(v500) do
+        v514:Disconnect();
+    end;
+    v500 = {};
+    for _, v516 in pairs(v501) do
+        v506(v516);
+    end;
+    v501 = {};
+end;
+local _ = l_l_v0_Window_0_Tab_3:CreateToggle({
+    Name = "Head Hitbox", 
+    CurrentValue = false, 
+    Flag = "HeadHitboxEnabled", 
+    Callback = function(v518) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v495 (ref), v512 (ref), v517 (ref)
+        v495 = v518;
+        if v518 then
+            v512();
+        else
+            v517();
+        end;
+    end
+});
+local _ = l_l_v0_Window_0_Tab_3:CreateSlider({
+    Name = "Hitbox Transparency", 
+    Range = {
+        0, 
+        0.99
+    }, 
+    Increment = 0.01, 
+    CurrentValue = v497, 
+    Flag = " HeadHitboxTransparency", 
+    Callback = function(v520) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v497 (ref), v501 (ref)
+        v497 = v520;
+        for _, v522 in pairs(v501) do
+            if v522 then
+                v522.Transparency = v497;
+            end;
+        end;
+    end
+});
+local _ = l_l_v0_Window_0_Tab_3:CreateSlider({
+    Name = "Hitbox Scale", 
+    Range = {
+        1, 
+        10
+    }, 
+    Increment = 0.5, 
+    Suffix = "X", 
+    CurrentValue = v498, 
+    Flag = "HeadHitboxScale", 
+    Callback = function(v524) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v498 (ref), v501 (ref)
+        v498 = v524;
+        for _, v526 in pairs(v501) do
+            if v526 then
+                v526.Size = Vector3.new(v498, v498, v498);
+            end;
+        end;
+    end
+});
+local _ = l_l_v0_Window_0_Tab_3:CreateColorPicker({
+    Name = "Hitbox Color", 
+    Color = v499, 
+    Flag = "HeadHitboxColor", 
+    Callback = function(v528) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v499 (ref), v501 (ref)
+        v499 = v528;
+        for _, v530 in pairs(v501) do
+            if v530 then
+                v530.Color = v499;
+            end;
+        end;
+    end
+});
+local v532 = v66.new();
+v532:UpdateSettings({
+    BoxEnable = false, 
+    HealthBar = false, 
+    Nickname = false, 
+    Skeleton = false, 
+    ChamsEnable = false, 
+    NicknameColor = Color3.new(1, 1, 1), 
+    SkeletonColor = Color3.new(1, 1, 1), 
+    BoxColor = Color3.new(1, 1, 1), 
+    ChamsColor = Color3.new(1, 1, 1), 
+    ChamsOutlineColor = Color3.new(1, 1, 1), 
+    OutlineColor = Color3.fromRGB(0, 0, 0), 
+    HealthBarColor = Color3.fromRGB(0, 255, 0), 
+    HealthBarOutlineColor = Color3.fromRGB(0, 0, 0), 
+    BoxThickness = 2, 
+    LineThickness = 2, 
+    HealthBarlineThickness = 2, 
+    HealthBarOutlineThickness = 3, 
+    TextSize = 19, 
+    RenderDistance = 1500
+});
+l_l_v0_Window_0_Tab_0:CreateToggle({
+    Name = "ESP Enabled", 
+    CurrentValue = false, 
+    Flag = "ESPEnabled", 
+    Callback = function(v533) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v532 (ref)
+        if v533 then
+            v532:Start();
+        else
+            v532:Stop();
+        end;
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateSection("2D Box");
+l_l_v0_Window_0_Tab_0:CreateToggle({
+    Name = "Box Enabled", 
+    CurrentValue = false, 
+    Flag = "BoxEnabled", 
+    Callback = function(v534) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v532 (ref)
+        v532:UpdateSettings({
+            BoxEnable = v534
+        });
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateColorPicker({
+    Name = "Box Color", 
+    Color = Color3.new(1, 1, 1), 
+    Flag = "BoxColor", 
+    Callback = function(v535) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v532 (ref)
+        v532:UpdateSettings({
+            BoxColor = v535
+        });
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateSection("Skeleton");
+l_l_v0_Window_0_Tab_0:CreateToggle({
+    Name = "Skeleton Enabled", 
+    CurrentValue = false, 
+    Flag = "SkeletonEnabled", 
+    Callback = function(v536) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v532 (ref)
+        v532:UpdateSettings({
+            Skeleton = v536
+        });
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateColorPicker({
+    Name = "Skeleton Color", 
+    Color = Color3.new(1, 1, 1), 
+    Flag = "SkeletonColor", 
+    Callback = function(v537) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v532 (ref)
+        v532:UpdateSettings({
+            SkeletonColor = v537
+        });
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateSection("HealthBar");
+l_l_v0_Window_0_Tab_0:CreateToggle({
+    Name = "HealthBar Enabled", 
+    CurrentValue = false, 
+    Flag = "HealthBarEnabled", 
+    Callback = function(v538) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v532 (ref)
+        v532:UpdateSettings({
+            HealthBar = v538
+        });
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateSection("Chams");
+local v539 = false;
+local v540 = false;
+local v541 = 1;
+local v542 = Color3.fromRGB(150, 0, 0);
+local v543 = {};
+local v544 = {};
+local function v549(v545) --[[ Line: 0 ]] --[[ Name:  ]]
+    local v546 = string.gsub(v545, "Viewmodels/", "");
+    for _, v548 in ipairs(game.Players:GetPlayers()) do
+        if v548.Name == v546 then
+            return v548;
+        end;
+    end;
+    return nil;
+end;
+local function v552(v550) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v549 (ref), l_LocalPlayer_1 (ref)
+    local v551 = v549(v550);
+    if not v551 then
+        return false;
+    else
+        return v551.Team ~= l_LocalPlayer_1.Team;
+    end;
+end;
+local function v557(v553) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v552 (ref), v541 (ref), v542 (ref), v544 (ref), v543 (ref)
+    if not v552(v553.Name) then
+        return;
+    else
+        local v555 = v553.ChildAdded:Connect(function(v554) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v541 (ref), v542 (ref), v544 (ref)
+            if v554:IsA("Highlight") then
+                v554.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop;
+                v554.FillTransparency = v541;
+                v554.FillColor = v542;
+                v554.OutlineColor = v542;
+                table.insert(v544, v554);
+            end;
+        end);
+        table.insert(v543, v555);
+        local l_EnemyHighlight_0 = v553:FindFirstChild("EnemyHighlight");
+        if l_EnemyHighlight_0 then
+            l_EnemyHighlight_0.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop;
+            l_EnemyHighlight_0.FillTransparency = v541;
+            l_EnemyHighlight_0.FillColor = v542;
+            l_EnemyHighlight_0.OutlineColor = v542;
+            table.insert(v544, l_EnemyHighlight_0);
+        end;
+        return;
+    end;
+end;
+local function v559(v558) --[[ Line: 0 ]] --[[ Name:  ]]
+    if v558 then
+        v558.DepthMode = Enum.HighlightDepthMode.Occluded;
+        v558.FillTransparency = 1;
+        v558.FillColor = Color3.fromRGB(150, 0, 0);
+        v558.OutlineColor = Color3.fromRGB(150, 0, 0);
+    end;
+end;
+local function v564() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_Viewmodels_0 (ref), v557 (ref), v543 (ref)
+    local v561 = l_Viewmodels_0.ChildAdded:Connect(function(v560) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v557 (ref)
+        v557(v560);
+    end);
+    table.insert(v543, v561);
+    for _, v563 in ipairs(l_Viewmodels_0:GetChildren()) do
+        v557(v563);
+    end;
+end;
+local function v569() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v543 (ref), v544 (ref), v559 (ref)
+    for _, v566 in pairs(v543) do
+        v566:Disconnect();
+    end;
+    v543 = {};
+    for _, v568 in pairs(v544) do
+        v559(v568);
+    end;
+    v544 = {};
+end;
+l_l_v0_Window_0_Tab_0:CreateToggle({
+    Name = "Chams", 
+    CurrentValue = false, 
+    Flag = "Chams", 
+    Callback = function(v570) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v539 (ref), v564 (ref), v569 (ref)
+        v539 = v570;
+        if v570 then
+            v564();
+        else
+            v569();
+        end;
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateToggle({
+    Name = "Filled", 
+    CurrentValue = false, 
+    Flag = "FilledModeEnabled", 
+    Callback = function(v571) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v540 (ref), v541 (ref), v544 (ref)
+        v540 = v571;
+        if v571 then
+            v541 = 0.4;
+        else
+            v541 = 1;
+        end;
+        for _, v573 in pairs(v544) do
+            if v573 then
+                v573.FillTransparency = v541;
+            end;
+        end;
+    end
+});
+local function v576() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v544 (ref), v542 (ref)
+    for _, v575 in pairs(v544) do
+        if v575 then
+            v575.FillColor = v542;
+            v575.OutlineColor = v542;
+        end;
+    end;
+end;
+l_l_v0_Window_0_Tab_0:CreateColorPicker({
+    Name = "Chams Color", 
+    Color = v542, 
+    Flag = "ChamsColor", 
+    Callback = function(v577) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v542 (ref), v576 (ref)
+        v542 = v577;
+        v576();
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateSection("Nickname");
+l_l_v0_Window_0_Tab_0:CreateToggle({
+    Name = "Nickname Enabled", 
+    CurrentValue = false, 
+    Flag = "NicknameEnabled", 
+    Callback = function(v578) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v532 (ref)
+        v532:UpdateSettings({
+            Nickname = v578
+        });
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateColorPicker({
+    Name = "Nickname Color", 
+    Color = Color3.new(1, 1, 1), 
+    Flag = "NicknameColor", 
+    Callback = function(v579) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v532 (ref)
+        v532:UpdateSettings({
+            NicknameColor = v579
+        });
+    end
+});
+l_l_v0_Window_0_Tab_0:CreateSection("Tracers");
+local v580 = false;
+local v581 = {};
+local v582 = {};
+local function v585(v583) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_1 (ref), v581 (ref)
+    if not v583.Character then
+        return;
+    elseif v583.Team == l_LocalPlayer_1.Team then
+        return;
+    elseif not v583.Character:FindFirstChild("HumanoidRootPart") then
+        return;
+    else
+        local v584 = Drawing.new("Line");
+        v584.Visible = true;
+        v584.Color = Color3.fromRGB(255, 0, 0);
+        v584.Thickness = 1;
+        v584.Transparency = 0.5;
+        if v581[v583] then
+            v581[v583]:Remove();
+        end;
+        v581[v583] = v584;
+        return v584;
+    end;
+end;
+local function v594() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v580 (ref), l_workspace_0 (ref), v581 (ref), v582 (ref)
+    local v593 = game:GetService("RunService").RenderStepped:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v580 (ref), l_workspace_0 (ref), v581 (ref)
+        if not v580 then
+            return;
+        else
+            local l_CurrentCamera_2 = l_workspace_0.CurrentCamera;
+            if not l_CurrentCamera_2 then
+                return;
+            else
+                local v587 = Vector2.new(l_CurrentCamera_2.ViewportSize.X / 2, l_CurrentCamera_2.ViewportSize.Y);
+                for v588, v589 in pairs(v581) do
+                    if v588 and v588.Character and v589 and v588.Character.Parent and v588.Character.Parent == l_workspace_0 then
+                        local l_HumanoidRootPart_1 = v588.Character:FindFirstChild("HumanoidRootPart");
+                        if l_HumanoidRootPart_1 then
+                            local v591, v592 = l_CurrentCamera_2:WorldToViewportPoint(l_HumanoidRootPart_1.Position);
+                            if v592 then
+                                v589.From = v587;
+                                v589.To = Vector2.new(v591.X, v591.Y);
+                                v589.Visible = true;
+                            else
+                                v589.Visible = false;
+                            end;
+                        else
+                            v589:Remove();
+                            v581[v588] = nil;
+                        end;
+                    else
+                        v589:Remove();
+                        v581[v588] = nil;
+                    end;
+                end;
+                return;
+            end;
+        end;
+    end);
+    table.insert(v582, v593);
+end;
+local function v601() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), v582 (ref), v585 (ref), l_LocalPlayer_1 (ref), v594 (ref)
+    v221.Tracers = game.Players.PlayerAdded:Connect(function(v595) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v582 (ref), v585 (ref)
+        table.insert(v582, v595.CharacterAdded:Connect(function(_) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v585 (ref), v595 (ref)
+            task.delay(0.1, function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: v585 (ref), v595 (ref)
+                v585(v595);
+            end);
+        end));
+    end);
+    for _, v598 in ipairs(game.Players:GetPlayers()) do
+        do
+            local l_v598_0 = v598;
+            if l_v598_0 ~= l_LocalPlayer_1 then
+                table.insert(v582, l_v598_0.CharacterAdded:Connect(function(_) --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: v585 (ref), l_v598_0 (ref)
+                    task.delay(0.1, function() --[[ Line: 0 ]] --[[ Name:  ]]
+                        -- upvalues: v585 (ref), l_v598_0 (ref)
+                        v585(l_v598_0);
+                    end);
+                end));
+                v585(l_v598_0);
+            end;
+        end;
+    end;
+    v594();
+end;
+local function v606() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v221 (ref), v582 (ref), v581 (ref)
+    if v221.Tracers then
+        v221.Tracers:Disconnect();
+        v221.Tracers = nil;
+    end;
+    for _, v603 in pairs(v582) do
+        v603:Disconnect();
+        v603 = nil;
+    end;
+    v582 = {};
+    for _, v605 in pairs(v581) do
+        if v605 then
+            v605:Remove();
+        end;
+    end;
+    v581 = {};
+end;
+l_l_v0_Window_0_Tab_0:CreateToggle({
+    Name = "Tracers", 
+    CurrentValue = false, 
+    Flag = "TracersEnabled", 
+    Callback = function(v607) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v580 (ref), v601 (ref), v606 (ref)
+        v580 = v607;
+        if v607 then
+            v601();
+        else
+            v606();
+        end;
+    end
+});
+local v608 = {
+    Enabled = false, 
+    NamesEnabled = true, 
+    StepsOnly = false, 
+    Visuals = {}, 
+    MaxDistance = 100, 
+    DotRadius = 6, 
+    BadNames = {
+        "BombTick", 
+        "Tick"
+    }, 
+    GoodNames = {
+        "step", 
+        "Shoot", 
+        "Equip", 
+        "Hit", 
+        "Reload1", 
+        "Reload2", 
+        "Tap"
+    }
+};
+local l_CurrentCamera_3 = l_workspace_0.CurrentCamera;
+v608.Init = function(v610) --[[ Line: 0 ]] --[[ Name:  ]]
+    v610.Visuals = {};
+    v610.HookedSounds = {};
+    v610.SoundStates = {};
+end;
+v608.Start = function(v611) --[[ Line: 0 ]] --[[ Name:  ]]
+    if v611.Enabled then
+        return;
+    else
+        v611:Init();
+        v611:SetupSoundDetection();
+        v611.UpdateConnection = game:GetService("RunService").RenderStepped:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v611 (ref)
+            v611:UpdateVisuals();
+        end);
+        v611.SoundCheckConnection = game:GetService("RunService").Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v611 (ref)
+            v611:CheckAllSounds();
+        end);
+        v611.Enabled = true;
+        return;
+    end;
+end;
+v608.Stop = function(v612) --[[ Line: 0 ]] --[[ Name:  ]]
+    if not v612.Enabled then
+        return;
+    else
+        if v612.UpdateConnection then
+            v612.UpdateConnection:Disconnect();
+        end;
+        if v612.SoundCheckConnection then
+            v612.SoundCheckConnection:Disconnect();
+        end;
+        v612:RemoveSoundHooks();
+        v612:ClearVisuals();
+        v612.Enabled = false;
+        return;
+    end;
+end;
+v608.SetupSoundDetection = function(v613) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_workspace_0 (ref)
+    v613.DescendantAddedConnection = l_workspace_0.DescendantAdded:Connect(function(v614) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v613 (ref)
+        if v614:IsA("Sound") then
+            v613:HookSound(v614);
+        end;
+    end);
+    v613.DescendantRemovingConnection = l_workspace_0.DescendantRemoving:Connect(function(v615) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v613 (ref)
+        if v615:IsA("Sound") then
+            v613:UnhookSound(v615);
+        end;
+    end);
+    for _, v617 in pairs(l_workspace_0:GetDescendants()) do
+        if v617:IsA("Sound") then
+            v613:HookSound(v617);
+        end;
+    end;
+end;
+v608.IsGoodSound = function(v618, v619) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v223 (ref)
+    local v620 = v619.Volume or 1;
+    if v618.StepsOnly and v619.Name ~= "step" then
+        return false;
+    elseif v620 < 0.25 then
+        return false;
+    elseif not v618:IsInRange(v618:GetSoundPosition(v619), v619) then
+        return false;
+    else
+        local v621 = v223(v619);
+        if string.find(v621, game.Players.LocalPlayer.Name) then
+            return false;
+        else
+            for _, v623 in ipairs(v618.BadNames) do
+                if v619.Name == v623 then
+                    return false;
+                end;
+            end;
+            return true;
+        end;
+    end;
+end;
+v608.HookSound = function(v624, v625) --[[ Line: 0 ]] --[[ Name:  ]]
+    if v624.HookedSounds[v625] then
+        return;
+    else
+        local l_v624_SoundPosition_0 = v624:GetSoundPosition(v625);
+        if not l_v624_SoundPosition_0 then
+            return;
+        elseif not v624:IsGoodSound(v625) then
+            return;
+        else
+            v624.SoundStates[v625] = {
+                WasPlaying = v625.IsPlaying, 
+                LastCheck = tick(), 
+                Position = l_v624_SoundPosition_0
+            };
+            v624:CreateSoundVisual(v624.SoundStates[v625].Position, v625.Volume, v625.Name, v625);
+            v624.HookedSounds[v625] = true;
+            return;
+        end;
+    end;
+end;
+v608.UnhookSound = function(v627, v628) --[[ Line: 0 ]] --[[ Name:  ]]
+    v627.SoundStates[v628] = nil;
+    v627.HookedSounds[v628] = nil;
+end;
+v608.CheckAllSounds = function(v629) --[[ Line: 0 ]] --[[ Name:  ]]
+    if not v629.Enabled then
+        return;
+    else
+        local v630 = tick();
+        for v631, v632 in pairs(v629.SoundStates) do
+            if v631.Parent then
+                local l_IsPlaying_0 = v631.IsPlaying;
+                local l_v629_SoundPosition_0 = v629:GetSoundPosition(v631);
+                if l_v629_SoundPosition_0 then
+                    if l_IsPlaying_0 and not v632.WasPlaying and v629:IsGoodSound(v631) then
+                        v629:CreateSoundVisual(l_v629_SoundPosition_0, v631.Volume or 1, v631.Name, v631);
+                    end;
+                    v632.WasPlaying = l_IsPlaying_0;
+                    v632.Position = l_v629_SoundPosition_0;
+                    v632.LastCheck = v630;
+                end;
+            else
+                v629:UnhookSound(v631);
+            end;
+        end;
+        return;
+    end;
+end;
+v608.GetSoundPosition = function(_, v636) --[[ Line: 0 ]] --[[ Name:  ]]
+    local l_Parent_0 = v636.Parent;
+    if not l_Parent_0 then
+        return;
+    elseif l_Parent_0:IsA("BasePart") then
+        return l_Parent_0.Position;
+    else
+        return;
+    end;
+end;
+v608.GetScreenPosition = function(_, v639) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_CurrentCamera_3 (ref)
+    if not v639 then
+        return;
+    else
+        local v640, v641 = l_CurrentCamera_3:WorldToViewportPoint(v639);
+        if not v641 then
+            return;
+        else
+            return v640;
+        end;
+    end;
+end;
+v608.GetDistance = function(_, v643) --[[ Line: 0 ]] --[[ Name:  ]]
+    local l_LocalPlayer_2 = game.Players.LocalPlayer;
+    if not l_LocalPlayer_2 or not l_LocalPlayer_2.Character then
+        return;
+    else
+        return (v643 - l_LocalPlayer_2.Character:GetPivot().Position).Magnitude;
+    end;
+end;
+v608.IsInRange = function(v645, v646, v647) --[[ Line: 0 ]] --[[ Name:  ]]
+    if not v646 or not v647 then
+        return;
+    else
+        local l_v645_Distance_0 = v645:GetDistance(v646);
+        if not l_v645_Distance_0 then
+            return false;
+        else
+            return l_v645_Distance_0 <= v645.MaxDistance and l_v645_Distance_0 <= v647.RollOffMaxDistance;
+        end;
+    end;
+end;
+v608.CreateSoundVisual = function(v649, v650, v651, v652, _) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_workspace_0 (ref), v608 (ref)
+    local l_CurrentCamera_4 = l_workspace_0.CurrentCamera;
+    if not l_CurrentCamera_4 then
+        return;
+    else
+        local v655, _ = l_CurrentCamera_4:WorldToViewportPoint(v650);
+        local v657 = math.random() * 0.3 + 0.6;
+        local v658 = Color3.fromHSV(v657, 0.8, 1);
+        local v659 = Drawing.new("Circle");
+        v659.Visible = true;
+        v659.Thickness = 1;
+        v659.Color = v658;
+        v659.Radius = v649.DotRadius;
+        v659.Position = Vector2.new(v655.X, v655.Y);
+        v659.Filled = true;
+        table.insert(v649.Visuals, {
+            Object = v659, 
+            Type = "SoundDot", 
+            Created = tick(), 
+            LifeTime = 1, 
+            Intensity = v651, 
+            Position = v650
+        });
+        if v608.NamesEnabled and v652 and #v652 < 20 then
+            local v660 = Drawing.new("Text");
+            v660.Visible = true;
+            v660.Text = v652;
+            v660.Size = 10;
+            v660.Color = v658;
+            v660.Outline = true;
+            v660.OutlineColor = Color3.new(0, 0, 0);
+            v660.Position = Vector2.new(v655.X + 15, v655.Y - 12);
+            table.insert(v649.Visuals, {
+                Object = v660, 
+                Type = "SoundLabel", 
+                Created = tick(), 
+                LifeTime = 1, 
+                Intensity = v651, 
+                Position = v650
+            });
+        end;
+        return;
+    end;
+end;
+v608.UpdateVisuals = function(v661) --[[ Line: 0 ]] --[[ Name:  ]]
+    local v662 = tick();
+    for v663 = #v661.Visuals, 1, -1 do
+        local v664 = v661.Visuals[v663];
+        local v665 = v662 - v664.Created;
+        if v664.LifeTime < v665 then
+            v664.Object:Destroy();
+            table.remove(v661.Visuals, v663);
+        else
+            v661:UpdateVisual(v664, v665);
+        end;
+    end;
+end;
+v608.UpdateVisual = function(v666, v667, v668) --[[ Line: 0 ]] --[[ Name:  ]]
+    local v669 = v668 / v667.LifeTime;
+    local l_v666_ScreenPosition_0 = v666:GetScreenPosition(v667.Position);
+    if not l_v666_ScreenPosition_0 then
+        v667.Object.Visible = false;
+        return;
+    else
+        v667.Object.Visible = true;
+        v667.Object.Transparency = 1 - v669;
+        if v667.Type == "SoundDot" then
+            local l_Object_0 = v667.Object;
+            l_Object_0.Position = Vector2.new(l_v666_ScreenPosition_0.X, l_v666_ScreenPosition_0.Y);
+            l_Object_0.Radius = v666.DotRadius * (1 - v669);
+        elseif v667.Type == "SoundLabel" then
+            v667.Object.Position = Vector2.new(l_v666_ScreenPosition_0.X + 15, l_v666_ScreenPosition_0.Y - 12);
+        end;
+        return;
+    end;
+end;
+v608.ClearVisuals = function(v672) --[[ Line: 0 ]] --[[ Name:  ]]
+    for _, v674 in pairs(v672.Visuals) do
+        if v674.Object then
+            v674.Object:Remove();
+        end;
+    end;
+    v672.Visuals = {};
+end;
+v608.RemoveSoundHooks = function(v675) --[[ Line: 0 ]] --[[ Name:  ]]
+    if v675.DescendantAddedConnection then
+        v675.DescendantAddedConnection:Disconnect();
+    end;
+    if v675.DescendantRemovingConnection then
+        v675.DescendantRemovingConnection:Disconnect();
+    end;
+    v675.HookedSounds = {};
+    v675.SoundStates = {};
+end;
+l_l_v0_Window_0_Tab_4:CreateToggle({
+    Name = "Sound ESP", 
+    CurrentValue = false, 
+    Flag = "SoundESPEnabled", 
+    Callback = function(v676) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v608 (ref)
+        if v676 then
+            v608:Start();
+        else
+            v608:Stop();
+        end;
+    end
+});
+l_l_v0_Window_0_Tab_4:CreateToggle({
+    Name = "Steps Only", 
+    CurrentValue = false, 
+    Flag = "StepsOnlyEnabled", 
+    Callback = function(v677) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v608 (ref)
+        v608.StepsOnly = v677;
+    end
+});
+l_l_v0_Window_0_Tab_4:CreateToggle({
+    Name = "Sound Names", 
+    CurrentValue = false, 
+    Flag = "SoundNamesEnabled", 
+    Callback = function(v678) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v608 (ref)
+        v608.NamesEnabled = v678;
+    end
+});
+l_l_v0_Window_0_Tab_4:CreateSlider({
+    Name = "Dot Radius", 
+    Range = {
+        1, 
+        20
+    }, 
+    Increment = 0.5, 
+    CurrentValue = 6, 
+    Flag = "DotRadius", 
+    Callback = function(v679) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v608 (ref)
+        v608.DotRadius = v679;
+    end
+});
+local function v680() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v532 (ref), v569 (ref), v606 (ref), v279 (ref), v292 (ref), v261 (ref), v311 (ref), v331 (ref), v360 (ref), v368 (ref), v347 (ref), v354 (ref), v391 (ref), v419 (ref), v441 (ref), v463 (ref), v486 (ref), v517 (ref), v608 (ref)
+    v532:Stop();
+    v569();
+    v606();
+    v279();
+    v292();
+    v261();
+    v311();
+    v331();
+    v360();
+    v368();
+    v347();
+    v354();
+    v391();
+    v419();
+    v441();
+    v463();
+    v486();
+    v517();
+    v608:Stop();
+end;
+l_l_v0_Window_0_Tab_5:CreateButton({
+    Name = "Copy Discord Link", 
+    Callback = function() --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v0 (ref)
+        local v681 = "https://discord.gg/UPbd5yWqwc";
+        pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v681 (ref)
+            setclipboard(v681);
+        end);
+        v0:Notify({
+            Title = "Discord", 
+            Content = "The link has been copied to the clipboard: " .. v681, 
+            Duration = 6, 
+            Image = 4483362458
+        });
+    end
+});
+local function v682() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v680 (ref), v0 (ref)
+    v680();
+    v0:Destroy();
+end;
+local function v686() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v27 (ref), v28 (ref)
+    local v683 = v27 .. "/Key System" .. "/" .. Settings.KeySettings.FileName .. v28;
+    if isfile and isfile(v683) then
+        local l_status_7, l_result_7 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v683 (ref)
+            delfile(v683);
+            return true;
+        end);
+        if l_status_7 then
+            print("Key deleted");
+        else
+            print("Failed to delete key file: " .. tostring(l_result_7));
+        end;
+    else
+        print("Key file not found");
+    end;
+end;
+local _ = l_l_v0_Window_0_Tab_5:CreateButton({
+    Name = "Renew Key", 
+    Callback = function() --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v686 (ref), v682 (ref)
+        v686();
+        v682();
+    end
+});
+local _ = l_l_v0_Window_0_Tab_5:CreateButton({
+    Name = "Exit", 
+    Callback = function() --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v682 (ref)
+        v682();
+    end
+});
+if getgenv then
+    getgenv().RayfieldDestroyCallbacks = getgenv().RayfieldDestroyCallbacks or {};
+    table.insert(getgenv().RayfieldDestroyCallbacks, function() --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v680 (ref)
+        v680();
+    end);
+end;
+local v689 = "LoadConfiguration";
+local l_v0_0 = v0;
+v0[v689](l_v0_0);
