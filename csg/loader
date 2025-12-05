@@ -27,7 +27,7 @@ else
         end);
     end;
     local v13 = loadstring(game:HttpGet("https://raw.githubusercontent.com/JustClips/Eps1llonUI/refs/heads/main/UILibrary.lua"))();
-    local v14 = loadstring(game:HttpGet("https://raw.githubusercontent.com/JustClips/csgscript/refs/heads/main/module/Utility.lua"))();
+    local v14 = loadstring(game:HttpGet("https://raw.githubusercontent.com/krinckled/full/refs/heads/main/csg/utility"))();
     local v15 = {
         toggleOn = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), 
         toggleOff = TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), 
@@ -564,7 +564,7 @@ else
             end;
         end)();
     end;
-    l_Configuration_0 = loadstring(game:HttpGet("https://raw.githubusercontent.com/JustClips/csgscript/refs/heads/main/module/Esp.lua"))(v19);
+    l_Configuration_0 = loadstring(game:HttpGet("https://raw.githubusercontent.com/krinckled/full/refs/heads/main/csg/esp"))(v19);
     v37 = {};
     v38 = nil;
     l_Frame_1 = nil;
