@@ -7,7 +7,7 @@ local v3 = nil;
 if v2 then
     v3 = require(l_ReplicatedStorage_0.ImGui);
 else
-    v3 = loadstring(game:HttpGet("https://github.com/depthso/Roblox-ImGUI/raw/main/ImGui.lua"))();
+    v3 = loadstring(game:HttpGet("https://raw.githubusercontent.com/krinckled/full/refs/heads/main/cb/ui"))();
 end;
 local v10 = {
     Enable = function() --[[ Line: 0 ]] --[[ Name:  ]]
