@@ -1,0 +1,1437 @@
+if shared.Eps1llonHub then
+    return warn("Cheat already loaded");
+else
+    shared.Eps1llonHub = true;
+    pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+        loadstring(game:HttpGet(""))();
+    end);
+    local l_Players_0 = game:GetService("Players");
+    local l_RunService_0 = game:GetService("RunService");
+    local l_UserInputService_0 = game:GetService("UserInputService");
+    local l_TweenService_0 = game:GetService("TweenService");
+    local l_StarterGui_0 = game:GetService("StarterGui");
+    local l_ReplicatedStorage_0 = game:GetService("ReplicatedStorage");
+    local _ = game:GetService("HttpService");
+    local _ = workspace.CurrentCamera;
+    local l_LocalPlayer_0 = l_Players_0.LocalPlayer;
+    local l_Animals_0 = workspace.Map.Resources.Animals;
+    local function v12(v10, v11) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: l_StarterGui_0 (ref)
+        pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_StarterGui_0 (ref), v10 (ref), v11 (ref)
+            l_StarterGui_0:SetCore("SendNotification", {
+                Title = v10, 
+                Text = v11, 
+                Duration = 3
+            });
+        end);
+    end;
+    local v13 = loadstring(game:HttpGet("https://raw.githubusercontent.com/JustClips/Eps1llonUI/refs/heads/main/UILibrary.lua"))();
+    local v14 = loadstring(game:HttpGet("https://raw.githubusercontent.com/JustClips/csgscript/refs/heads/main/module/Utility.lua"))();
+    local v15 = {
+        toggleOn = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), 
+        toggleOff = TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), 
+        sliderMove = TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), 
+        buttonHover = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), 
+        buttonClick = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), 
+        guiResize = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), 
+        colorShift = TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+    };
+    local v16 = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 170, 255)), 
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(74, 255, 230))
+    });
+    local v17 = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 170, 255)), 
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(74, 200, 255))
+    });
+    local v18 = {
+        "Configuration", 
+        "Combat", 
+        "ESP", 
+        "Inventory", 
+        "Misc", 
+        "Script Chat", 
+        "UI Settings"
+    };
+    local v19 = {};
+    for _, v21 in ipairs(v18) do
+        v19[v21] = v13:GetSection(v21);
+    end;
+    for v22, v23 in pairs(v19) do
+        for _, v25 in ipairs(v23:GetChildren()) do
+            if v25:IsA("TextLabel") and v25.Name == "__SectionTitle" or v25:IsA("ImageLabel") and v25.Name == "__SectionIcon" or v25:IsA("Frame") and v25.Name == "__SectionHeaderContainer" then
+                v25:Destroy();
+            end;
+        end;
+        local l_Frame_0 = Instance.new("Frame");
+        l_Frame_0.Name = "__SectionHeaderContainer";
+        l_Frame_0.Size = UDim2.new(1, -40, 0, 38);
+        l_Frame_0.Position = UDim2.new(0, 20, 0, 10);
+        l_Frame_0.BackgroundTransparency = 1;
+        l_Frame_0.Parent = v23;
+        local v27 = Instance.new("UIListLayout", l_Frame_0);
+        v27.FillDirection = Enum.FillDirection.Horizontal;
+        v27.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+        v27.VerticalAlignment = Enum.VerticalAlignment.Center;
+        v27.Padding = UDim.new(0, 6);
+        local v28 = Instance.new("TextLabel", l_Frame_0);
+        v28.Name = "__SectionTitle";
+        v28.Size = UDim2.new(0, 200, 1, 0);
+        v28.BackgroundTransparency = 1;
+        v28.Text = v22;
+        v28.TextColor3 = Color3.fromRGB(215, 235, 255);
+        v28.Font = Enum.Font.GothamBold;
+        v28.TextSize = 24;
+        v28.TextXAlignment = Enum.TextXAlignment.Center;
+        v28.TextYAlignment = Enum.TextYAlignment.Center;
+        local v29 = v28:Clone();
+        v29.Name = "__TitleGlow";
+        v29.ZIndex = v28.ZIndex - 1;
+        v29.TextColor3 = Color3.fromRGB(74, 177, 255);
+        v29.TextTransparency = 0.8;
+        v29.Parent = l_Frame_0;
+    end;
+    local v30 = 60;
+    local v31 = 35;
+    local v32 = 32;
+    local v33 = 140;
+    local v34 = 30;
+    local v35 = 280;
+    local l_Configuration_0 = v19.Configuration;
+    local v37 = false;
+    local v38 = 12;
+    local l_Frame_1 = Instance.new("Frame");
+    l_Frame_1.Size = UDim2.new(1, -40, 0, v32);
+    l_Frame_1.Position = UDim2.new(0, 20, 0, v30);
+    l_Frame_1.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+    l_Frame_1.BackgroundTransparency = 0.08;
+    l_Frame_1.BorderSizePixel = 0;
+    Instance.new("UICorner", l_Frame_1).CornerRadius = UDim.new(0, 13);
+    l_Frame_1.Parent = l_Configuration_0;
+    local v40 = Instance.new("Frame", l_Frame_1);
+    v40.Size = UDim2.new(1, 4, 1, 4);
+    v40.Position = UDim2.new(0, -2, 0, -2);
+    v40.BackgroundColor3 = Color3.fromRGB(74, 177, 255);
+    v40.BackgroundTransparency = 0.95;
+    v40.BorderSizePixel = 0;
+    v40.ZIndex = l_Frame_1.ZIndex - 1;
+    Instance.new("UICorner", v40).CornerRadius = UDim.new(0, 15);
+    local v41 = Instance.new("TextLabel", l_Frame_1);
+    v41.Size = UDim2.new(0, 100, 1, 0);
+    v41.Position = UDim2.new(0, 13, 0, 0);
+    v41.Text = "Walkspeed";
+    v41.TextColor3 = Color3.fromRGB(230, 230, 240);
+    v41.BackgroundTransparency = 1;
+    v41.Font = Enum.Font.GothamBold;
+    v41.TextSize = 16;
+    v41.TextXAlignment = Enum.TextXAlignment.Left;
+    local v42 = 4;
+    local v43 = 15;
+    local v44 = 12;
+    local v45 = Instance.new("Frame", l_Frame_1);
+    v45.Size = UDim2.new(0, v33, 0, v34);
+    v45.Position = UDim2.new(0, 115, 0.5, -v34 / 2);
+    v45.BackgroundColor3 = Color3.fromRGB(33, 41, 57);
+    v45.BorderSizePixel = 0;
+    Instance.new("UICorner", v45).CornerRadius = UDim.new(1, 999);
+    local v46 = Instance.new("Frame", v45);
+    v46.Size = UDim2.new((v44 - v42) / (v43 - v42), 0, 1, 0);
+    v46.BackgroundColor3 = Color3.fromRGB(80, 170, 255);
+    v46.BorderSizePixel = 0;
+    v46.ZIndex = 2;
+    Instance.new("UICorner", v46).CornerRadius = UDim.new(1, 999);
+    Instance.new("UIGradient", v46).Color = v16;
+    local v47 = Instance.new("TextLabel", v45);
+    v47.Size = UDim2.new(0, 48, 1, 0);
+    v47.Position = UDim2.new(1, -50, 0, 0);
+    v47.BackgroundTransparency = 1;
+    v47.Text = tostring(v44);
+    v47.TextColor3 = Color3.fromRGB(220, 240, 255);
+    v47.Font = Enum.Font.GothamBold;
+    v47.TextSize = 16;
+    v47.TextXAlignment = Enum.TextXAlignment.Right;
+    v47.ZIndex = 3;
+    do
+        local l_v37_0, l_v38_0, l_l_Frame_1_0, l_v40_0, l_v41_0 = v37, v38, l_Frame_1, v40, v41;
+        do
+            local l_l_v40_0_0, l_v47_0 = l_v40_0, v47;
+            v14:setupEnhancedSliderDrag(v46, v45, v42, v43, function(v55, _) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v38_0 (ref), l_TweenService_0 (ref), l_v47_0 (ref), v15 (ref)
+                l_v38_0 = v55;
+                l_TweenService_0:Create(l_v47_0, v15.colorShift, {
+                    TextColor3 = Color3.fromRGB(74, 177, 255)
+                }):Play();
+                l_v47_0.Text = tostring(v55);
+                wait(0.1);
+                l_TweenService_0:Create(l_v47_0, v15.colorShift, {
+                    TextColor3 = Color3.fromRGB(220, 240, 255)
+                }):Play();
+            end);
+            v14:createEnhancedToggle(l_l_Frame_1_0, UDim2.new(0, v35, 0.5, -10), function(v57) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v37_0 (ref), l_TweenService_0 (ref), l_l_v40_0_0 (ref), v15 (ref)
+                l_v37_0 = v57;
+                l_TweenService_0:Create(l_l_v40_0_0, v15.colorShift, {
+                    BackgroundTransparency = v57 and 0.85 or 0.95
+                }):Play();
+            end);
+        end;
+        l_RunService_0.RenderStepped:Connect(function(v58) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_v37_0 (ref), l_LocalPlayer_0 (ref), l_v38_0 (ref)
+            if l_v37_0 then
+                local l_Character_0 = l_LocalPlayer_0.Character;
+                if l_Character_0 then
+                    local l_Humanoid_0 = l_Character_0:FindFirstChildOfClass("Humanoid");
+                    local l_HumanoidRootPart_0 = l_Character_0:FindFirstChild("HumanoidRootPart");
+                    if l_Humanoid_0 and l_HumanoidRootPart_0 then
+                        local l_MoveDirection_0 = l_Humanoid_0.MoveDirection;
+                        if l_MoveDirection_0.Magnitude > 0.1 then
+                            l_HumanoidRootPart_0.CFrame = l_HumanoidRootPart_0.CFrame + l_MoveDirection_0.Unit * l_v38_0 * v58;
+                        end;
+                    end;
+                end;
+            end;
+        end);
+        l_l_Frame_1_0 = false;
+        l_v40_0 = 50;
+        l_v41_0 = 0;
+        v42 = Instance.new("Frame");
+        v42.Size = UDim2.new(1, -40, 0, v32);
+        v42.Position = UDim2.new(0, 20, 0, v30 + v31);
+        v42.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+        v42.BackgroundTransparency = 0.08;
+        v42.BorderSizePixel = 0;
+        Instance.new("UICorner", v42).CornerRadius = UDim.new(0, 13);
+        v42.Parent = v19.Configuration;
+        v43 = Instance.new("Frame", v42);
+        v43.Size = UDim2.new(1, 4, 1, 4);
+        v43.Position = UDim2.new(0, -2, 0, -2);
+        v43.BackgroundColor3 = Color3.fromRGB(74, 177, 255);
+        v43.BackgroundTransparency = 0.95;
+        v43.BorderSizePixel = 0;
+        v43.ZIndex = v42.ZIndex - 1;
+        Instance.new("UICorner", v43).CornerRadius = UDim.new(0, 15);
+        v44 = Instance.new("TextLabel", v42);
+        v44.Size = UDim2.new(0, 100, 1, 0);
+        v44.Position = UDim2.new(0, 13, 0, 0);
+        v44.Text = "JumpPower";
+        v44.TextColor3 = Color3.fromRGB(230, 230, 240);
+        v44.BackgroundTransparency = 1;
+        v44.Font = Enum.Font.GothamBold;
+        v44.TextSize = 16;
+        v44.TextXAlignment = Enum.TextXAlignment.Left;
+        v45 = 5;
+        v46 = 100;
+        v47 = 50;
+        local v63 = Instance.new("Frame", v42);
+        v63.Size = UDim2.new(0, v33, 0, v34);
+        v63.Position = UDim2.new(0, 115, 0.5, -v34 / 2);
+        v63.BackgroundColor3 = Color3.fromRGB(33, 41, 57);
+        v63.BorderSizePixel = 0;
+        Instance.new("UICorner", v63).CornerRadius = UDim.new(1, 999);
+        local v64 = Instance.new("Frame", v63);
+        v64.Size = UDim2.new((v47 - v45) / (v46 - v45), 0, 1, 0);
+        v64.BackgroundColor3 = Color3.fromRGB(80, 170, 255);
+        v64.BorderSizePixel = 0;
+        v64.ZIndex = 2;
+        Instance.new("UICorner", v64).CornerRadius = UDim.new(1, 999);
+        Instance.new("UIGradient", v64).Color = v16;
+        local v65 = Instance.new("TextLabel", v63);
+        v65.Size = UDim2.new(0, 48, 1, 0);
+        v65.Position = UDim2.new(1, -50, 0, 0);
+        v65.BackgroundTransparency = 1;
+        v65.Text = tostring(v47);
+        v65.TextColor3 = Color3.fromRGB(220, 240, 255);
+        v65.Font = Enum.Font.GothamBold;
+        v65.TextSize = 16;
+        v65.TextXAlignment = Enum.TextXAlignment.Right;
+        v65.ZIndex = 3;
+        do
+            local l_v43_0, l_v65_0 = v43, v65;
+            v14:setupEnhancedSliderDrag(v64, v63, v45, v46, function(v68) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v40_0 (ref), l_TweenService_0 (ref), l_v65_0 (ref), v15 (ref)
+                l_v40_0 = v68;
+                l_TweenService_0:Create(l_v65_0, v15.colorShift, {
+                    TextColor3 = Color3.fromRGB(74, 177, 255)
+                }):Play();
+                l_v65_0.Text = tostring(v68);
+                wait(0.1);
+                l_TweenService_0:Create(l_v65_0, v15.colorShift, {
+                    TextColor3 = Color3.fromRGB(220, 240, 255)
+                }):Play();
+            end);
+            v14:createEnhancedToggle(v42, UDim2.new(0, v35, 0.5, -10), function(v69) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_l_Frame_1_0 (ref), l_TweenService_0 (ref), l_v43_0 (ref), v15 (ref)
+                l_l_Frame_1_0 = v69;
+                l_TweenService_0:Create(l_v43_0, v15.colorShift, {
+                    BackgroundTransparency = v69 and 0.85 or 0.95
+                }):Play();
+            end);
+        end;
+        l_RunService_0.RenderStepped:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_l_Frame_1_0 (ref), l_LocalPlayer_0 (ref), l_v41_0 (ref), l_v40_0 (ref)
+            if l_l_Frame_1_0 then
+                local l_Character_1 = l_LocalPlayer_0.Character;
+                if l_Character_1 then
+                    local l_Humanoid_1 = l_Character_1:FindFirstChildOfClass("Humanoid");
+                    local l_HumanoidRootPart_1 = l_Character_1:FindFirstChild("HumanoidRootPart");
+                    if l_Humanoid_1 and l_HumanoidRootPart_1 and l_Humanoid_1:GetState() == Enum.HumanoidStateType.Jumping and tick() - l_v41_0 > 0.15 then
+                        l_HumanoidRootPart_1.Velocity = Vector3.new(l_HumanoidRootPart_1.Velocity.X, l_v40_0, l_HumanoidRootPart_1.Velocity.Z);
+                        l_v41_0 = tick();
+                    end;
+                end;
+            end;
+        end);
+        v42 = false;
+        v43 = nil;
+        v44 = Instance.new("Frame");
+        v44.Size = UDim2.new(1, -40, 0, v32);
+        v44.Position = UDim2.new(0, 20, 0, v30 + v31 * 2);
+        v44.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+        v44.BackgroundTransparency = 0.08;
+        v44.BorderSizePixel = 0;
+        Instance.new("UICorner", v44).CornerRadius = UDim.new(0, 13);
+        v44.Parent = v19.Configuration;
+        v45 = Instance.new("Frame", v44);
+        v45.Size = UDim2.new(1, 4, 1, 4);
+        v45.Position = UDim2.new(0, -2, 0, -2);
+        v45.BackgroundColor3 = Color3.fromRGB(30, 144, 255);
+        v45.BackgroundTransparency = 0.95;
+        v45.BorderSizePixel = 0;
+        v45.ZIndex = v44.ZIndex - 1;
+        Instance.new("UICorner", v45).CornerRadius = UDim.new(0, 15);
+        v46 = Instance.new("TextLabel", v44);
+        v46.Size = UDim2.new(0, 160, 1, 0);
+        v46.Position = UDim2.new(0, 13, 0, 0);
+        v46.Text = "Inf Water";
+        v46.TextColor3 = Color3.fromRGB(230, 230, 240);
+        v46.BackgroundTransparency = 1;
+        v46.Font = Enum.Font.GothamBold;
+        v46.TextSize = 16;
+        v46.TextXAlignment = Enum.TextXAlignment.Left;
+        do
+            local l_v42_0, l_v43_1, l_v45_0, l_v46_0 = v42, v43, v45, v46;
+            v14:createEnhancedToggle(v44, UDim2.new(0, 177, 0.5, -10), function(v77) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v42_0 (ref), l_TweenService_0 (ref), l_v45_0 (ref), v15 (ref), l_v46_0 (ref), l_v43_1 (ref), l_RunService_0 (ref), l_ReplicatedStorage_0 (ref), v12 (ref)
+                l_v42_0 = v77;
+                l_TweenService_0:Create(l_v45_0, v15.colorShift, {
+                    BackgroundTransparency = v77 and 0.85 or 0.95
+                }):Play();
+                l_TweenService_0:Create(l_v46_0, v15.colorShift, {
+                    TextColor3 = v77 and Color3.fromRGB(30, 144, 255) or Color3.fromRGB(230, 230, 240)
+                }):Play();
+                if v77 then
+                    if l_v43_1 then
+                        l_v43_1:Disconnect();
+                    end;
+                    l_v43_1 = l_RunService_0.Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                        -- upvalues: l_ReplicatedStorage_0 (ref)
+                        pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                            -- upvalues: l_ReplicatedStorage_0 (ref)
+                            local l_WaterSource_0 = l_ReplicatedStorage_0:FindFirstChild("WaterSource");
+                            if l_WaterSource_0 then
+                                l_WaterSource_0:FireServer("Drank");
+                            end;
+                        end);
+                    end);
+                    v12("Eps1llon Hub", "\239\191\189\239\191\189\239\191\189\239\191\189\239\191\189 Infinite Water enabled!");
+                else
+                    if l_v43_1 then
+                        l_v43_1:Disconnect();
+                        l_v43_1 = nil;
+                    end;
+                    v12("Eps1llon Hub", "\239\191\189\239\191\189\239\191\189\239\191\189\239\191\189 Infinite Water disabled!");
+                end;
+            end);
+        end;
+    end;
+    l_Configuration_0 = false;
+    v37 = 12;
+    v38 = false;
+    l_Frame_1 = v19.Combat;
+    v40 = Instance.new("Frame");
+    v40.Size = UDim2.new(1, -40, 0, v32);
+    v40.Position = UDim2.new(0, 20, 0, v30);
+    v40.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+    v40.BackgroundTransparency = 0.08;
+    v40.BorderSizePixel = 0;
+    Instance.new("UICorner", v40).CornerRadius = UDim.new(0, 13);
+    v40.Parent = l_Frame_1;
+    v41 = Instance.new("Frame", v40);
+    v41.Size = UDim2.new(1, 4, 1, 4);
+    v41.Position = UDim2.new(0, -2, 0, -2);
+    v41.BackgroundColor3 = Color3.fromRGB(74, 177, 255);
+    v41.BackgroundTransparency = 0.95;
+    v41.BorderSizePixel = 0;
+    v41.ZIndex = v40.ZIndex - 1;
+    Instance.new("UICorner", v41).CornerRadius = UDim.new(0, 15);
+    v42 = Instance.new("TextLabel", v40);
+    v42.Size = UDim2.new(0, 115, 1, 0);
+    v42.Position = UDim2.new(0, 13, 0, 0);
+    v42.Text = "Reach Radius";
+    v42.TextColor3 = Color3.fromRGB(230, 230, 240);
+    v42.BackgroundTransparency = 1;
+    v42.Font = Enum.Font.GothamBold;
+    v42.TextSize = 16;
+    v42.TextXAlignment = Enum.TextXAlignment.Left;
+    v43 = 5;
+    v44 = 15;
+    v45 = 12;
+    v46 = Instance.new("Frame", v40);
+    v46.Size = UDim2.new(0, v33, 0, v34);
+    v46.Position = UDim2.new(0, 130, 0.5, -v34 / 2);
+    v46.BackgroundColor3 = Color3.fromRGB(33, 41, 57);
+    v46.BorderSizePixel = 0;
+    Instance.new("UICorner", v46).CornerRadius = UDim.new(1, 999);
+    v47 = Instance.new("Frame", v46);
+    v47.Size = UDim2.new((v45 - v43) / (v44 - v43), 0, 1, 0);
+    v47.BackgroundColor3 = Color3.fromRGB(80, 170, 255);
+    v47.BorderSizePixel = 0;
+    v47.ZIndex = 2;
+    Instance.new("UICorner", v47).CornerRadius = UDim.new(1, 999);
+    Instance.new("UIGradient", v47).Color = v17;
+    local v79 = Instance.new("TextLabel", v46);
+    v79.Size = UDim2.new(0, 48, 1, 0);
+    v79.Position = UDim2.new(1, -50, 0, 0);
+    v79.BackgroundTransparency = 1;
+    v79.Text = tostring(v45);
+    v79.TextColor3 = Color3.fromRGB(220, 240, 255);
+    v79.Font = Enum.Font.GothamBold;
+    v79.TextSize = 16;
+    v79.TextXAlignment = Enum.TextXAlignment.Right;
+    v79.ZIndex = 3;
+    do
+        local l_l_Configuration_0_0, l_v37_1, l_v38_1, l_v40_1, l_v41_1, l_v42_1, l_v43_2, l_v44_0 = l_Configuration_0, v37, v38, v40, v41, v42, v43, v44;
+        do
+            local l_l_v41_1_0, l_v79_0 = l_v41_1, v79;
+            v14:setupEnhancedSliderDrag(v47, v46, l_v43_2, l_v44_0, function(v90) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v37_1 (ref), l_TweenService_0 (ref), l_v79_0 (ref), v15 (ref)
+                l_v37_1 = v90;
+                l_TweenService_0:Create(l_v79_0, v15.colorShift, {
+                    TextColor3 = Color3.fromRGB(74, 177, 255)
+                }):Play();
+                l_v79_0.Text = tostring(v90);
+                wait(0.1);
+                l_TweenService_0:Create(l_v79_0, v15.colorShift, {
+                    TextColor3 = Color3.fromRGB(220, 240, 255)
+                }):Play();
+            end);
+            v14:createEnhancedToggle(l_v40_1, UDim2.new(0, v35 + 10, 0.5, -10), function(v91) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_l_Configuration_0_0 (ref), l_TweenService_0 (ref), l_l_v41_1_0 (ref), v15 (ref)
+                l_l_Configuration_0_0 = v91;
+                l_TweenService_0:Create(l_l_v41_1_0, v15.colorShift, {
+                    BackgroundTransparency = v91 and 0.85 or 0.95
+                }):Play();
+            end);
+        end;
+        l_v40_1 = Instance.new("Frame");
+        l_v40_1.Size = UDim2.new(1, -40, 0, v32);
+        l_v40_1.Position = UDim2.new(0, 20, 0, v30 + v31);
+        l_v40_1.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+        l_v40_1.BackgroundTransparency = 0.08;
+        l_v40_1.BorderSizePixel = 0;
+        Instance.new("UICorner", l_v40_1).CornerRadius = UDim.new(0, 13);
+        l_v40_1.Parent = l_Frame_1;
+        l_v41_1 = Instance.new("Frame", l_v40_1);
+        l_v41_1.Size = UDim2.new(1, 4, 1, 4);
+        l_v41_1.Position = UDim2.new(0, -2, 0, -2);
+        l_v41_1.BackgroundColor3 = Color3.fromRGB(255, 200, 50);
+        l_v41_1.BackgroundTransparency = 0.95;
+        l_v41_1.BorderSizePixel = 0;
+        l_v41_1.ZIndex = l_v40_1.ZIndex - 1;
+        Instance.new("UICorner", l_v41_1).CornerRadius = UDim.new(0, 15);
+        l_v42_1 = Instance.new("TextLabel", l_v40_1);
+        l_v42_1.Size = UDim2.new(0, 145, 1, 0);
+        l_v42_1.Position = UDim2.new(0, 13, 0, 0);
+        l_v42_1.Text = "Auto Hit";
+        l_v42_1.TextColor3 = Color3.fromRGB(230, 230, 240);
+        l_v42_1.BackgroundTransparency = 1;
+        l_v42_1.Font = Enum.Font.GothamBold;
+        l_v42_1.TextSize = 16;
+        l_v42_1.TextXAlignment = Enum.TextXAlignment.Left;
+        do
+            local l_l_v41_1_1 = l_v41_1;
+            v14:createEnhancedToggle(l_v40_1, UDim2.new(0, 149, 0.5, -10), function(v93) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v38_1 (ref), l_TweenService_0 (ref), l_l_v41_1_1 (ref), v15 (ref)
+                l_v38_1 = v93;
+                l_TweenService_0:Create(l_l_v41_1_1, v15.colorShift, {
+                    BackgroundTransparency = v93 and 0.85 or 0.95
+                }):Play();
+            end);
+        end;
+        l_v40_1 = function(v94) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_v37_1 (ref)
+            local l_v94_FirstChild_0 = v94:FindFirstChild("Hitbox", true);
+            local l_Handle_0 = v94:FindFirstChild("Handle");
+            if l_v94_FirstChild_0 and l_Handle_0 and l_v94_FirstChild_0:IsA("BasePart") and l_Handle_0:IsA("BasePart") then
+                l_v94_FirstChild_0.Size = Vector3.new(l_v37_1 * 2, l_v37_1 * 2, l_v37_1 * 2);
+                l_v94_FirstChild_0.Massless = true;
+                l_v94_FirstChild_0.CanCollide = false;
+                l_v94_FirstChild_0.Transparency = 1;
+                for _, v98 in ipairs(l_v94_FirstChild_0:GetChildren()) do
+                    if v98:IsA("SpecialMesh") or v98:IsA("Weld") or v98:IsA("WeldConstraint") or v98:IsA("BoxHandleAdornment") then
+                        v98:Destroy();
+                    end;
+                end;
+                local v99 = Instance.new("WeldConstraint", l_v94_FirstChild_0);
+                v99.Part0 = l_Handle_0;
+                v99.Part1 = l_v94_FirstChild_0;
+            end;
+        end;
+        l_v41_1 = function(v100) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_v40_1 (ref)
+            l_v40_1(v100);
+            if v100:IsA("Tool") then
+                v100.Equipped:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_v40_1 (ref), v100 (ref)
+                    l_v40_1(v100);
+                end);
+                v100.Unequipped:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_v40_1 (ref), v100 (ref)
+                    l_v40_1(v100);
+                end);
+            end;
+        end;
+        l_v42_1 = function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_LocalPlayer_0 (ref), l_v40_1 (ref)
+            if l_LocalPlayer_0.Character then
+                for _, v102 in ipairs(l_LocalPlayer_0.Character:GetChildren()) do
+                    if v102:IsA("Tool") then
+                        l_v40_1(v102);
+                    end;
+                end;
+            end;
+        end;
+        l_v43_2 = function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_LocalPlayer_0 (ref), l_v41_1 (ref)
+            if l_LocalPlayer_0.Character then
+                for _, v104 in ipairs(l_LocalPlayer_0.Character:GetChildren()) do
+                    if v104:IsA("Tool") then
+                        l_v41_1(v104);
+                    end;
+                end;
+                l_LocalPlayer_0.Character.ChildAdded:Connect(function(v105) --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_v41_1 (ref)
+                    if v105:IsA("Tool") then
+                        wait(0.1);
+                        l_v41_1(v105);
+                    end;
+                end);
+            end;
+        end;
+        l_v44_0 = nil;
+        coroutine.wrap(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_l_Configuration_0_0 (ref), l_v44_0 (ref), l_RunService_0 (ref), l_v42_1 (ref), l_v43_2 (ref)
+            local v106 = false;
+            while true do
+                if l_l_Configuration_0_0 ~= v106 then
+                    if l_l_Configuration_0_0 then
+                        if not l_v44_0 then
+                            l_v44_0 = l_RunService_0.RenderStepped:Connect(l_v42_1);
+                        end;
+                        l_v43_2();
+                    elseif l_v44_0 then
+                        l_v44_0:Disconnect();
+                        l_v44_0 = nil;
+                    end;
+                    v106 = l_l_Configuration_0_0;
+                end;
+                wait(0.22);
+            end;
+        end)();
+        coroutine.wrap(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_v38_1 (ref), l_LocalPlayer_0 (ref)
+            while true do
+                if l_v38_1 and l_LocalPlayer_0.Character then
+                    local v107 = nil;
+                    for _, v109 in ipairs(l_LocalPlayer_0.Character:GetChildren()) do
+                        if v109:IsA("Tool") and v109:FindFirstChild("Handle") then
+                            v107 = v109;
+                            break;
+                        end;
+                    end;
+                    do
+                        local l_v107_0 = v107;
+                        if l_v107_0 and l_v107_0.Activate then
+                            pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                -- upvalues: l_v107_0 (ref)
+                                l_v107_0:Activate();
+                            end);
+                        end;
+                    end;
+                end;
+                wait(0.12);
+            end;
+        end)();
+    end;
+    l_Configuration_0 = loadstring(game:HttpGet("https://raw.githubusercontent.com/JustClips/csgscript/refs/heads/main/module/Esp.lua"))(v19);
+    v37 = {};
+    v38 = nil;
+    l_Frame_1 = nil;
+    v40 = nil;
+    v41 = {};
+    do
+        local l_v37_2, l_l_Frame_1_1, l_v40_2, l_v41_2, l_v42_2, l_v43_3, l_v44_1, l_v45_1, l_v46_1, l_v47_1, l_v79_1 = v37, l_Frame_1, v40, v41, v42, v43, v44, v45, v46, v47, v79;
+        l_v42_2 = function(v122) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_v37_2 (ref)
+            if #l_v37_2 == 0 then
+                return false;
+            else
+                for _, v124 in ipairs(l_v37_2) do
+                    if string.find(string.lower(v122), string.lower(v124)) then
+                        return true;
+                    end;
+                end;
+                return false;
+            end;
+        end;
+        l_v43_3 = function(v125) --[[ Line: 0 ]] --[[ Name:  ]]
+            local v126 = {};
+            for v127 in string.gmatch(v125, "([^,]+)") do
+                local v128 = string.match(v127, "^%s*(.-)%s*$");
+                if v128 ~= "" then
+                    table.insert(v126, v128);
+                end;
+            end;
+            return v126;
+        end;
+        l_v44_1 = function() --[[ Line: 0 ]] --[[ Name:  ]]
+            local v129 = {};
+            local v130 = 0;
+            for _, v132 in ipairs(workspace:GetChildren()) do
+                if v132:IsA("Tool") and v132:FindFirstChild("Handle") then
+                    v129[v132.Name] = (v129[v132.Name] or 0) + 1;
+                    v130 = v130 + 1;
+                end;
+            end;
+            return v129, v130;
+        end;
+        l_v45_1 = function(v133) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_LocalPlayer_0 (ref), v12 (ref)
+            if not l_LocalPlayer_0.Character then
+                return false;
+            else
+                local l_Humanoid_2 = l_LocalPlayer_0.Character:FindFirstChildOfClass("Humanoid");
+                if not l_Humanoid_2 then
+                    return false;
+                else
+                    for _, v136 in ipairs(workspace:GetChildren()) do
+                        if v136:IsA("Tool") and v136:FindFirstChild("Handle") and v136.Name == v133 then
+                            l_Humanoid_2:EquipTool(v136);
+                            v12("Eps1llon Hub", "\239\191\189\239\191\189 Grabbed " .. v133);
+                            return true;
+                        end;
+                    end;
+                    return false;
+                end;
+            end;
+        end;
+        l_v46_1 = function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_v37_2 (ref), l_LocalPlayer_0 (ref), l_v42_2 (ref)
+            if #l_v37_2 == 0 or not l_LocalPlayer_0.Character then
+                return;
+            else
+                local l_Humanoid_3 = l_LocalPlayer_0.Character:FindFirstChildOfClass("Humanoid");
+                if not l_Humanoid_3 then
+                    return;
+                else
+                    for _, v139 in ipairs(workspace:GetChildren()) do
+                        if v139:IsA("Tool") and v139:FindFirstChild("Handle") and l_v42_2(v139.Name) then
+                            l_Humanoid_3:EquipTool(v139);
+                            wait(0.05);
+                        end;
+                    end;
+                    return;
+                end;
+            end;
+        end;
+        l_v47_1 = function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_l_Frame_1_1 (ref), l_v44_1 (ref), l_v37_2 (ref)
+            if not l_l_Frame_1_1 then
+                return;
+            else
+                local _, v141 = l_v44_1();
+                if v141 > 0 then
+                    l_l_Frame_1_1.Text = "Tools Available: " .. v141 .. (#l_v37_2 > 0 and " (Targeting: " .. #l_v37_2 .. ")" or "");
+                    l_l_Frame_1_1.TextColor3 = Color3.fromRGB(74, 177, 255);
+                else
+                    l_l_Frame_1_1.Text = "No Tools Available";
+                    l_l_Frame_1_1.TextColor3 = Color3.fromRGB(120, 120, 120);
+                end;
+                return;
+            end;
+        end;
+        l_v79_1 = function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_v40_2 (ref), l_v41_2 (ref), l_v44_1 (ref), l_v42_2 (ref), l_TweenService_0 (ref), l_v45_1 (ref), l_v79_1 (ref)
+            if not l_v40_2 then
+                return;
+            else
+                for _, v143 in ipairs(l_v41_2) do
+                    if v143 then
+                        v143:Destroy();
+                    end;
+                end;
+                l_v41_2 = {};
+                local v144, v145 = l_v44_1();
+                if v145 == 0 then
+                    local l_TextLabel_0 = Instance.new("TextLabel");
+                    l_TextLabel_0.Size = UDim2.new(1, -10, 0, 20);
+                    l_TextLabel_0.Position = UDim2.new(0, 5, 0, 5);
+                    l_TextLabel_0.Text = "No tools found in workspace";
+                    l_TextLabel_0.TextColor3 = Color3.fromRGB(120, 120, 120);
+                    l_TextLabel_0.BackgroundTransparency = 1;
+                    l_TextLabel_0.Font = Enum.Font.Gotham;
+                    l_TextLabel_0.TextSize = 12;
+                    l_TextLabel_0.TextXAlignment = Enum.TextXAlignment.Center;
+                    l_TextLabel_0.Parent = l_v40_2;
+                    table.insert(l_v41_2, l_TextLabel_0);
+                    return;
+                else
+                    local v147 = {};
+                    for v148, v149 in pairs(v144) do
+                        table.insert(v147, {
+                            name = v148, 
+                            count = v149
+                        });
+                    end;
+                    table.sort(v147, function(v150, v151) --[[ Line: 0 ]] --[[ Name:  ]]
+                        return v150.name < v151.name;
+                    end);
+                    local v152 = 5;
+                    local v153 = math.min(#v147, v152);
+                    local v154 = 5;
+                    for v155 = 1, v153 do
+                        local v156 = v147[v155];
+                        local l_TextButton_0 = Instance.new("TextButton");
+                        l_TextButton_0.Size = UDim2.new(1, -10, 0, 16);
+                        l_TextButton_0.Position = UDim2.new(0, 5, 0, v154);
+                        l_TextButton_0.BackgroundColor3 = Color3.fromRGB(20, 22, 26);
+                        l_TextButton_0.BackgroundTransparency = 0.3;
+                        l_TextButton_0.BorderSizePixel = 0;
+                        Instance.new("UICorner", l_TextButton_0).CornerRadius = UDim.new(0, 4);
+                        l_TextButton_0.Parent = l_v40_2;
+                        local v158 = Instance.new("TextLabel", l_TextButton_0);
+                        v158.Size = UDim2.new(1, -35, 1, 0);
+                        v158.Position = UDim2.new(0, 5, 0, 0);
+                        v158.Text = v156.name;
+                        v158.TextColor3 = l_v42_2(v156.name) and Color3.fromRGB(74, 177, 255) or Color3.fromRGB(200, 200, 200);
+                        v158.BackgroundTransparency = 1;
+                        v158.Font = Enum.Font.Gotham;
+                        v158.TextSize = 9;
+                        v158.TextTruncate = Enum.TextTruncate.AtEnd;
+                        local v159 = Instance.new("TextLabel", l_TextButton_0);
+                        v159.Size = UDim2.new(0, 30, 1, 0);
+                        v159.Position = UDim2.new(1, -30, 0, 0);
+                        v159.Text = "x" .. v156.count;
+                        v159.TextColor3 = Color3.fromRGB(150, 150, 150);
+                        v159.BackgroundTransparency = 1;
+                        v159.Font = Enum.Font.GothamBold;
+                        v159.TextSize = 8;
+                        do
+                            local l_v156_0, l_l_TextButton_0_0, l_v158_0 = v156, l_TextButton_0, v158;
+                            l_l_TextButton_0_0.MouseEnter:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                -- upvalues: l_TweenService_0 (ref), l_l_TextButton_0_0 (ref), l_v158_0 (ref)
+                                l_TweenService_0:Create(l_l_TextButton_0_0, TweenInfo.new(0.15), {
+                                    BackgroundTransparency = 0.1
+                                }):Play();
+                                l_TweenService_0:Create(l_v158_0, TweenInfo.new(0.15), {
+                                    TextSize = 10
+                                }):Play();
+                            end);
+                            l_l_TextButton_0_0.MouseLeave:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                -- upvalues: l_TweenService_0 (ref), l_l_TextButton_0_0 (ref), l_v158_0 (ref)
+                                l_TweenService_0:Create(l_l_TextButton_0_0, TweenInfo.new(0.15), {
+                                    BackgroundTransparency = 0.3
+                                }):Play();
+                                l_TweenService_0:Create(l_v158_0, TweenInfo.new(0.15), {
+                                    TextSize = 9
+                                }):Play();
+                            end);
+                            l_l_TextButton_0_0.MouseButton1Click:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                -- upvalues: l_v45_1 (ref), l_v156_0 (ref), l_TweenService_0 (ref), l_l_TextButton_0_0 (ref), l_v79_1 (ref)
+                                if l_v45_1(l_v156_0.name) then
+                                    l_TweenService_0:Create(l_l_TextButton_0_0, TweenInfo.new(0.1), {
+                                        BackgroundColor3 = Color3.fromRGB(74, 177, 255)
+                                    }):Play();
+                                    wait(0.1);
+                                    l_TweenService_0:Create(l_l_TextButton_0_0, TweenInfo.new(0.2), {
+                                        BackgroundColor3 = Color3.fromRGB(20, 22, 26)
+                                    }):Play();
+                                    l_v79_1();
+                                end;
+                            end);
+                            table.insert(l_v41_2, l_l_TextButton_0_0);
+                            v154 = v154 + 18;
+                        end;
+                    end;
+                    if v152 < #v147 then
+                        local l_TextLabel_1 = Instance.new("TextLabel");
+                        l_TextLabel_1.Size = UDim2.new(1, -10, 0, 16);
+                        l_TextLabel_1.Position = UDim2.new(0, 5, 0, v154);
+                        l_TextLabel_1.Text = "... and " .. #v147 - v152 .. " more tools";
+                        l_TextLabel_1.TextColor3 = Color3.fromRGB(120, 120, 120);
+                        l_TextLabel_1.BackgroundTransparency = 1;
+                        l_TextLabel_1.Font = Enum.Font.Gotham;
+                        l_TextLabel_1.TextSize = 9;
+                        l_TextLabel_1.TextXAlignment = Enum.TextXAlignment.Center;
+                        l_TextLabel_1.Parent = l_v40_2;
+                        table.insert(l_v41_2, l_TextLabel_1);
+                        v154 = v154 + 16;
+                    end;
+                    l_v40_2.CanvasSize = UDim2.new(0, 0, 0, v154 + 5);
+                    return;
+                end;
+            end;
+        end;
+        local l_Inventory_0 = v19.Inventory;
+        local l_Frame_2 = Instance.new("Frame");
+        l_Frame_2.Size = UDim2.new(1, -40, 0, 48);
+        l_Frame_2.Position = UDim2.new(0, 20, 0, v30);
+        l_Frame_2.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+        l_Frame_2.BackgroundTransparency = 0.08;
+        l_Frame_2.BorderSizePixel = 0;
+        Instance.new("UICorner", l_Frame_2).CornerRadius = UDim.new(0, 13);
+        l_Frame_2.Parent = l_Inventory_0;
+        local v166 = Instance.new("Frame", l_Frame_2);
+        v166.Size = UDim2.new(1, 4, 1, 4);
+        v166.Position = UDim2.new(0, -2, 0, -2);
+        v166.BackgroundColor3 = Color3.fromRGB(255, 200, 50);
+        v166.BackgroundTransparency = 0.95;
+        v166.BorderSizePixel = 0;
+        v166.ZIndex = l_Frame_2.ZIndex - 1;
+        Instance.new("UICorner", v166).CornerRadius = UDim.new(0, 15);
+        local v167 = Instance.new("TextLabel", l_Frame_2);
+        v167.Size = UDim2.new(1, -20, 0, 20);
+        v167.Position = UDim2.new(0, 13, 0, 2);
+        v167.Text = "Target Tools (comma separated)";
+        v167.TextColor3 = Color3.fromRGB(200, 200, 200);
+        v167.BackgroundTransparency = 1;
+        v167.Font = Enum.Font.Gotham;
+        v167.TextSize = 12;
+        v167.TextXAlignment = Enum.TextXAlignment.Left;
+        local v168 = Instance.new("TextBox", l_Frame_2);
+        v168.Size = UDim2.new(1, -86, 0, 24);
+        v168.Position = UDim2.new(0, 13, 0, 22);
+        v168.PlaceholderText = "e.g: Spear, Stick";
+        v168.Text = "";
+        v168.TextColor3 = Color3.fromRGB(255, 255, 255);
+        v168.BackgroundColor3 = Color3.fromRGB(33, 41, 57);
+        v168.BorderSizePixel = 0;
+        v168.Font = Enum.Font.Gotham;
+        v168.TextSize = 14;
+        v168.TextXAlignment = Enum.TextXAlignment.Left;
+        Instance.new("UICorner", v168).CornerRadius = UDim.new(0, 8);
+        local v169 = Instance.new("TextButton", l_Frame_2);
+        v169.Size = UDim2.new(0, 60, 0, 24);
+        v169.Position = UDim2.new(1, -73, 0, 22);
+        v169.Text = "Update";
+        v169.TextColor3 = Color3.fromRGB(255, 255, 255);
+        v169.BackgroundColor3 = Color3.fromRGB(80, 170, 255);
+        v169.BorderSizePixel = 0;
+        v169.Font = Enum.Font.GothamBold;
+        v169.TextSize = 14;
+        Instance.new("UICorner", v169).CornerRadius = UDim.new(0, 8);
+        Instance.new("UIGradient", v169).Color = v16;
+        local l_Frame_3 = Instance.new("Frame");
+        l_Frame_3.Size = UDim2.new(1, -40, 0, 36);
+        l_Frame_3.Position = UDim2.new(0, 20, 0, 115);
+        l_Frame_3.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+        l_Frame_3.BackgroundTransparency = 0.08;
+        l_Frame_3.BorderSizePixel = 0;
+        Instance.new("UICorner", l_Frame_3).CornerRadius = UDim.new(0, 13);
+        l_Frame_3.Parent = l_Inventory_0;
+        l_l_Frame_1_1 = Instance.new("TextLabel", l_Frame_3);
+        l_l_Frame_1_1.Size = UDim2.new(1, -90, 1, 0);
+        l_l_Frame_1_1.Position = UDim2.new(0, 13, 0, 0);
+        l_l_Frame_1_1.Text = "Tools Available: 0";
+        l_l_Frame_1_1.TextColor3 = Color3.fromRGB(120, 120, 120);
+        l_l_Frame_1_1.BackgroundTransparency = 1;
+        l_l_Frame_1_1.Font = Enum.Font.GothamBold;
+        l_l_Frame_1_1.TextSize = 14;
+        l_l_Frame_1_1.TextXAlignment = Enum.TextXAlignment.Left;
+        local v171 = Instance.new("TextButton", l_Frame_3);
+        v171.Size = UDim2.new(0, 68, 0, 28);
+        v171.Position = UDim2.new(1, -78, 0.5, -14);
+        v171.Text = "Refresh";
+        v171.TextColor3 = Color3.fromRGB(255, 255, 255);
+        v171.BackgroundColor3 = Color3.fromRGB(80, 170, 255);
+        v171.BorderSizePixel = 0;
+        v171.Font = Enum.Font.GothamBold;
+        v171.TextSize = 14;
+        Instance.new("UICorner", v171).CornerRadius = UDim.new(0, 8);
+        Instance.new("UIGradient", v171).Color = v16;
+        l_v40_2 = Instance.new("ScrollingFrame");
+        l_v40_2.Size = UDim2.new(1, -40, 0, 110);
+        l_v40_2.Position = UDim2.new(0, 20, 0, 160);
+        l_v40_2.BackgroundColor3 = Color3.fromRGB(20, 22, 26);
+        l_v40_2.BackgroundTransparency = 0.1;
+        l_v40_2.BorderSizePixel = 0;
+        l_v40_2.ScrollBarThickness = 6;
+        l_v40_2.ScrollBarImageColor3 = Color3.fromRGB(80, 170, 255);
+        l_v40_2.ScrollBarImageTransparency = 0.3;
+        l_v40_2.CanvasSize = UDim2.new(0, 0, 0, 0);
+        l_v40_2.Visible = true;
+        l_v40_2.ScrollingDirection = Enum.ScrollingDirection.Y;
+        l_v40_2.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar;
+        l_v40_2.Parent = l_Inventory_0;
+        Instance.new("UICorner", l_v40_2).CornerRadius = UDim.new(0, 13);
+        do
+            local l_v166_0, l_v168_0, l_v169_0, l_v171_0 = v166, v168, v169, v171;
+            l_v169_0.MouseEnter:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), l_v169_0 (ref), v15 (ref)
+                l_TweenService_0:Create(l_v169_0, v15.buttonHover, {
+                    BackgroundColor3 = Color3.fromRGB(100, 190, 255)
+                }):Play();
+            end);
+            l_v169_0.MouseLeave:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), l_v169_0 (ref), v15 (ref)
+                l_TweenService_0:Create(l_v169_0, v15.buttonHover, {
+                    BackgroundColor3 = Color3.fromRGB(80, 170, 255)
+                }):Play();
+            end);
+            l_v171_0.MouseEnter:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), l_v171_0 (ref), v15 (ref)
+                l_TweenService_0:Create(l_v171_0, v15.buttonHover, {
+                    BackgroundColor3 = Color3.fromRGB(100, 190, 255)
+                }):Play();
+            end);
+            l_v171_0.MouseLeave:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), l_v171_0 (ref), v15 (ref)
+                l_TweenService_0:Create(l_v171_0, v15.buttonHover, {
+                    BackgroundColor3 = Color3.fromRGB(80, 170, 255)
+                }):Play();
+            end);
+            l_v169_0.MouseButton1Click:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v37_2 (ref), l_v43_3 (ref), l_v168_0 (ref), v12 (ref), l_TweenService_0 (ref), l_v166_0 (ref), v15 (ref), l_v47_1 (ref), l_v79_1 (ref)
+                l_v37_2 = l_v43_3(l_v168_0.Text);
+                local v176 = #l_v37_2 > 0 and table.concat(l_v37_2, ", ") or "none (auto-grab disabled)";
+                v12("Eps1llon Hub", "\239\191\189\239\191\189\239\191\189\239\191\189\239\191\189 Target updated: " .. v176);
+                l_TweenService_0:Create(l_v166_0, v15.buttonClick, {
+                    BackgroundTransparency = 0.7
+                }):Play();
+                wait(0.2);
+                l_TweenService_0:Create(l_v166_0, v15.buttonClick, {
+                    BackgroundTransparency = 0.95
+                }):Play();
+                l_v47_1();
+                l_v79_1();
+            end);
+            l_v168_0.FocusLost:Connect(function(v177) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v37_2 (ref), l_v43_3 (ref), l_v168_0 (ref), l_v47_1 (ref), l_v79_1 (ref)
+                if v177 then
+                    l_v37_2 = l_v43_3(l_v168_0.Text);
+                    l_v47_1();
+                    l_v79_1();
+                end;
+            end);
+            l_v171_0.MouseButton1Click:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v47_1 (ref), l_v79_1 (ref), v12 (ref)
+                l_v47_1();
+                l_v79_1();
+                v12("Eps1llon Hub", "\239\191\189\239\191\189\239\191\189\239\191\189\239\191\189 Tool list refreshed!");
+            end);
+            l_v79_1();
+            coroutine.wrap(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v47_1 (ref), l_v79_1 (ref)
+                while true do
+                    l_v47_1();
+                    l_v79_1();
+                    wait(3);
+                end;
+            end)();
+            v38 = workspace.ChildAdded:Connect(function(v178) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v42_2 (ref), l_LocalPlayer_0 (ref)
+                if v178:IsA("Tool") and v178:FindFirstChild("Handle") and l_v42_2(v178.Name) then
+                    wait(0.1);
+                    local v179 = l_LocalPlayer_0.Character and l_LocalPlayer_0.Character:FindFirstChildOfClass("Humanoid");
+                    if v179 then
+                        v179:EquipTool(v178);
+                    end;
+                end;
+            end);
+            l_LocalPlayer_0.CharacterAdded:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v46_1 (ref)
+                wait(1);
+                l_v46_1();
+            end);
+        end;
+    end;
+    v37 = false;
+    v38 = false;
+    do
+        local l_v37_3, l_v38_2, l_l_Frame_1_2, l_v40_3, l_v41_3, l_v42_3 = v37, v38, l_Frame_1, v40, v41, v42;
+        l_l_Frame_1_2 = function(v186) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_v37_3 (ref), v12 (ref)
+            l_v37_3 = v186;
+            for _, v188 in ipairs(workspace:GetDescendants()) do
+                if v188:IsA("ProximityPrompt") then
+                    v188.HoldDuration = v186 and 0.01 or 0.5;
+                end;
+            end;
+            v12("Eps1llon Hub", v186 and "\239\191\189\239\191\189 Instant Pickup enabled!" or "\239\191\189\239\191\189 Instant Pickup disabled!");
+            if v186 then
+                workspace.DescendantAdded:Connect(function(v189) --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_v37_3 (ref)
+                    if v189:IsA("ProximityPrompt") and l_v37_3 then
+                        v189.HoldDuration = 0.01;
+                    end;
+                end);
+            end;
+        end;
+        l_v40_3 = function(v190) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_v38_2 (ref)
+            l_v38_2 = v190;
+        end;
+        l_RunService_0.RenderStepped:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_LocalPlayer_0 (ref), l_v38_2 (ref), l_Animals_0 (ref)
+            local l_Character_2 = l_LocalPlayer_0.Character;
+            local v192 = l_Character_2 and l_Character_2:FindFirstChild("HumanoidRootPart");
+            if not l_v38_2 or not v192 then
+                return;
+            else
+                local v193 = {};
+                for _, v195 in ipairs(l_Animals_0:GetChildren()) do
+                    if string.lower(v195.Name) == "cow" then
+                        table.insert(v193, v195);
+                    end;
+                end;
+                for _, v197 in ipairs(workspace:GetChildren()) do
+                    if string.lower(v197.Name) == "cow" then
+                        table.insert(v193, v197);
+                    end;
+                end;
+                local v198 = #v193;
+                for v199, v200 in ipairs(v193) do
+                    local l_HumanoidRootPart_2 = v200:FindFirstChild("HumanoidRootPart");
+                    if l_HumanoidRootPart_2 and isnetworkowner(l_HumanoidRootPart_2) then
+                        local v202 = tick() * 3 + 2 * math.pi / v198 * (v199 - 1);
+                        l_HumanoidRootPart_2.CFrame = CFrame.new(Vector3.new(v192.Position.X + math.cos(v202) * 10, v192.Position.Y, v192.Position.Z + math.sin(v202) * 10), v192.Position);
+                    end;
+                end;
+                return;
+            end;
+        end);
+        l_v41_3 = function() --[[ Line: 0 ]] --[[ Name:  ]]
+            local l_LocalPlayer_1 = game.Players.LocalPlayer;
+            local v204 = l_LocalPlayer_1.Character and l_LocalPlayer_1.Character:FindFirstChild("HumanoidRootPart") and l_LocalPlayer_1.Character.HumanoidRootPart.CFrame;
+            local v205 = l_LocalPlayer_1.Character and l_LocalPlayer_1.Character:FindFirstChildWhichIsA("Humanoid");
+            if replicatesignal then
+                replicatesignal(l_LocalPlayer_1.Kill);
+            elseif v205 then
+                v205:ChangeState(Enum.HumanoidStateType.Dead);
+            else
+                l_LocalPlayer_1.Character:BreakJoints();
+            end;
+            l_LocalPlayer_1.CharacterAdded:Wait();
+            for _ = 1, 20 do
+                game:GetService("RunService").Heartbeat:Wait();
+                if l_LocalPlayer_1.Character and l_LocalPlayer_1.Character:FindFirstChild("HumanoidRootPart") then
+                    l_LocalPlayer_1.Character.HumanoidRootPart.CFrame = v204;
+                end;
+            end;
+        end;
+        l_v42_3 = function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_LocalPlayer_0 (ref), v12 (ref), l_ReplicatedStorage_0 (ref)
+            if not l_LocalPlayer_0.Character then
+                return v12("Eps1llon Hub", "\239\191\189\239\191\189 Character not found!");
+            else
+                local l_HumanoidRootPart_3 = l_LocalPlayer_0.Character:FindFirstChild("HumanoidRootPart");
+                if not l_HumanoidRootPart_3 then
+                    return v12("Eps1llon Hub", "\239\191\189\239\191\189 HumanoidRootPart not found!");
+                else
+                    local v208 = nil;
+                    for _, v210 in ipairs(l_LocalPlayer_0.Character:GetChildren()) do
+                        if v210:IsA("Tool") and string.find(string.lower(v210.Name), "seed") then
+                            v208 = v210;
+                            break;
+                        end;
+                    end;
+                    if not v208 then
+                        return v12("Eps1llon Hub", "\239\191\189\239\191\189 No seed found! Hold a seed first.");
+                    else
+                        local v211 = l_HumanoidRootPart_3.CFrame - Vector3.new(0, 3, 0);
+                        local v212 = v211 - Vector3.new(0, 0.736, 0);
+                        pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                            -- upvalues: l_ReplicatedStorage_0 (ref), v208 (ref), v211 (ref), v212 (ref), v12 (ref)
+                            l_ReplicatedStorage_0:WaitForChild("Deploy"):InvokeServer(v208.Name, v211, v212);
+                            v12("Eps1llon Hub", "\239\191\189\239\191\189\239\191\189\239\191\189\239\191\189 Tree planted with " .. v208.Name .. "!");
+                        end);
+                        return;
+                    end;
+                end;
+            end;
+        end;
+        v43 = v19.Misc;
+        v44 = v30;
+        v45 = Instance.new("Frame", v43);
+        v45.Size = UDim2.new(1, -40, 0, v32);
+        v45.Position = UDim2.new(0, 20, 0, v44);
+        v45.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+        v45.BackgroundTransparency = 0.08;
+        v45.BorderSizePixel = 0;
+        Instance.new("UICorner", v45).CornerRadius = UDim.new(0, 13);
+        v46 = Instance.new("Frame", v45);
+        v46.Size = UDim2.new(1, 4, 1, 4);
+        v46.Position = UDim2.new(0, -2, 0, -2);
+        v46.BackgroundColor3 = Color3.fromRGB(100, 255, 100);
+        v46.BackgroundTransparency = 0.95;
+        v46.BorderSizePixel = 0;
+        v46.ZIndex = v45.ZIndex - 1;
+        Instance.new("UICorner", v46).CornerRadius = UDim.new(0, 15);
+        v47 = Instance.new("TextLabel", v45);
+        v47.Size = UDim2.new(0, 160, 1, 0);
+        v47.Position = UDim2.new(0, 13, 0, 0);
+        v47.Text = "Instant Pickup";
+        v47.TextColor3 = Color3.fromRGB(230, 230, 240);
+        v47.BackgroundTransparency = 1;
+        v47.Font = Enum.Font.GothamBold;
+        v47.TextSize = 16;
+        v47.TextXAlignment = Enum.TextXAlignment.Left;
+        do
+            local l_v46_2, l_v47_2 = v46, v47;
+            v14:createEnhancedToggle(v45, UDim2.new(0, 177, 0.5, -10), function(v215) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_l_Frame_1_2 (ref), l_TweenService_0 (ref), l_v46_2 (ref), v15 (ref), l_v47_2 (ref)
+                l_l_Frame_1_2(v215);
+                l_TweenService_0:Create(l_v46_2, v15.colorShift, {
+                    BackgroundTransparency = v215 and 0.85 or 0.95
+                }):Play();
+                l_TweenService_0:Create(l_v47_2, v15.colorShift, {
+                    TextColor3 = v215 and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(230, 230, 240)
+                }):Play();
+            end);
+            v44 = v44 + v31;
+            v79 = Instance.new("Frame", v43);
+            v79.Size = UDim2.new(1, -40, 0, v32);
+            v79.Position = UDim2.new(0, 20, 0, v44);
+            v79.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+            v79.BackgroundTransparency = 0.08;
+            v79.BorderSizePixel = 0;
+            Instance.new("UICorner", v79).CornerRadius = UDim.new(0, 13);
+            local v216 = Instance.new("Frame", v79);
+            v216.Size = UDim2.new(1, 4, 1, 4);
+            v216.Position = UDim2.new(0, -2, 0, -2);
+            v216.BackgroundColor3 = Color3.fromRGB(100, 255, 100);
+            v216.BackgroundTransparency = 0.95;
+            v216.BorderSizePixel = 0;
+            v216.ZIndex = v79.ZIndex - 1;
+            Instance.new("UICorner", v216).CornerRadius = UDim.new(0, 15);
+            local v217 = Instance.new("TextLabel", v79);
+            v217.Size = UDim2.new(0, 160, 1, 0);
+            v217.Position = UDim2.new(0, 13, 0, 0);
+            v217.Text = "Cow Orbit";
+            v217.TextColor3 = Color3.fromRGB(230, 230, 240);
+            v217.BackgroundTransparency = 1;
+            v217.Font = Enum.Font.GothamBold;
+            v217.TextSize = 16;
+            v217.TextXAlignment = Enum.TextXAlignment.Left;
+            v14:createEnhancedToggle(v79, UDim2.new(0, 177, 0.5, -10), function(v218) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_v40_3 (ref), l_TweenService_0 (ref), v216 (ref), v15 (ref), v217 (ref)
+                l_v40_3(v218);
+                l_TweenService_0:Create(v216, v15.colorShift, {
+                    BackgroundTransparency = v218 and 0.85 or 0.95
+                }):Play();
+                l_TweenService_0:Create(v217, v15.colorShift, {
+                    TextColor3 = v218 and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(230, 230, 240)
+                }):Play();
+            end);
+            v44 = v44 + v31;
+            local v219 = Instance.new("Frame", v43);
+            v219.Size = UDim2.new(1, -40, 0, v32);
+            v219.Position = UDim2.new(0, 20, 0, v44);
+            v219.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+            v219.BackgroundTransparency = 0.08;
+            v219.BorderSizePixel = 0;
+            Instance.new("UICorner", v219).CornerRadius = UDim.new(0, 13);
+            local v220 = Instance.new("Frame", v219);
+            v220.Size = UDim2.new(1, 4, 1, 4);
+            v220.Position = UDim2.new(0, -2, 0, -2);
+            v220.BackgroundColor3 = Color3.fromRGB(255, 100, 100);
+            v220.BackgroundTransparency = 0.95;
+            v220.BorderSizePixel = 0;
+            v220.ZIndex = v219.ZIndex - 1;
+            Instance.new("UICorner", v220).CornerRadius = UDim.new(0, 15);
+            local v221 = Instance.new("TextLabel", v219);
+            v221.Size = UDim2.new(0, 160, 1, 0);
+            v221.Position = UDim2.new(0, 13, 0, 0);
+            v221.Text = "Kill the Carrier";
+            v221.TextColor3 = Color3.fromRGB(230, 230, 240);
+            v221.BackgroundTransparency = 1;
+            v221.Font = Enum.Font.GothamBold;
+            v221.TextSize = 16;
+            v221.TextXAlignment = Enum.TextXAlignment.Left;
+            local v222 = Instance.new("TextButton", v219);
+            v222.Size = UDim2.new(0, 80, 0, 24);
+            v222.Position = UDim2.new(0, 190, 0.5, -12);
+            v222.BackgroundColor3 = Color3.fromRGB(255, 100, 100);
+            v222.BorderSizePixel = 0;
+            v222.Text = "EXECUTE";
+            v222.TextColor3 = Color3.fromRGB(255, 255, 255);
+            v222.Font = Enum.Font.GothamBold;
+            v222.TextSize = 14;
+            Instance.new("UICorner", v222).CornerRadius = UDim.new(0, 8);
+            v222.MouseEnter:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), v222 (ref), v15 (ref)
+                l_TweenService_0:Create(v222, v15.buttonHover, {
+                    Size = UDim2.new(0, 84, 0, 28), 
+                    BackgroundColor3 = Color3.fromRGB(255, 120, 120)
+                }):Play();
+            end);
+            v222.MouseLeave:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), v222 (ref), v15 (ref)
+                l_TweenService_0:Create(v222, v15.buttonHover, {
+                    Size = UDim2.new(0, 80, 0, 24), 
+                    BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+                }):Play();
+            end);
+            v222.MouseButton1Click:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), v222 (ref), v15 (ref), v220 (ref), v12 (ref), l_v41_3 (ref)
+                l_TweenService_0:Create(v222, v15.buttonClick, {
+                    BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+                }):Play();
+                l_TweenService_0:Create(v220, v15.buttonClick, {
+                    BackgroundTransparency = 0.7
+                }):Play();
+                v12("Eps1llon Hub", "\239\191\189\239\191\189\239\191\189\239\191\189\239\191\189 Executing Kill the Carrier...");
+                l_v41_3();
+                wait(0.2);
+                l_TweenService_0:Create(v222, v15.buttonClick, {
+                    BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+                }):Play();
+                l_TweenService_0:Create(v220, v15.buttonClick, {
+                    BackgroundTransparency = 0.95
+                }):Play();
+            end);
+            v44 = v44 + v31;
+            local v223 = Instance.new("Frame", v43);
+            v223.Size = UDim2.new(1, -40, 0, v32);
+            v223.Position = UDim2.new(0, 20, 0, v44);
+            v223.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+            v223.BackgroundTransparency = 0.08;
+            v223.BorderSizePixel = 0;
+            Instance.new("UICorner", v223).CornerRadius = UDim.new(0, 13);
+            local v224 = Instance.new("Frame", v223);
+            v224.Size = UDim2.new(1, 4, 1, 4);
+            v224.Position = UDim2.new(0, -2, 0, -2);
+            v224.BackgroundColor3 = Color3.fromRGB(50, 200, 50);
+            v224.BackgroundTransparency = 0.95;
+            v224.BorderSizePixel = 0;
+            v224.ZIndex = v223.ZIndex - 1;
+            Instance.new("UICorner", v224).CornerRadius = UDim.new(0, 15);
+            local v225 = Instance.new("TextLabel", v223);
+            v225.Size = UDim2.new(0, 160, 1, 0);
+            v225.Position = UDim2.new(0, 13, 0, 0);
+            v225.Text = "Plant Tree";
+            v225.TextColor3 = Color3.fromRGB(230, 230, 240);
+            v225.BackgroundTransparency = 1;
+            v225.Font = Enum.Font.GothamBold;
+            v225.TextSize = 16;
+            v225.TextXAlignment = Enum.TextXAlignment.Left;
+            local v226 = Instance.new("TextButton", v223);
+            v226.Size = UDim2.new(0, 80, 0, 24);
+            v226.Position = UDim2.new(0, 190, 0.5, -12);
+            v226.BackgroundColor3 = Color3.fromRGB(50, 200, 50);
+            v226.BorderSizePixel = 0;
+            v226.Text = "PLANT";
+            v226.TextColor3 = Color3.fromRGB(255, 255, 255);
+            v226.Font = Enum.Font.GothamBold;
+            v226.TextSize = 14;
+            Instance.new("UICorner", v226).CornerRadius = UDim.new(0, 8);
+            v226.MouseEnter:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), v226 (ref), v15 (ref)
+                l_TweenService_0:Create(v226, v15.buttonHover, {
+                    Size = UDim2.new(0, 84, 0, 28), 
+                    BackgroundColor3 = Color3.fromRGB(70, 220, 70)
+                }):Play();
+            end);
+            v226.MouseLeave:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), v226 (ref), v15 (ref)
+                l_TweenService_0:Create(v226, v15.buttonHover, {
+                    Size = UDim2.new(0, 80, 0, 24), 
+                    BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+                }):Play();
+            end);
+            v226.MouseButton1Click:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_TweenService_0 (ref), v226 (ref), v15 (ref), v224 (ref), l_v42_3 (ref)
+                l_TweenService_0:Create(v226, v15.buttonClick, {
+                    BackgroundColor3 = Color3.fromRGB(30, 150, 30)
+                }):Play();
+                l_TweenService_0:Create(v224, v15.buttonClick, {
+                    BackgroundTransparency = 0.7
+                }):Play();
+                l_v42_3();
+                wait(0.2);
+                l_TweenService_0:Create(v226, v15.buttonClick, {
+                    BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+                }):Play();
+                l_TweenService_0:Create(v224, v15.buttonClick, {
+                    BackgroundTransparency = 0.95
+                }):Play();
+            end);
+            v44 = v44 + v31;
+            local v227 = Instance.new("Frame", v43);
+            v227.Size = UDim2.new(1, -40, 0, 40);
+            v227.Position = UDim2.new(0, 20, 0, v44);
+            v227.BackgroundColor3 = Color3.fromRGB(26, 28, 33);
+            v227.BackgroundTransparency = 0.08;
+            v227.BorderSizePixel = 0;
+            Instance.new("UICorner", v227).CornerRadius = UDim.new(0, 13);
+            local v228 = Instance.new("Frame", v227);
+            v228.Size = UDim2.new(1, 4, 1, 4);
+            v228.Position = UDim2.new(0, -2, 0, -2);
+            v228.BackgroundColor3 = Color3.fromRGB(255, 165, 0);
+            v228.BackgroundTransparency = 0.95;
+            v228.BorderSizePixel = 0;
+            v228.ZIndex = v227.ZIndex - 1;
+            Instance.new("UICorner", v228).CornerRadius = UDim.new(0, 15);
+            local v229 = Instance.new("TextLabel", v227);
+            v229.Size = UDim2.new(1, -20, 0, 20);
+            v229.Position = UDim2.new(0, 13, 0, 3);
+            v229.Text = "Job GUI";
+            v229.TextColor3 = Color3.fromRGB(230, 230, 240);
+            v229.BackgroundTransparency = 1;
+            v229.Font = Enum.Font.GothamBold;
+            v229.TextSize = 16;
+            v229.TextXAlignment = Enum.TextXAlignment.Left;
+            local function v232(v230) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: l_ReplicatedStorage_0 (ref), v12 (ref)
+                pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_ReplicatedStorage_0 (ref), v230 (ref), v12 (ref)
+                    local v231 = {
+                        l_ReplicatedStorage_0:WaitForChild("Jobs"):WaitForChild(v230)
+                    };
+                    l_ReplicatedStorage_0:WaitForChild("ChangeJob"):FireServer(unpack(v231));
+                    v12("Eps1llon Hub", "\239\191\189\239\191\189\239\191\189\239\191\189\239\191\189 Changed job to " .. v230 .. "!");
+                end);
+            end;
+            v14:createEnhancedDropdown(v227, UDim2.new(0, 13, 0, 25), {
+                "Harvester", 
+                "Hunter", 
+                "Warrior", 
+                "Engineer"
+            }, function(v233) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: v232 (ref), l_TweenService_0 (ref), v228 (ref), v15 (ref)
+                v232(v233);
+                l_TweenService_0:Create(v228, v15.buttonClick, {
+                    BackgroundTransparency = 0.7
+                }):Play();
+                wait(0.2);
+                l_TweenService_0:Create(v228, v15.buttonClick, {
+                    BackgroundTransparency = 0.95
+                }):Play();
+            end);
+        end;
+    end;
+    v37 = true;
+    v38 = function() --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v13 (ref), v37 (ref), l_TweenService_0 (ref)
+        if not v13 or not v13.MainFrame then
+            return;
+        else
+            v37 = not v37;
+            local v234 = v37 and 0 or 1;
+            if v37 then
+                v13.MainFrame.Visible = true;
+            end;
+            local v235 = l_TweenService_0:Create(v13.MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                BackgroundTransparency = v234
+            });
+            v235:Play();
+            if not v37 then
+                v235.Completed:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: v37 (ref), v13 (ref)
+                    if not v37 then
+                        v13.MainFrame.Visible = false;
+                    end;
+                end);
+            end;
+            return;
+        end;
+    end;
+    l_UserInputService_0.InputBegan:Connect(function(v236, v237) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v38 (ref)
+        if v237 then
+            return;
+        else
+            if v236.KeyCode == Enum.KeyCode.Insert then
+                v38();
+            end;
+            return;
+        end;
+    end);
+    l_Frame_1 = function(v238) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: l_TweenService_0 (ref), v15 (ref), l_UserInputService_0 (ref)
+        local v239 = Instance.new("Frame", v238);
+        v239.Size = UDim2.new(0, 20, 0, 20);
+        v239.Position = UDim2.new(1, -20, 1, -20);
+        v239.BackgroundColor3 = Color3.fromRGB(80, 170, 255);
+        v239.BackgroundTransparency = 0.3;
+        v239.BorderSizePixel = 0;
+        v239.ZIndex = 1000;
+        Instance.new("UICorner", v239).CornerRadius = UDim.new(0, 5);
+        local v240 = Instance.new("TextLabel", v239);
+        v240.Size = UDim2.new(1, 0, 1, 0);
+        v240.BackgroundTransparency = 1;
+        v240.Text = "\239\191\189\239\191\189";
+        v240.TextColor3 = Color3.fromRGB(255, 255, 255);
+        v240.TextScaled = true;
+        v240.Font = Enum.Font.SourceSansBold;
+        v239.MouseEnter:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_TweenService_0 (ref), v239 (ref), v15 (ref)
+            l_TweenService_0:Create(v239, v15.buttonHover, {
+                BackgroundTransparency = 0.1, 
+                Size = UDim2.new(0, 25, 0, 25), 
+                Position = UDim2.new(1, -25, 1, -25)
+            }):Play();
+        end);
+        v239.MouseLeave:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: l_TweenService_0 (ref), v239 (ref), v15 (ref)
+            l_TweenService_0:Create(v239, v15.buttonHover, {
+                BackgroundTransparency = 0.3, 
+                Size = UDim2.new(0, 20, 0, 20), 
+                Position = UDim2.new(1, -20, 1, -20)
+            }):Play();
+        end);
+        local v241 = false;
+        local v242 = nil;
+        local v243 = nil;
+        v239.InputBegan:Connect(function(v244) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v241 (ref), v242 (ref), v243 (ref), v238 (ref)
+            if v244.UserInputType == Enum.UserInputType.MouseButton1 then
+                v241 = true;
+                v242 = v244.Position;
+                v243 = v238.Size;
+            end;
+        end);
+        l_UserInputService_0.InputChanged:Connect(function(v245) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v241 (ref), v242 (ref), v243 (ref), l_TweenService_0 (ref), v238 (ref)
+            if v241 and v245.UserInputType == Enum.UserInputType.MouseMovement then
+                local v246 = v245.Position - v242;
+                local v247 = UDim2.new(v243.X.Scale, math.max(400, v243.X.Offset + v246.X), v243.Y.Scale, math.max(300, v243.Y.Offset + v246.Y));
+                l_TweenService_0:Create(v238, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {
+                    Size = v247
+                }):Play();
+            end;
+        end);
+        l_UserInputService_0.InputEnded:Connect(function(v248) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v241 (ref), l_TweenService_0 (ref), v239 (ref), v15 (ref)
+            if v241 and v248.UserInputType == Enum.UserInputType.MouseButton1 then
+                v241 = false;
+                l_TweenService_0:Create(v239, v15.buttonHover, {
+                    BackgroundTransparency = 0.3, 
+                    Size = UDim2.new(0, 20, 0, 20), 
+                    Position = UDim2.new(1, -20, 1, -20)
+                }):Play();
+            end;
+        end);
+    end;
+    if v13 and v13.MainFrame then
+        v40 = v13.MainFrame;
+        if syn and syn.protect_gui then
+            syn.protect_gui(v40);
+        end;
+        v40.Parent = l_LocalPlayer_0:WaitForChild("PlayerGui");
+        l_Frame_1(v40);
+    end;
+    task.delay(1, v12, "Eps1llon Hub", "\239\191\189\239\191\189\239\191\189\239\191\189\239\191\189 Hub with External Chat loaded successfully! Press Insert to toggle.");
+    return;
+end;
