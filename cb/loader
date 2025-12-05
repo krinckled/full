@@ -1,0 +1,991 @@
+-- pc only high unc 
+
+local l_RunService_0 = game:GetService("RunService");
+local l_ReplicatedStorage_0 = game:GetService("ReplicatedStorage");
+local v2 = l_RunService_0:IsStudio();
+local v3 = nil;
+if v2 then
+    v3 = require(l_ReplicatedStorage_0.ImGui);
+else
+    v3 = loadstring(game:HttpGet("https://github.com/depthso/Roblox-ImGUI/raw/main/ImGui.lua"))();
+end;
+local v10 = {
+    Enable = function() --[[ Line: 0 ]] --[[ Name:  ]]
+        getgenv().SilentAimSettings.Enabled = true;
+    end, 
+    Disable = function() --[[ Line: 0 ]] --[[ Name:  ]]
+        getgenv().SilentAimSettings.Enabled = false;
+    end, 
+    SetFOV = function(v4) --[[ Line: 0 ]] --[[ Name:  ]]
+        getgenv().SilentAimSettings.FOVRadius = v4;
+    end, 
+    SetHitChance = function(v5) --[[ Line: 0 ]] --[[ Name:  ]]
+        getgenv().SilentAimSettings.HitChance = v5;
+    end, 
+    SetTargetPart = function(v6) --[[ Line: 0 ]] --[[ Name:  ]]
+        getgenv().SilentAimSettings.TargetPart = v6;
+    end, 
+    SetTeamCheck = function(v7) --[[ Line: 0 ]] --[[ Name:  ]]
+        getgenv().SilentAimSettings.TeamCheck = v7;
+    end, 
+    SetVisibleCheck = function(v8) --[[ Line: 0 ]] --[[ Name:  ]]
+        getgenv().SilentAimSettings.VisibleCheck = v8;
+    end, 
+    SetAliveCheck = function(v9) --[[ Line: 0 ]] --[[ Name:  ]]
+        getgenv().SilentAimSettings.AliveCheck = v9;
+    end
+};
+getgenv().SilentAimSettings = {
+    Enabled = false, 
+    TeamCheck = false, 
+    VisibleCheck = false, 
+    AliveCheck = true, 
+    TargetPart = "Head", 
+    FOVRadius = 120, 
+    HitChance = 100
+};
+local v11 = {
+    Players = game:GetService("Players"), 
+    RunService = game:GetService("RunService"), 
+    UserInputService = game:GetService("UserInputService"), 
+    Camera = workspace.CurrentCamera
+};
+local l_RunService_1 = v11.RunService;
+local l_UserInputService_0 = v11.UserInputService;
+local l_Camera_0 = v11.Camera;
+local l_LocalPlayer_0 = v11.Players.LocalPlayer;
+local v16 = {
+    "Head", 
+    "HumanoidRootPart"
+};
+local _ = 0.165;
+local function v21(v18) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_Camera_0 (ref)
+    local v19, v20 = l_Camera_0:WorldToScreenPoint(v18);
+    return Vector2.new(v19.X, v19.Y), v20;
+end;
+local function v24(v22, v23) --[[ Line: 0 ]] --[[ Name:  ]]
+    return (v23 - v22).Unit;
+end;
+local function v25() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_UserInputService_0 (ref)
+    return l_UserInputService_0:GetMouseLocation();
+end;
+local function v27(v26) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref)
+    return v26.Team == l_LocalPlayer_0.Team;
+end;
+local function v33(v28) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref), l_Camera_0 (ref)
+    local l_Character_0 = v28.Character;
+    local l_Character_1 = l_LocalPlayer_0.Character;
+    if not l_Character_0 or not l_Character_1 then
+        return false;
+    else
+        local v31 = l_Character_0:FindFirstChild("Head") or l_Character_0:FindFirstChild("HumanoidRootPart");
+        if not v31 then
+            return false;
+        else
+            local v32 = {
+                v31.Position, 
+                l_Character_1, 
+                l_Character_0
+            };
+            return #l_Camera_0:GetPartsObscuringTarget(v32, {
+                l_Character_1, 
+                l_Character_0
+            }) == 0;
+        end;
+    end;
+end;
+local function v53() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v25 (ref), v11 (ref), l_LocalPlayer_0 (ref), v27 (ref), v33 (ref), v21 (ref), v16 (ref)
+    local l_TargetPart_0 = getgenv().SilentAimSettings.TargetPart;
+    local l_FOVRadius_0 = getgenv().SilentAimSettings.FOVRadius;
+    local l_VisibleCheck_0 = getgenv().SilentAimSettings.VisibleCheck;
+    local l_AliveCheck_0 = getgenv().SilentAimSettings.AliveCheck;
+    local l_TeamCheck_0 = getgenv().SilentAimSettings.TeamCheck;
+    local v39 = v25();
+    local v40 = nil;
+    local v41 = nil;
+    local v42 = nil;
+    for _, v44 in pairs(v11.Players:GetPlayers()) do
+        if v44 ~= l_LocalPlayer_0 and (not l_TeamCheck_0 or not v27(v44)) and (not l_VisibleCheck_0 or v33(v44)) then
+            local l_Character_2 = v44.Character;
+            if l_Character_2 then
+                local l_HumanoidRootPart_0 = l_Character_2:FindFirstChild("HumanoidRootPart");
+                local l_Humanoid_0 = l_Character_2:FindFirstChild("Humanoid");
+                if l_HumanoidRootPart_0 and l_Humanoid_0 and (not l_AliveCheck_0 or l_Humanoid_0.Health > 0) then
+                    local v48, v49 = v21(l_HumanoidRootPart_0.Position);
+                    if v49 then
+                        local l_Magnitude_0 = (v39 - v48).Magnitude;
+                        local v51;
+                        if not v42 then
+                            v51 = l_FOVRadius_0;
+                        else
+                            v51 = v42;
+                        end;
+                        if l_Magnitude_0 <= v51 then
+                            local l_l_Character_2_FirstChild_0 = l_Character_2:FindFirstChild(l_TargetPart_0 == "Random" and v16[math.random(1, #v16)] or l_TargetPart_0);
+                            if l_l_Character_2_FirstChild_0 then
+                                v40 = l_l_Character_2_FirstChild_0;
+                                v41 = v44;
+                                v42 = l_Magnitude_0;
+                            end;
+                        end;
+                    end;
+                end;
+            end;
+        end;
+    end;
+    return v40, v41;
+end;
+local function v55(v54) --[[ Line: 0 ]] --[[ Name:  ]]
+    return math.random() * 100 <= v54;
+end;
+local v56 = nil;
+l_RunService_1.Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v56 (ref), v53 (ref)
+    if getgenv().SilentAimSettings.Enabled then
+        v56 = v53();
+    else
+        v56 = nil;
+    end;
+end);
+local v57 = nil;
+v57 = hookmetamethod(game, "__namecall", newcclosure(function(...) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref), v57 (ref), v55 (ref), v56 (ref), v24 (ref)
+    local v58 = getnamecallmethod();
+    local v59 = {
+        ...
+    };
+    local v60 = v59[1];
+    if v58 == "Destroy" and v60 == l_LocalPlayer_0 then
+        return;
+    elseif ({})[v58] then
+        return v57(...);
+    else
+        local v61 = v55(getgenv().SilentAimSettings.HitChance);
+        if not getgenv().SilentAimSettings.Enabled or not v61 or checkcaller() then
+            return v57(...);
+        else
+            if v58 == "FindPartOnRayWithIgnoreList" then
+                local l_v56_0 = v56;
+                if l_v56_0 then
+                    local v63 = v59[2];
+                    if typeof(v63) == "Ray" then
+                        local l_Origin_0 = v63.Origin;
+                        if false then
+                            l_Origin_0 = (l_v56_0.CFrame * CFrame.new(0, 0, 1)).Position;
+                        end;
+                        local v65 = v24(l_Origin_0, l_v56_0.Position) * 1000;
+                        v59[2] = Ray.new(l_Origin_0, v65);
+                    end;
+                    return v57(unpack(v59));
+                end;
+            end;
+            return v57(...);
+        end;
+    end;
+end));
+local v66 = nil;
+local v67 = nil;
+local v68 = false;
+local function v75() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v66 (ref), v67 (ref), v68 (ref)
+    local l_LocalPlayer_1 = game:GetService("Players").LocalPlayer;
+    local l_FOVCircle_0 = l_LocalPlayer_1:FindFirstChild("PlayerGui"):FindFirstChild("FOVCircle");
+    if not l_FOVCircle_0 then
+        l_FOVCircle_0 = Instance.new("ScreenGui");
+        l_FOVCircle_0.Name = "FOVCircle";
+        l_FOVCircle_0.Parent = l_LocalPlayer_1.PlayerGui;
+    end;
+    v66 = l_FOVCircle_0.FindFirstChild(l_FOVCircle_0, "FOVCircleFrame");
+    if not v66 then
+        v66 = Instance.new("Frame");
+        v66.Name = "FOVCircleFrame";
+        v66.Size = UDim2.new(0, 100, 0, 100);
+        v66.Position = UDim2.new(0.5, -50, 0.5, -50);
+        v66.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
+        v66.BackgroundTransparency = 1;
+        v66.Parent = l_FOVCircle_0;
+    end;
+    if not v66:FindFirstChild("UIStroke") then
+        local l_UIStroke_0 = Instance.new("UIStroke");
+        l_UIStroke_0.Color = Color3.fromRGB(0, 0, 0);
+        l_UIStroke_0.Thickness = 2;
+        l_UIStroke_0.Parent = v66;
+    end;
+    if not v66:FindFirstChild("UICorner") then
+        local l_UICorner_0 = Instance.new("UICorner");
+        l_UICorner_0.CornerRadius = UDim.new(1, 0);
+        l_UICorner_0.Parent = v66;
+    end;
+    v67 = l_FOVCircle_0.FindFirstChild(l_FOVCircle_0, "InnerFOVCircleFrame");
+    if not v67 then
+        v67 = Instance.new("Frame");
+        v67.Name = "InnerFOVCircleFrame";
+        v67.Size = UDim2.new(0, 98, 0, 98);
+        v67.Position = UDim2.new(0.5, -49, 0.5, -49);
+        v67.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+        v67.BackgroundTransparency = 1;
+        v67.Parent = l_FOVCircle_0;
+    end;
+    if not v67:FindFirstChild("UIStroke") then
+        local l_UIStroke_1 = Instance.new("UIStroke");
+        l_UIStroke_1.Color = Color3.fromRGB(255, 255, 255);
+        l_UIStroke_1.Thickness = 2;
+        l_UIStroke_1.Parent = v67;
+    end;
+    if not v67:FindFirstChild("UICorner") then
+        local l_UICorner_1 = Instance.new("UICorner");
+        l_UICorner_1.CornerRadius = UDim.new(1, 0);
+        l_UICorner_1.Parent = v67;
+    end;
+    v68 = true;
+end;
+local function v76() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v66 (ref), v67 (ref), v68 (ref)
+    if v66 then
+        v66:Destroy();
+        v66 = nil;
+    end;
+    if v67 then
+        v67:Destroy();
+        v67 = nil;
+    end;
+    v68 = false;
+end;
+local function v78() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v68 (ref), v66 (ref), v67 (ref)
+    if not v68 then
+        return;
+    else
+        local v77 = (getgenv().SilentAimSettings.FOVRadius or 120) * 2;
+        if v77 < 10 then
+            v77 = 10;
+        end;
+        if v66 then
+            v66.Size = UDim2.new(0, v77, 0, v77);
+            v66.Position = UDim2.new(0.5, -v77 / 2, 0.5, -v77 / 2);
+        end;
+        if v67 then
+            v67.Size = UDim2.new(0, v77 - 2, 0, v77 - 2);
+            v67.Position = UDim2.new(0.5, -(v77 - 2) / 2, 0.5, -(v77 - 2) / 2);
+        end;
+        return;
+    end;
+end;
+local v79 = v3.CreateWindow(v3, {
+    Title = "Counter Blox HvH", 
+    Size = UDim2.new(0, 350, 0, 300), 
+    Position = UDim2.new(0.5, 0, 0, 70)
+});
+v79:Center();
+local l_v79_Tab_0 = v79:CreateTab({
+    Name = "Aim Assist"
+});
+l_v79_Tab_0:Checkbox({
+    Label = "Silent Aim", 
+    Value = false
+}).Callback = function(_, v82) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v10 (ref), v76 (ref)
+    if v82 then
+        v10.Enable();
+    else
+        v10.Disable();
+        v76();
+    end;
+end;
+local v83 = false;
+local v84 = nil;
+local v85 = nil;
+local v86 = nil;
+local v87 = nil;
+local v88 = 0;
+local v89 = 0.1;
+local function v95(v90) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref), l_Camera_0 (ref)
+    local l_Character_3 = v90.Character;
+    if not l_Character_3 then
+        return false;
+    else
+        local l_Head_0 = l_Character_3:FindFirstChild("Head");
+        if not l_Head_0 then
+            return false;
+        else
+            local v93 = {
+                l_Head_0.Position, 
+                l_LocalPlayer_0.Character.Head.Position
+            };
+            local v94 = {
+                l_LocalPlayer_0.Character, 
+                l_Character_3
+            };
+            return #l_Camera_0:GetPartsObscuringTarget(v93, v94) == 0;
+        end;
+    end;
+end;
+local function v97(v96) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref)
+    return v96.Team == l_LocalPlayer_0.Team;
+end;
+local function v102() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v11 (ref), l_LocalPlayer_0 (ref), v97 (ref), v95 (ref)
+    for _, v99 in pairs(v11.Players:GetPlayers()) do
+        if v99 ~= l_LocalPlayer_0 and not v97(v99) then
+            local l_Character_4 = v99.Character;
+            if l_Character_4 then
+                local l_Humanoid_1 = l_Character_4:FindFirstChild("Humanoid");
+                if l_Humanoid_1 and l_Humanoid_1.Health > 0 and l_Character_4:FindFirstChild("Head") and v95(v99) then
+                    return v99;
+                end;
+            end;
+        end;
+    end;
+    return nil;
+end;
+local function v103() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v85 (ref), v86 (ref), v87 (ref), v95 (ref), v97 (ref), v88 (ref), v89 (ref)
+    if not v85 or not v86 or not v87 then
+        return;
+    elseif not v87 or v87.Health <= 0 then
+        v85 = nil;
+        v86 = nil;
+        v87 = nil;
+        return;
+    elseif not v95(v85) then
+        v85 = nil;
+        v86 = nil;
+        v87 = nil;
+        return;
+    elseif v97(v85) then
+        v85 = nil;
+        v86 = nil;
+        v87 = nil;
+        return;
+    else
+        if tick() - v88 >= v89 then
+            mouse1press();
+            wait(0.01);
+            mouse1release();
+            v88 = tick();
+        end;
+        return;
+    end;
+end;
+local function v105() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v83 (ref), v84 (ref), l_RunService_1 (ref), v85 (ref), v86 (ref), v87 (ref), v102 (ref), v103 (ref)
+    if not v83 then
+        return;
+    else
+        v84 = l_RunService_1.Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v85 (ref), v86 (ref), v87 (ref), v102 (ref), v103 (ref)
+            if not v85 or not v86 or not v87 then
+                local v104 = v102();
+                if v104 then
+                    v85 = v104;
+                    v86 = v85.Character;
+                    v87 = v86:FindFirstChild("Humanoid");
+                end;
+            else
+                v103();
+            end;
+        end);
+        return;
+    end;
+end;
+local function v106() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v84 (ref), v85 (ref), v86 (ref), v87 (ref), v88 (ref)
+    if v84 then
+        v84:Disconnect();
+        v84 = nil;
+    end;
+    v85 = nil;
+    v86 = nil;
+    v87 = nil;
+    v88 = 0;
+end;
+l_v79_Tab_0:Checkbox({
+    Label = "Auto Fire", 
+    Value = false
+}).Callback = function(_, v108) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v83 (ref), v105 (ref), v106 (ref)
+    v83 = v108;
+    if v108 then
+        v105();
+    else
+        v106();
+    end;
+end;
+l_v79_Tab_0:Checkbox({
+    Label = "Team Check", 
+    Value = false
+}).Callback = function(_, v110) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v10 (ref)
+    v10.SetTeamCheck(v110);
+end;
+l_v79_Tab_0:Checkbox({
+    Label = "Visibility Check", 
+    Value = false
+}).Callback = function(_, v112) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v10 (ref)
+    v10.SetVisibleCheck(v112);
+end;
+l_v79_Tab_0:Combo({
+    Label = "Bone", 
+    Items = {
+        Head = "Head", 
+        Torso = "HumanoidRootPart"
+    }, 
+    Selected = "Head"
+}).Callback = function(_, v114) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v10 (ref)
+    v10.SetTargetPart(v114);
+end;
+l_v79_Tab_0:ProgressSlider({
+    Label = "FOV", 
+    Value = 120, 
+    MinValue = 1, 
+    MaxValue = 1000, 
+    Fill = true
+}).Callback = function(_, v116) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v10 (ref), v78 (ref)
+    v10.SetFOV(v116);
+    v78();
+end;
+l_v79_Tab_0:ProgressSlider({
+    Label = "Hit Chance", 
+    Value = 100, 
+    MinValue = 1, 
+    MaxValue = 100, 
+    Fill = true
+}).Callback = function(_, v118) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v10 (ref)
+    v10.SetHitChance(v118);
+end;
+l_v79_Tab_0:Checkbox({
+    Label = "Show FOV", 
+    Value = false
+}).Callback = function(_, v120) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v75 (ref), v78 (ref), v76 (ref)
+    if v120 then
+        v75();
+        v78();
+    else
+        v76();
+    end;
+end;
+local l_v79_Tab_1 = v79:CreateTab({
+    Name = "Visuals"
+});
+local v122 = false;
+local v123 = nil;
+local v124 = {};
+local function v127(v125) --[[ Line: 0 ]] --[[ Name:  ]]
+    local l_LocalPlayer_2 = game:GetService("Players").LocalPlayer;
+    return v125.TeamColor.Color or l_LocalPlayer_2.TeamColor == v125.TeamColor and Color3.fromRGB(0, 0, 255) or Color3.fromRGB(255, 0, 0);
+end;
+local function v138(v128) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v124 (ref), v127 (ref), v122 (ref)
+    local l_Character_5 = v128.Character;
+    if not l_Character_5 or not l_Character_5:FindFirstChild("Head") then
+        return;
+    else
+        local l_Head_1 = l_Character_5.Head;
+        local l_NameESP_0 = l_Head_1:FindFirstChild("NameESP");
+        if not l_NameESP_0 then
+            l_NameESP_0 = Instance.new("BillboardGui");
+            l_NameESP_0.Name = "NameESP";
+            l_NameESP_0.Size = UDim2.new(0, 200, 0, 50);
+            l_NameESP_0.AlwaysOnTop = true;
+            local l_TextLabel_0 = Instance.new("TextLabel");
+            l_TextLabel_0.Name = "NameLabel";
+            l_TextLabel_0.BackgroundTransparency = 1;
+            l_TextLabel_0.Size = UDim2.new(1, 0, 1, 0);
+            l_TextLabel_0.Font = Enum.Font.SourceSansBold;
+            l_TextLabel_0.TextSize = 16;
+            l_TextLabel_0.TextStrokeTransparency = 0.5;
+            l_TextLabel_0.Parent = l_NameESP_0;
+            l_NameESP_0.Parent = l_Head_1;
+            v124[v128] = l_NameESP_0;
+        end;
+        local v133 = l_NameESP_0.FindFirstChild(l_NameESP_0, "NameLabel");
+        if v133 then
+            local v134 = 0;
+            local v135 = 100;
+            if game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                v134 = (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position - l_Head_1.Position).magnitude;
+            end;
+            local l_Humanoid_2 = l_Character_5:FindFirstChild("Humanoid");
+            if l_Humanoid_2 then
+                v135 = l_Humanoid_2.Health;
+            end;
+            local l_DisplayName_0 = v128.DisplayName;
+            v133.Text = string.format("[%d HP] %s [%dm]", v135, l_DisplayName_0, math.floor(v134));
+            v133.TextColor3 = v127(v128);
+            v133.Visible = v122;
+            l_NameESP_0.StudsOffset = Vector3.new(0, 2 + math.clamp(v134 / 50, 0, 5), 0);
+        end;
+        return;
+    end;
+end;
+local function v141() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v122 (ref), v138 (ref)
+    if not v122 then
+        return;
+    else
+        for _, v140 in ipairs(game:GetService("Players"):GetPlayers()) do
+            if v140 ~= game:GetService("Players").LocalPlayer and v140.Character then
+                v138(v140);
+            end;
+        end;
+        return;
+    end;
+end;
+local function v145(v142) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v122 (ref), v141 (ref), v123 (ref), l_RunService_1 (ref), v124 (ref)
+    v122 = v142;
+    if v142 then
+        v141();
+        if not v123 then
+            v123 = l_RunService_1.Heartbeat:Connect(v141);
+        end;
+    else
+        if v123 then
+            v123:Disconnect();
+            v123 = nil;
+        end;
+        for _, v144 in pairs(v124) do
+            if v144 and v144.Parent then
+                v144:Destroy();
+            end;
+        end;
+        v124 = {};
+    end;
+end;
+l_v79_Tab_1:Checkbox({
+    Label = "ESP Name", 
+    Value = false
+}).Callback = function(_, v147) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v145 (ref)
+    v145(v147);
+end;
+local v148 = false;
+local v149 = nil;
+local v150 = {};
+local function v160(v151) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v150 (ref), v148 (ref)
+    local l_Character_6 = v151.Character;
+    if not l_Character_6 or not l_Character_6:FindFirstChild("HumanoidRootPart") then
+        return;
+    else
+        local l_HumanoidRootPart_1 = l_Character_6.HumanoidRootPart;
+        local l_WeaponESP_0 = l_HumanoidRootPart_1:FindFirstChild("WeaponESP");
+        if not l_WeaponESP_0 then
+            l_WeaponESP_0 = Instance.new("BillboardGui");
+            l_WeaponESP_0.Name = "WeaponESP";
+            l_WeaponESP_0.Size = UDim2.new(0, 200, 0, 50);
+            l_WeaponESP_0.AlwaysOnTop = true;
+            local l_TextLabel_1 = Instance.new("TextLabel");
+            l_TextLabel_1.Name = "WeaponLabel";
+            l_TextLabel_1.BackgroundTransparency = 1;
+            l_TextLabel_1.Size = UDim2.new(1, 0, 1, 0);
+            l_TextLabel_1.Font = Enum.Font.SourceSansBold;
+            l_TextLabel_1.TextSize = 16;
+            l_TextLabel_1.TextStrokeTransparency = 0.5;
+            l_TextLabel_1.Parent = l_WeaponESP_0;
+            l_WeaponESP_0.Parent = l_HumanoidRootPart_1;
+            v150[v151] = l_WeaponESP_0;
+        end;
+        local v156 = l_WeaponESP_0.FindFirstChild(l_WeaponESP_0, "WeaponLabel");
+        if v156 then
+            local v157 = 0;
+            if game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                v157 = (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position - l_HumanoidRootPart_1.Position).magnitude;
+            end;
+            local v158 = "None";
+            local v159 = l_Character_6:FindFirstChild("Tool") or l_Character_6:FindFirstChild("EquippedTool");
+            if v159 and v159:IsA("StringValue") then
+                v158 = v159.Value;
+            elseif v159 and v159:IsA("Tool") then
+                v158 = v159.Name;
+            end;
+            v156.Text = v158;
+            v156.TextColor3 = Color3.fromRGB(255, 255, 255);
+            v156.Visible = v148;
+            l_WeaponESP_0.StudsOffset = Vector3.new(0, -2 - math.clamp(v157 / 50, 0, 5), 0);
+        end;
+        return;
+    end;
+end;
+local function v163() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v148 (ref), v160 (ref)
+    if not v148 then
+        return;
+    else
+        for _, v162 in ipairs(game:GetService("Players"):GetPlayers()) do
+            if v162 ~= game:GetService("Players").LocalPlayer and v162.Character then
+                v160(v162);
+            end;
+        end;
+        return;
+    end;
+end;
+local function v167(v164) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v148 (ref), v163 (ref), v149 (ref), l_RunService_1 (ref), v150 (ref)
+    v148 = v164;
+    if v164 then
+        v163();
+        if not v149 then
+            v149 = l_RunService_1.Heartbeat:Connect(v163);
+        end;
+    else
+        if v149 then
+            v149:Disconnect();
+            v149 = nil;
+        end;
+        for _, v166 in pairs(v150) do
+            if v166 and v166.Parent then
+                v166:Destroy();
+            end;
+        end;
+        v150 = {};
+    end;
+end;
+l_v79_Tab_1:Checkbox({
+    Label = "ESP Weapon", 
+    Value = false
+}).Callback = function(_, v169) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v167 (ref)
+    v167(v169);
+end;
+local v170 = false;
+local v171 = nil;
+local v172 = Color3.fromRGB(255, 255, 255);
+local function v178() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v170 (ref), v172 (ref)
+    if not v170 then
+        return;
+    else
+        local v173 = workspace:FindFirstChild("Camera") and workspace.Camera:FindFirstChild("Arms");
+        if not v173 then
+            return;
+        else
+            local function v174(v175) --[[ Line: 0 ]] --[[ Name:  ]]
+                -- upvalues: v172 (ref), v174 (ref)
+                for _, v177 in pairs(v175:GetChildren()) do
+                    if v177:IsA("BasePart") then
+                        if not v177.Parent or v177.Parent.Name ~= "IDFArms" then
+                            v177.Material = Enum.Material.ForceField;
+                            v177.BrickColor = BrickColor.White();
+                            v177.Color = v172;
+                        end;
+                    elseif v177:IsA("Model") and v177.Name ~= "IDFArms" then
+                        v174(v177);
+                    end;
+                end;
+            end;
+            v174(v173);
+            return;
+        end;
+    end;
+end;
+local function v180(v179) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v170 (ref), v178 (ref), v171 (ref), l_RunService_1 (ref)
+    v170 = v179;
+    if v179 then
+        v178();
+        if not v171 then
+            v171 = l_RunService_1.Heartbeat:Connect(v178);
+        end;
+    elseif v171 then
+        v171:Disconnect();
+        v171 = nil;
+    end;
+end;
+l_v79_Tab_1:Checkbox({
+    Label = "Custom Weapons", 
+    Value = false
+}).Callback = function(_, v182) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v180 (ref)
+    v180(v182);
+end;
+local v183 = l_v79_Tab_1:Combo({
+    Label = "Weapon Color", 
+    Selected = "White", 
+    Items = {
+        "White", 
+        "Red", 
+        "Green", 
+        "Blue", 
+        "Yellow", 
+        "Purple", 
+        "Cyan", 
+        "Orange", 
+        "Pink", 
+        "Brown", 
+        "Black"
+    }
+});
+local v184 = {
+    White = Color3.fromRGB(255, 255, 255), 
+    Red = Color3.fromRGB(255, 0, 0), 
+    Green = Color3.fromRGB(0, 255, 0), 
+    Blue = Color3.fromRGB(0, 0, 255), 
+    Yellow = Color3.fromRGB(255, 255, 0), 
+    Purple = Color3.fromRGB(128, 0, 128), 
+    Cyan = Color3.fromRGB(0, 255, 255), 
+    Orange = Color3.fromRGB(255, 165, 0), 
+    Pink = Color3.fromRGB(255, 192, 203), 
+    Brown = Color3.fromRGB(165, 42, 42), 
+    Black = Color3.fromRGB(0, 0, 0)
+};
+v183.Callback = function(_, v186) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v172 (ref), v184 (ref), v170 (ref), v178 (ref)
+    v172 = v184[v186] or Color3.fromRGB(255, 255, 255);
+    if v170 then
+        v178();
+    end;
+end;
+local v187 = false;
+local v188 = nil;
+local v189 = {};
+local v190 = 0.7;
+local v191 = Color3.fromRGB(255, 255, 255);
+local function v194() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v189 (ref)
+    for _, v193 in pairs(v189) do
+        if v193 and v193.Parent then
+            v193:Destroy();
+        end;
+    end;
+    v189 = {};
+end;
+local function v199(v195, v196) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v189 (ref)
+    for _, v198 in pairs(v189) do
+        if v198 and v198.Parent then
+            v198.FillColor = v196;
+            v198.FillTransparency = v195;
+        end;
+    end;
+end;
+local function v211(_, v201) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v191 (ref), v190 (ref), v189 (ref)
+    local l_Highlight_0 = v201:FindFirstChild("Highlight");
+    if l_Highlight_0 then
+        local v203 = {};
+        for _, v205 in pairs(l_Highlight_0:GetChildren()) do
+            if v205:IsA("Highlight") then
+                table.insert(v203, v205);
+            end;
+        end;
+        for v206 = 1, #v203 - 1 do
+            v203[v206]:Destroy();
+        end;
+        if #v203 > 0 then
+            local v207 = v203[#v203];
+            v207.FillColor = v191;
+            v207.FillTransparency = v190;
+            return v207;
+        end;
+    else
+        local l_Folder_0 = Instance.new("Folder");
+        l_Folder_0.Name = "Highlight";
+        l_Folder_0.Parent = v201;
+    end;
+    local l_Highlight_1 = v201:FindFirstChild("Highlight");
+    if not l_Highlight_1 then
+        l_Highlight_1 = Instance.new("Folder");
+        l_Highlight_1.Name = "Highlight";
+        l_Highlight_1.Parent = v201;
+    end;
+    local l_Highlight_2 = Instance.new("Highlight");
+    l_Highlight_2.FillColor = v191;
+    l_Highlight_2.FillTransparency = v190;
+    l_Highlight_2.OutlineColor = v191;
+    l_Highlight_2.OutlineTransparency = 1;
+    l_Highlight_2.Enabled = true;
+    l_Highlight_2.Adornee = v201;
+    l_Highlight_2.Parent = l_Highlight_1;
+    table.insert(v189, l_Highlight_2);
+    return l_Highlight_2;
+end;
+local function v221() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v187 (ref), v211 (ref)
+    if not v187 then
+        return;
+    else
+        local l_LocalPlayer_3 = game:GetService("Players").LocalPlayer;
+        if not l_LocalPlayer_3.Character then
+            local _ = l_LocalPlayer_3.CharacterAdded:Wait();
+        end;
+        for _, v215 in pairs(game:GetService("Players"):GetPlayers()) do
+            if v215 ~= l_LocalPlayer_3 and v215.Character then
+                local l_Character_7 = v215.Character;
+                for _, v218 in pairs(l_Character_7:GetChildren()) do
+                    if v218:IsA("BasePart") and v218.Name ~= "HumanoidRootPart" then
+                        v211(v215, v218);
+                    end;
+                end;
+                for _, v220 in pairs(l_Character_7:GetChildren()) do
+                    if v220:IsA("Accessory") and v220:FindFirstChild("Handle") then
+                        v211(v215, v220.Handle);
+                    end;
+                end;
+            end;
+        end;
+        return;
+    end;
+end;
+l_v79_Tab_1:Checkbox({
+    Label = "Chams", 
+    Value = false
+}).Callback = function(_, v223) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v187 (ref), v221 (ref), v188 (ref), l_RunService_1 (ref), v194 (ref)
+    v187 = v223;
+    if v223 then
+        v221();
+        if not v188 then
+            v188 = l_RunService_1.Heartbeat:Connect(v221);
+        end;
+    else
+        if v188 then
+            v188:Disconnect();
+            v188 = nil;
+        end;
+        v194();
+    end;
+end;
+l_v79_Tab_1:Slider({
+    Label = "Transparency", 
+    Value = 0.7, 
+    MinValue = 0, 
+    MaxValue = 1, 
+    Step = 0.1
+}).Callback = function(_, v225) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v190 (ref), v187 (ref), v199 (ref), v191 (ref)
+    v190 = v225;
+    if v187 then
+        v199(v190, v191);
+    end;
+end;
+l_v79_Tab_1:Combo({
+    Label = "Chams Color", 
+    Selected = "White", 
+    Items = {
+        "White", 
+        "Red", 
+        "Green", 
+        "Blue", 
+        "Yellow", 
+        "Purple", 
+        "Cyan", 
+        "Orange", 
+        "Pink", 
+        "Brown", 
+        "Black"
+    }
+}).Callback = function(_, v227) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v191 (ref), v184 (ref), v187 (ref), v199 (ref), v190 (ref)
+    v191 = v184[v227] or Color3.fromRGB(255, 255, 255);
+    if v187 then
+        v199(v190, v191);
+    end;
+end;
+local l_v79_Tab_2 = v79:CreateTab({
+    Name = "Movement"
+});
+local v229 = l_v79_Tab_2:Checkbox({
+    Label = "Bhop", 
+    Value = false
+});
+l_v79_Tab_2:Label({
+    Text = "**Developed by @CowkaWare**", 
+    RichText = true
+});
+l_v79_Tab_2:Label({
+    Text = "Helped by @originalimage"
+});
+l_v79_Tab_2:Label({
+    Text = "**More Soon**", 
+    RichText = true
+});
+local v230 = false;
+local v231 = nil;
+local v232 = nil;
+local v233 = nil;
+local v234 = nil;
+local v235 = false;
+local function v240() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v230 (ref), v234 (ref), v232 (ref), v235 (ref), v233 (ref), v231 (ref)
+    if not v230 then
+        return;
+    else
+        local l_LocalPlayer_4 = game:GetService("Players").LocalPlayer;
+        v234 = (l_LocalPlayer_4.Character or l_LocalPlayer_4.CharacterAdded:Wait()):WaitForChild("Humanoid");
+        v232 = game:GetService("UserInputService").InputBegan:Connect(function(v237) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v235 (ref)
+            if v237.KeyCode == Enum.KeyCode.Space then
+                v235 = true;
+            end;
+        end);
+        v233 = game:GetService("UserInputService").InputEnded:Connect(function(v238) --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v235 (ref)
+            if v238.KeyCode == Enum.KeyCode.Space then
+                v235 = false;
+            end;
+        end);
+        v231 = game:GetService("RunService").Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v235 (ref), v234 (ref), l_LocalPlayer_4 (ref), v230 (ref)
+            if v235 and v234 then
+                v234.Jump = not v234.Jump;
+            end;
+            local l_Character_8 = l_LocalPlayer_4.Character;
+            if l_Character_8 and v230 and v235 and v234 and v234:GetState() == Enum.HumanoidStateType.Freefall and v234.MoveDirection.Magnitude > 0 then
+                l_Character_8:TranslateBy(v234.MoveDirection / 5.9);
+            end;
+        end);
+        return;
+    end;
+end;
+local function v241() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v231 (ref), v232 (ref), v233 (ref), v234 (ref), v235 (ref)
+    if v231 then
+        v231:Disconnect();
+        v231 = nil;
+    end;
+    if v232 then
+        v232:Disconnect();
+        v232 = nil;
+    end;
+    if v233 then
+        v233:Disconnect();
+        v233 = nil;
+    end;
+    v234 = nil;
+    v235 = false;
+end;
+v229.Callback = function(_, v243) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v230 (ref), v240 (ref), v241 (ref)
+    v230 = v243;
+    if v243 then
+        v240();
+    else
+        v241();
+    end;
+end;
+game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function(v244) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v230 (ref), v234 (ref)
+    if v230 then
+        v234 = v244:WaitForChild("Humanoid");
+    end;
+end);
+l_RunService_1.Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v68 (ref), v78 (ref)
+    if v68 then
+        v78();
+    end;
+end);
+v79:ShowTab(l_v79_Tab_0);
