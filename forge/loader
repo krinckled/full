@@ -1,0 +1,494 @@
+local v0 = loadstring(game:HttpGet("https://raw.githubusercontent.com/AbdouGG/uiliborin/main/lib"))();
+local v1 = v0:MakeWindow({
+    Name = "Ego Hub / The Forge", 
+    HidePremium = true, 
+    SaveConfig = false
+});
+local l_Players_0 = game:GetService("Players");
+local l_LocalPlayer_0 = l_Players_0.LocalPlayer;
+local l_ReplicatedStorage_0 = game:GetService("ReplicatedStorage");
+local l_RunService_0 = game:GetService("RunService");
+local v6 = false;
+local v7 = 20;
+local v8 = true;
+local v9 = -3;
+local v10 = 40;
+local function v19(v11) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref), v10 (ref)
+    local l_HumanoidRootPart_0 = (l_LocalPlayer_0.Character or l_LocalPlayer_0.CharacterAdded:Wait()):FindFirstChild("HumanoidRootPart");
+    if not l_HumanoidRootPart_0 or not l_HumanoidRootPart_0:IsA("BasePart") then
+        warn("HumanoidRootPart not found during move attempt.");
+        return;
+    else
+        local v13 = CFrame.new(v11);
+        local l_CFrame_0 = l_HumanoidRootPart_0.CFrame;
+        local v15 = tick();
+        local l_Magnitude_0 = (l_CFrame_0.Position - v13.Position).Magnitude;
+        local v17 = nil;
+        if l_Magnitude_0 < 2 then
+            v17 = 0.1;
+        else
+            v17 = l_Magnitude_0 / v10;
+            v17 = math.max(0.2, math.min(v17, 15));
+        end;
+        while tick() - v15 < v17 do
+            local v18 = tick() - v15;
+            l_HumanoidRootPart_0.CFrame = l_CFrame_0:Lerp(v13, (math.min(v18 / v17, 1)));
+            task.wait();
+        end;
+        l_HumanoidRootPart_0.CFrame = v13;
+        return;
+    end;
+end;
+local function v25() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref)
+    local l_Character_0 = l_LocalPlayer_0.Character;
+    if not l_Character_0 then
+        return;
+    else
+        local l_Humanoid_0 = l_Character_0:FindFirstChild("Humanoid");
+        local l_HumanoidRootPart_1 = l_Character_0:FindFirstChild("HumanoidRootPart");
+        if l_Humanoid_0 then
+            l_Humanoid_0.PlatformStand = false;
+        end;
+        if l_HumanoidRootPart_1 then
+            l_HumanoidRootPart_1.CFrame = CFrame.new(l_HumanoidRootPart_1.Position);
+        end;
+        for _, v24 in ipairs(l_Character_0:GetDescendants()) do
+            if v24:IsA("BasePart") then
+                v24.CanCollide = true;
+            end;
+        end;
+        return;
+    end;
+end;
+local function v35(v26) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref), v7 (ref), l_Players_0 (ref)
+    local l_Character_1 = l_LocalPlayer_0.Character;
+    if not l_Character_1 or not l_Character_1:FindFirstChild("HumanoidRootPart") then
+        return nil;
+    else
+        local l_Living_0 = workspace:FindFirstChild("Living");
+        if not l_Living_0 then
+            return nil;
+        else
+            local l_Position_0 = l_Character_1.HumanoidRootPart.Position;
+            local v30 = nil;
+            local v31 = v26 or v7;
+            for _, v33 in ipairs(l_Living_0:GetChildren()) do
+                if v33:IsA("Model") and v33:FindFirstChild("Humanoid") and v33:FindFirstChild("HumanoidRootPart") and v33 ~= l_Character_1 and not l_Players_0:GetPlayerFromCharacter(v33) then
+                    local l_Magnitude_1 = (l_Position_0 - v33.HumanoidRootPart.Position).Magnitude;
+                    if l_Magnitude_1 < v31 then
+                        v31 = l_Magnitude_1;
+                        v30 = v33;
+                    end;
+                end;
+            end;
+            return v30, v31;
+        end;
+    end;
+end;
+local function v51(v36, v37) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: l_LocalPlayer_0 (ref), v0 (ref), v19 (ref), v9 (ref), l_RunService_0 (ref), v6 (ref), l_ReplicatedStorage_0 (ref), v25 (ref)
+    if not v36 or not v36.Parent then
+        return;
+    else
+        local l_HumanoidRootPart_2 = v36:FindFirstChild("HumanoidRootPart");
+        local l_Humanoid_1 = v36:FindFirstChild("Humanoid");
+        if not l_HumanoidRootPart_2 or not l_Humanoid_1 then
+            return;
+        else
+            local l_Character_2 = l_LocalPlayer_0.Character;
+            local v41 = l_Character_2 and l_Character_2:FindFirstChild("Humanoid");
+            local v42 = l_Character_2 and l_Character_2:FindFirstChild("HumanoidRootPart");
+            if not l_Character_2 or not v41 or v41.Health <= 0 then
+                return;
+            else
+                v0:MakeNotification({
+                    Name = "Mob Detected!", 
+                    Content = "Moving & Killing...", 
+                    Image = "rbxassetid://4483345998", 
+                    Time = 2
+                });
+                v19(l_HumanoidRootPart_2.Position + Vector3.new(0, v9, 0));
+                v41.PlatformStand = true;
+                local v43 = nil;
+                v43 = l_RunService_0.Stepped:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: l_Character_2 (ref)
+                    if not l_Character_2 or not l_Character_2.Parent then
+                        return;
+                    else
+                        for _, v45 in ipairs(l_Character_2:GetDescendants()) do
+                            if v45:IsA("BasePart") and v45.CanCollide == true then
+                                v45.CanCollide = false;
+                            end;
+                        end;
+                        return;
+                    end;
+                end);
+                local v46 = nil;
+                v46 = l_RunService_0.Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                    -- upvalues: v36 (ref), l_HumanoidRootPart_2 (ref), v42 (ref), v9 (ref)
+                    if not v36 or not v36.Parent or not l_HumanoidRootPart_2 or not l_HumanoidRootPart_2.Parent then
+                        return;
+                    elseif not v42 or not v42.Parent then
+                        return;
+                    else
+                        local v47 = l_HumanoidRootPart_2.Position + Vector3.new(0, v9, 0);
+                        v42.CFrame = CFrame.new(v47) * CFrame.Angles(math.rad(-90), 0, 0);
+                        v42.Velocity = Vector3.new(0, 0, 0);
+                        v42.RotVelocity = Vector3.new(0, 0, 0);
+                        return;
+                    end;
+                end);
+                while v36 and v36.Parent and l_Humanoid_1 and l_Humanoid_1.Health > 0 do
+                    local l_Character_3 = l_LocalPlayer_0.Character;
+                    local v49 = l_Character_3 and l_Character_3:FindFirstChild("Humanoid");
+                    if l_Character_3 and v49 and v49.Health > 0 and (not v37 or v6) then
+                        pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                            -- upvalues: l_ReplicatedStorage_0 (ref)
+                            local v50 = {
+                                [1] = "Weapon"
+                            };
+                            l_ReplicatedStorage_0.Shared.Packages.Knit.Services.ToolService.RF.ToolActivated:InvokeServer(unpack(v50));
+                        end);
+                        wait(0.3);
+                    else
+                        break;
+                    end;
+                end;
+                if v43 then
+                    v43:Disconnect();
+                end;
+                if v46 then
+                    v46:Disconnect();
+                end;
+                v25();
+                wait(0.5);
+                return;
+            end;
+        end;
+    end;
+end;
+local l_Rocks_0 = workspace:WaitForChild("Rocks");
+local v53 = {};
+local v54 = {};
+local function v65() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v53 (ref), v54 (ref), l_Rocks_0 (ref)
+    v53 = {};
+    v54 = {};
+    for _, v56 in ipairs(l_Rocks_0:GetChildren()) do
+        if v56:IsA("Folder") then
+            for _, v58 in ipairs(v56:GetDescendants()) do
+                local l_Hitbox_0 = v58:FindFirstChild("Hitbox");
+                if l_Hitbox_0 and l_Hitbox_0:IsA("BasePart") then
+                    local l_Name_0 = v58.Name;
+                    if not v54[l_Name_0] then
+                        v54[l_Name_0] = {};
+                        table.insert(v53, l_Name_0);
+                    end;
+                    table.insert(v54[l_Name_0], l_Hitbox_0);
+                end;
+            end;
+        end;
+    end;
+    table.sort(v53);
+    for _, v62 in pairs(v54) do
+        table.sort(v62, function(v63, v64) --[[ Line: 0 ]] --[[ Name:  ]]
+            return v63.Parent:GetFullName() < v64.Parent:GetFullName();
+        end);
+    end;
+    return v53;
+end;
+v65();
+local v66 = {};
+local function v68(v67) --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v54 (ref), v66 (ref)
+    if not v54[v67] or #v54[v67] == 0 then
+        return nil;
+    else
+        if not v66[v67] then
+            v66[v67] = 0;
+        end;
+        v66[v67] = v66[v67] + 1;
+        if v66[v67] > #v54[v67] then
+            v66[v67] = 1;
+        end;
+        return v54[v67][v66[v67]];
+    end;
+end;
+local v69 = nil;
+local v70 = nil;
+local function v92() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v69 (ref), v0 (ref), v6 (ref), v70 (ref), l_LocalPlayer_0 (ref), v8 (ref), v35 (ref), v7 (ref), v51 (ref), v68 (ref), v66 (ref), v54 (ref), v19 (ref), l_RunService_0 (ref), v25 (ref), l_ReplicatedStorage_0 (ref)
+    if not v69 then
+        v0:MakeNotification({
+            Name = "Auto Farm", 
+            Content = "Please select a rock type first!", 
+            Image = "rbxassetid://4483345998", 
+            Time = 3
+        });
+        v6 = false;
+        if autoFarmToggle then
+            autoFarmToggle:Set(false);
+        end;
+        return;
+    else
+        v70 = task.spawn(function() --[[ Line: 0 ]] --[[ Name:  ]]
+            -- upvalues: v6 (ref), v69 (ref), l_LocalPlayer_0 (ref), v0 (ref), v8 (ref), v35 (ref), v7 (ref), v51 (ref), v68 (ref), v66 (ref), v54 (ref), v19 (ref), l_RunService_0 (ref), v25 (ref), l_ReplicatedStorage_0 (ref), v70 (ref)
+            while v6 and v69 and l_LocalPlayer_0.Parent do
+                local l_Character_4 = l_LocalPlayer_0.Character;
+                local v72 = l_Character_4 and l_Character_4:FindFirstChild("Humanoid");
+                if not l_Character_4 or not l_Character_4.Parent or v72 and v72.Health <= 0 then
+                    v0:MakeNotification({
+                        Name = "Player Died", 
+                        Content = "Auto Farm stopping...", 
+                        Time = 2
+                    });
+                    v6 = false;
+                    if autoFarmToggle then
+                        autoFarmToggle:Set(false);
+                        break;
+                    else
+                        break;
+                    end;
+                else
+                    if v8 then
+                        local v73 = v35(v7);
+                        if v73 then
+                            v51(v73, true);
+                        end;
+                    end;
+                    if v6 then
+                        local v74 = v68(v69);
+                        if v74 and v74:IsA("BasePart") then
+                            local v75 = v66[v69] or 0;
+                            local v76 = #v54[v69] or 0;
+                            v0:MakeNotification({
+                                Name = "Auto Farming " .. v69, 
+                                Content = string.format("Moving to Rock %d of %d", v75, v76), 
+                                Image = "rbxassetid://4483345998", 
+                                Time = 2
+                            });
+                            v19(v74.Position);
+                            wait(0.1);
+                            l_Character_4 = l_LocalPlayer_0.Character;
+                            v72 = l_Character_4 and l_Character_4:FindFirstChild("Humanoid");
+                            local v77 = l_Character_4 and l_Character_4:FindFirstChild("HumanoidRootPart");
+                            local v78 = nil;
+                            local v79 = nil;
+                            do
+                                local l_l_Character_4_0, l_v74_0 = l_Character_4, v74;
+                                do
+                                    local l_v77_0 = v77;
+                                    if v72 and l_v77_0 then
+                                        v72.PlatformStand = true;
+                                        v78 = l_RunService_0.Stepped:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                            -- upvalues: l_l_Character_4_0 (ref)
+                                            if not l_l_Character_4_0 or not l_l_Character_4_0.Parent then
+                                                return;
+                                            else
+                                                for _, v84 in ipairs(l_l_Character_4_0:GetDescendants()) do
+                                                    if v84:IsA("BasePart") and v84.CanCollide == true then
+                                                        v84.CanCollide = false;
+                                                    end;
+                                                end;
+                                                return;
+                                            end;
+                                        end);
+                                        v79 = l_RunService_0.Heartbeat:Connect(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                            -- upvalues: l_v74_0 (ref), l_v77_0 (ref)
+                                            if not l_v74_0 or not l_v74_0.Parent then
+                                                return;
+                                            elseif not l_v77_0 or not l_v77_0.Parent then
+                                                return;
+                                            else
+                                                local l_Position_1 = l_v74_0.Position;
+                                                l_v77_0.CFrame = CFrame.new(l_Position_1);
+                                                l_v77_0.Velocity = Vector3.new(0, 0, 0);
+                                                l_v77_0.RotVelocity = Vector3.new(0, 0, 0);
+                                                return;
+                                            end;
+                                        end);
+                                    end;
+                                    while v6 do
+                                        local l_Character_5 = l_LocalPlayer_0.Character;
+                                        local v87 = l_Character_5 and l_Character_5:FindFirstChild("Humanoid");
+                                        if l_Character_5 and v87 and v87.Health > 0 then
+                                            if v8 then
+                                                local v88 = v35(v7);
+                                                if v88 then
+                                                    if v78 then
+                                                        v78.Disconnect(v78);
+                                                    end;
+                                                    if v79 then
+                                                        v79.Disconnect(v79);
+                                                    end;
+                                                    v25();
+                                                    v51(v88, true);
+                                                    if not v6 then
+                                                        break;
+                                                    else
+                                                        break;
+                                                    end;
+                                                end;
+                                            end;
+                                            if not l_v74_0 or not l_v74_0.Parent then
+                                                v0:MakeNotification({
+                                                    Name = "Rock Destroyed", 
+                                                    Content = "Moving to next " .. v69, 
+                                                    Image = "rbxassetid://4483345998", 
+                                                    Time = 2
+                                                });
+                                                break;
+                                            else
+                                                local l_status_0, l_result_0 = pcall(function() --[[ Line: 0 ]] --[[ Name:  ]]
+                                                    -- upvalues: l_ReplicatedStorage_0 (ref)
+                                                    local v89 = {
+                                                        [1] = "Pickaxe"
+                                                    };
+                                                    l_ReplicatedStorage_0.Shared.Packages.Knit.Services.ToolService.RF.ToolActivated:InvokeServer(unpack(v89));
+                                                end);
+                                                if not l_status_0 then
+                                                    warn("Pickaxe activation failed:", l_result_0);
+                                                end;
+                                                wait(0.2);
+                                            end;
+                                        else
+                                            break;
+                                        end;
+                                    end;
+                                    if v78 then
+                                        v78.Disconnect(v78);
+                                    end;
+                                    if v79 then
+                                        v79.Disconnect(v79);
+                                    end;
+                                    v25();
+                                    wait(1);
+                                end;
+                            end;
+                        else
+                            v0:MakeNotification({
+                                Name = "Auto Farm Complete", 
+                                Content = "No more " .. v69 .. " found!", 
+                                Image = "rbxassetid://4483345998", 
+                                Time = 3
+                            });
+                            --[[ close >= 0 ]]
+                            break;
+                        end;
+                    else
+                        break;
+                    end;
+                end;
+            end;
+            v6 = false;
+            if autoFarmToggle then
+                autoFarmToggle:Set(false);
+            end;
+            v70 = nil;
+        end);
+        return;
+    end;
+end;
+local function v93() --[[ Line: 0 ]] --[[ Name:  ]]
+    -- upvalues: v6 (ref), v70 (ref), v25 (ref), v0 (ref)
+    v6 = false;
+    if v70 then
+        v70 = nil;
+    end;
+    v25();
+    v0:MakeNotification({
+        Name = "Auto Farm", 
+        Content = "Stopped", 
+        Image = "rbxassetid://4483345998", 
+        Time = 2
+    });
+end;
+local v94 = v1:MakeTab({
+    Name = "Auto Farm rocks", 
+    Icon = "rbxassetid://4483345998"
+});
+local v95 = nil;
+local v96 = nil;
+v95 = v94:AddDropdown({
+    Name = "Select Rock Type", 
+    Options = v53, 
+    Callback = function(v97) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v69 (ref), v66 (ref), v0 (ref)
+        v69 = v97;
+        v66[v97] = 0;
+        v0:MakeNotification({
+            Name = "Rock Selected", 
+            Content = v97, 
+            Image = "rbxassetid://4483345998", 
+            Time = 2
+        });
+    end
+});
+v96 = v94:AddToggle({
+    Name = "Auto Farm Selected Rock", 
+    Default = false, 
+    Callback = function(v98) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v6 (ref), v92 (ref), v93 (ref)
+        v6 = v98;
+        if v98 then
+            v92();
+        else
+            v93();
+        end;
+    end
+});
+v94:AddButton({
+    Name = "Refresh Rock List", 
+    Callback = function() --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v65 (ref), v66 (ref), v69 (ref), v95 (ref), v6 (ref), v96 (ref), v0 (ref)
+        local v99 = v65();
+        v66 = {};
+        v69 = nil;
+        if v95 then
+            v95:Refresh(v99, true);
+        end;
+        if v6 then
+            v6 = false;
+            if v96 then
+                v96:Set(false);
+            end;
+        end;
+        v0:MakeNotification({
+            Name = "Refreshed", 
+            Content = string.format("Found %d rock types", #v99), 
+            Image = "rbxassetid://4483345998", 
+            Time = 2
+        });
+    end
+});
+local v100 = v1:MakeTab({
+    Name = "Mob Farm", 
+    Icon = "rbxassetid://4483345998"
+});
+v100:AddLabel("Mob Auto-Farm Settings");
+v100:AddSlider({
+    Name = "Mob Detection Range", 
+    Min = 10, 
+    Max = 100, 
+    Default = 40, 
+    Color = Color3.fromRGB(255, 255, 255), 
+    Increment = 5, 
+    ValueName = "studs", 
+    Callback = function(v101) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v7 (ref)
+        v7 = v101;
+    end
+});
+local v102 = nil;
+v102 = v100:AddToggle({
+    Name = "Auto Kill Mobs While Rock Farming", 
+    Default = true, 
+    Callback = function(v103) --[[ Line: 0 ]] --[[ Name:  ]]
+        -- upvalues: v8 (ref)
+        v8 = v103;
+    end
+});
+v0:Init();
