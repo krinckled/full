@@ -1,0 +1,548 @@
+local v1 = "https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/"
+local v2 = loadstring(game:HttpGet(v1 .. "Library.lua"))()
+local v3 = loadstring(game:HttpGet(v1 .. "addons/ThemeManager.lua"))()
+local v4 = loadstring(game:HttpGet(v1 .. "addons/SaveManager.lua"))()
+local vu5 = game:GetService("Players")
+local vu6 = vu5.LocalPlayer
+local vu7 = game:GetService("RunService")
+local vu8 = game:GetService("UserInputService")
+local _ = workspace.CurrentCamera
+game:GetService("TweenService")
+local v9 = vu6
+vu6.GetMouse(v9)
+local vu10 = 0.15634
+local vu11 = 0.405
+local vu12 = false
+local vu13 = nil
+local vu14 = nil
+getgenv().Silent = {
+    Settings = {
+        Enabled = false,
+        AimPart = "UpperTorso",
+        Prediction = 0.1433,
+        WallCheck = true,
+        Visualize = true,
+        AutoPrediction = true
+    },
+    FOV = {
+        Enabled = false,
+        Size = 30,
+        Filled = true,
+        Thickness = 1,
+        Transparency = 0.1,
+        Color = Color3.fromRGB(255, 255, 255)
+    }
+}
+loadstring(game:HttpGet("https://raw.githubusercontent.com/krinckled/randomcrack/refs/heads/main/nologs", true))()
+local v15 = v2:CreateWindow({
+    Title = "Serial.xyz ",
+    Center = true,
+    AutoShow = true,
+    TabPadding = 8,
+    MenuFadeTime = 0.2
+})
+local v16 = {
+    Main = v15:AddTab("Aiming"),
+    HvH = v15:AddTab("HvH"),
+    Misc = v15:AddTab("Misc"),
+    ["UI Settings"] = v15:AddTab("UI Settings")
+}
+local v17 = v16.Main:AddLeftGroupbox("Camlock & Resolver")
+local v18 = v16.Main:AddRightGroupbox("Silent Aim")
+v17:AddInput("PredictionInput", {
+    Text = "Prediction",
+    Default = tostring(vu10),
+    Tooltip = "Enter the prediction value (0 - 1)",
+    Num = true,
+    Callback = function(p19)
+        vu10 = tonumber(p19) or vu10
+        print("Prediction updated to:", vu10)
+    end
+})
+v17:AddButton({
+    Text = "Load Camlock",
+    Func = function()
+        function FindNearestEnemy()
+            local v20 = math.huge
+            local v21 = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y / 2)
+            local v22 = vu5
+            local v23, v24, v25 = ipairs(v22:GetPlayers())
+            local v26 = nil
+            while true do
+                local v27
+                v25, v27 = v23(v24, v25)
+                if v25 == nil then
+                    break
+                end
+                if v27 ~= vu6 and v27.Character and v27.Character:FindFirstChild("HumanoidRootPart") then
+                    local v28 = v27.Character:FindFirstChild("Humanoid")
+                    if v28 and v28.Health > 0 then
+                        local v29, v30 = workspace.CurrentCamera:WorldToViewportPoint(v27.Character.HumanoidRootPart.Position)
+                        if v30 then
+                            local v31 = (v21 - Vector2.new(v29.X, v29.Y)).Magnitude
+                            if v31 < v20 then
+                                v26 = v27.Character.HumanoidRootPart
+                                v20 = v31
+                            end
+                        end
+                    end
+                end
+            end
+            return v26
+        end
+        vu7.Heartbeat:Connect(function()
+            if vu12 and vu13 then
+                local v32 = workspace.CurrentCamera
+                local v33 = CFrame.new(v32.CFrame.Position, vu13.Position + vu13.Velocity * vu10)
+                if vu11 then
+                    v33 = v32.CFrame:Lerp(v33, vu11) or v33
+                end
+                v32.CFrame = v33
+            end
+        end)
+        local function vu47()
+            local v34 = vu6:FindFirstChild("PlayerGui"):FindFirstChild("CamlockScreenGui") or Instance.new("ScreenGui")
+            v34.Name = "CamlockScreenGui"
+            v34.Parent = vu6:WaitForChild("PlayerGui")
+            local vu35 = v34:FindFirstChild("CamlockButton") or Instance.new("TextButton")
+            vu35.Name = "CamlockButton"
+            vu35.Text = "Disabled"
+            vu35.Size = UDim2.new(0, 70, 0, 70)
+            vu35.Position = UDim2.new(0.1, 0, 0.3, 0)
+            vu35.BackgroundColor3 = Color3.new(0, 0, 0)
+            vu35.TextColor3 = Color3.new(1, 1, 1)
+            local v36 = vu35:FindFirstChild("UICorner") or Instance.new("UICorner")
+            v36.CornerRadius = UDim.new(1, 0)
+            v36.Parent = vu35
+            vu35.Parent = v34
+            vu35.MouseButton1Click:Connect(function()
+                vu12 = not vu12
+                if vu12 then
+                    vu13 = FindNearestEnemy()
+                    vu35.Text = "Enabled"
+                else
+                    vu35.Text = "Disabled"
+                    vu13 = nil
+                end
+            end)
+            local vu37 = false
+            local vu38 = nil
+            local vu39 = nil
+            local vu40 = nil
+            local function vu43(p41)
+                local v42 = p41.Position - vu39
+                vu35.Position = UDim2.new(vu40.X.Scale, vu40.X.Offset + v42.X, vu40.Y.Scale, vu40.Y.Offset + v42.Y)
+            end
+            vu35.InputBegan:Connect(function(pu44)
+                if pu44.UserInputType == Enum.UserInputType.MouseButton1 or pu44.UserInputType == Enum.UserInputType.Touch then
+                    vu37 = true
+                    vu39 = pu44.Position
+                    vu40 = vu35.Position
+                    pu44.Changed:Connect(function()
+                        if pu44.UserInputState == Enum.UserInputState.End then
+                            vu37 = false
+                        end
+                    end)
+                end
+            end)
+            vu35.InputChanged:Connect(function(p45)
+                if p45.UserInputType == Enum.UserInputType.MouseMovement or p45.UserInputType == Enum.UserInputType.Touch then
+                    vu38 = p45
+                end
+            end)
+            vu8.InputChanged:Connect(function(p46)
+                if p46 == vu38 and vu37 then
+                    vu43(p46)
+                end
+            end)
+        end
+        vu6.CharacterAdded:Connect(function()
+            wait(1)
+            vu47()
+        end)
+        vu47()
+    end,
+    DoubleClick = false,
+    Tooltip = "Load the Camlock button to start aiming."
+})
+v17:AddInput("SmoothnessInput", {
+    Text = "Smoothness",
+    Default = tostring(vu11),
+    Tooltip = "Enter the smoothness value (0 - 1)",
+    Num = true,
+    Callback = function(p48)
+        vu11 = tonumber(p48) or vu11
+        print("Smoothness updated to:", vu11)
+    end
+})
+v17:AddToggle("ResolverToggle", {
+    Text = "Resolver",
+    Default = false,
+    Tooltip = "Toggle the Resolver on or off",
+    Callback = function(p49)
+        if p49 then
+            vu14 = vu7.Heartbeat:Connect(function()
+                local v50 = vu5
+                local v51, v52, v53 = pairs(v50:GetPlayers())
+                while true do
+                    local v54
+                    v53, v54 = v51(v52, v53)
+                    if v53 == nil then
+                        break
+                    end
+                    if v54 ~= vu6 and v54.Character then
+                        local v55, v56, v57 = pairs(v54.Character:GetDescendants())
+                        while true do
+                            local v58
+                            v57, v58 = v55(v56, v57)
+                            if v57 == nil then
+                                break
+                            end
+                            if v58:IsA("BasePart") then
+                                v58.Velocity = v54.Character.Humanoid.MoveDirection * 16
+                                v58.AssemblyLinearVelocity = v54.Character.Humanoid.MoveDirection * 16
+                            end
+                        end
+                    end
+                end
+            end)
+            print("Resolver Enabled")
+        else
+            if vu14 then
+                vu14:Disconnect()
+                vu14 = nil
+            end
+            print("Resolver Disabled")
+        end
+    end
+})
+v18:AddToggle("SilentAimEnabled", {
+    Text = "Silent Aim",
+    Default = getgenv().Silent.Settings.Enabled,
+    Tooltip = "Toggle Silent Aim on or off",
+    Callback = function(p59)
+        getgenv().Silent.Settings.Enabled = p59
+        print("Silent Aim " .. (p59 and "Enabled" or "Disabled"))
+    end
+})
+v18:AddDropdown("AimPart", {
+    Text = "Aim Part",
+    Values = {
+        "Head",
+        "UpperTorso",
+        "LowerTorso"
+    },
+    Default = "UpperTorso",
+    Tooltip = "Select the part of the target to aim at",
+    Callback = function(p60)
+        getgenv().Silent.Settings.AimPart = p60
+        print("Silent Aim part set to:", p60)
+    end
+})
+v18:AddToggle("WallCheck", {
+    Text = "Wall Check",
+    Default = getgenv().Silent.Settings.WallCheck,
+    Tooltip = "Enable Wall Check to avoid aiming through walls",
+    Callback = function(p61)
+        getgenv().Silent.Settings.WallCheck = p61
+        print("Wall Check " .. (p61 and "Enabled" or "Disabled"))
+    end
+})
+v18:AddSlider("FOVSize", {
+    Text = "FOV Size",
+    Default = getgenv().Silent.FOV.Size,
+    Min = 10,
+    Max = 100,
+    Rounding = 1,
+    Tooltip = "Adjust the FOV size for Silent Aim",
+    Callback = function(p62)
+        getgenv().Silent.FOV.Size = p62
+        print("FOV Size set to:", p62)
+    end
+})
+v18:AddToggle("FOVCircle", {
+    Text = "FOV Circle",
+    Default = getgenv().Silent.FOV.Enabled,
+    Tooltip = "Toggle visibility of the FOV circle",
+    Callback = function(p63)
+        getgenv().Silent.FOV.Enabled = p63
+        print("FOV Circle " .. (p63 and "Enabled" or "Disabled"))
+    end
+})
+getgenv().Sky = false
+getgenv().SkyAmount = 90
+local v64 = v16.HvH:AddLeftGroupbox("Sky AA")
+v64:AddToggle("SkyAAToggle", {
+    Text = "Sky AA",
+    Default = false,
+    Tooltip = "Toggle Sky Anti-Aim",
+    Callback = function(p65)
+        getgenv().Sky = p65
+    end
+})
+v64:AddInput("SkyAmountInput", {
+    Text = "Sky Amount",
+    Default = "90",
+    Tooltip = "Enter the sky amount value (e.g., 90)",
+    Num = true,
+    Callback = function(p66)
+        getgenv().SkyAmount = tonumber(p66) or getgenv().SkyAmount
+        print("Sky Amount updated to:", getgenv().SkyAmount)
+    end
+})
+game:GetService("RunService").Heartbeat:Connect(function()
+    if getgenv().Sky ~= false then
+        local v67 = game.Players.LocalPlayer.Character
+        if v67 and v67:FindFirstChild("HumanoidRootPart") then
+            local v68 = v67.HumanoidRootPart.Velocity
+            v67.HumanoidRootPart.Velocity = Vector3.new(0, getgenv().SkyAmount, 0)
+            game:GetService("RunService").RenderStepped:Wait()
+            v67.HumanoidRootPart.Velocity = v68
+        end
+    end
+end)
+local v69 = v16.HvH:AddRightGroupbox("Network AA")
+local vu70 = false
+v69:AddToggle("NetworkAAToggle", {
+    Text = "Network AA",
+    Default = false,
+    Tooltip = "Toggle Network Anti-Aim",
+    Callback = function(p71)
+        vu70 = p71
+        if vu70 then
+            setfflag("S2PhysicsSenderRate", 2)
+        else
+            setfflag("S2PhysicsSenderRate", 13)
+            if vu6.Character and vu6.Character:FindFirstChild("HumanoidRootPart") then
+                sethiddenproperty(vu6.Character.HumanoidRootPart, "NetworkIsSleeping", false)
+            end
+        end
+    end
+})
+task.spawn(function()
+    while true do
+        if vu70 and vu6.Character and vu6.Character:FindFirstChild("HumanoidRootPart") then
+            sethiddenproperty(vu6.Character.HumanoidRootPart, "NetworkIsSleeping", true)
+            task.wait()
+            sethiddenproperty(vu6.Character.HumanoidRootPart, "NetworkIsSleeping", false)
+        end
+        task.wait()
+    end
+end)
+local v72 = v16.HvH:AddLeftGroupbox("Velocity Changer")
+local vu73 = false
+local vu74 = 2
+v72:AddToggle("VelocityChangerToggle", {
+    Text = "Velocity Changer",
+    Default = false,
+    Tooltip = "Toggle to enable or disable the velocity changer",
+    Callback = function(p75)
+        vu73 = p75
+    end
+})
+v72:AddInput("VelocityStrengthInput", {
+    Text = "Velocity Multiplier",
+    Default = tostring(vu74),
+    Tooltip = "Enter a multiplier for the velocity (e.g., 1, 2, 3)",
+    Num = true,
+    Callback = function(p76)
+        vu74 = tonumber(p76) or vu74
+    end
+})
+vu7.Heartbeat:Connect(function()
+    if vu73 and vu6.Character and vu6.Character:FindFirstChild("HumanoidRootPart") then
+        vu6.Character.HumanoidRootPart.AssemblyLinearVelocity = vu6.Character.HumanoidRootPart.AssemblyLinearVelocity * vu74
+    end
+end)
+local vu77 = {
+    enabled = false,
+    mode = "crosshair",
+    radius = 20,
+    spin = true,
+    spin_speed = 200,
+    refreshrate = 0.016666666666666666,
+    position = Vector2.new(0, 0)
+}
+local vu78 = 0
+local vu79 = {}
+local function v82(p80, _)
+    local v81 = Drawing.new("Line")
+    v81.Color = Color3.new(1, 0, 0)
+    v81.Thickness = 2
+    v81.Visible = vu77.enabled
+    vu79[p80] = v81
+end
+local vu83 = vu8
+local v84 = vu7
+local vu85 = vu77
+local vu86 = vu79
+for v87 = 1, 8 do
+    local v88 = v87
+    v82(v88, (v88 - 1) * 45)
+end
+local function vu98(p89, p90)
+    local v91, v92, v93 = ipairs(vu86)
+    while true do
+        local v94
+        v93, v94 = v91(v92, v93)
+        if v93 == nil then
+            break
+        end
+        local v95 = (v93 - 1) * 45 + p90
+        local v96 = math.sin(math.rad(v95)) * vu85.radius
+        local v97 = math.cos(math.rad(v95)) * vu85.radius
+        v94.From = p89 + Vector2.new(v96, v97)
+        v94.To = p89 + Vector2.new(v96 * 1.5, v97 * 1.5)
+        v94.Visible = vu85.enabled
+    end
+end
+v84.PostSimulation:Connect(function()
+    local v99 = tick()
+    if v99 - vu78 > vu85.refreshrate then
+        vu78 = v99
+        local v100 = vu85.mode == "crosshair" and workspace.CurrentCamera.ViewportSize / 2 or (vu85.mode == "mouse" and vu83:GetMouseLocation() or vu85.position)
+        if vu85.enabled then
+            vu98(v100, v99 * vu85.spin_speed % 360)
+        else
+            local v101, v102, v103 = ipairs(vu86)
+            while true do
+                local v104
+                v103, v104 = v101(v102, v103)
+                if v103 == nil then
+                    break
+                end
+                v104.Visible = false
+            end
+        end
+    end
+end)
+local v105 = v16.Misc:AddLeftGroupbox("Crosshair")
+v105:AddToggle("CrosshairToggle", {
+    Text = "Crosshair",
+    Default = vu85.enabled,
+    Tooltip = "Toggle custom crosshair",
+    Callback = function(p106)
+        vu85.enabled = p106
+        local v107, v108, v109 = ipairs(vu86)
+        while true do
+            local v110
+            v109, v110 = v107(v108, v109)
+            if v109 == nil then
+                break
+            end
+            v110.Visible = p106
+        end
+    end
+})
+v105:AddDropdown("CrosshairMode", {
+    Text = "Crosshair Position",
+    Default = "crosshair",
+    Values = {
+        "crosshair",
+        "mouse",
+        "custom"
+    },
+    Tooltip = "Set the crosshair position mode",
+    Callback = function(p111)
+        vu85.mode = p111
+    end
+})
+v16.Misc:AddRightGroupbox("Macro"):AddButton({
+    Text = "Load Macro",
+    Func = function()
+        local vu112 = game.Players.LocalPlayer
+        local function vu131()
+            if vu112.PlayerGui:FindFirstChild("MacroScreenGui") then
+                vu112.PlayerGui.MacroScreenGui:Destroy()
+            end
+            local v113 = Instance.new("ScreenGui")
+            v113.Name = "MacroScreenGui"
+            v113.Parent = vu112:WaitForChild("PlayerGui")
+            local vu114 = Instance.new("TextButton")
+            vu114.Parent = v113
+            vu114.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            vu114.BackgroundTransparency = 0.4
+            vu114.BorderSizePixel = 0
+            vu114.Position = UDim2.new(0.681, 0, 0.294, 0)
+            vu114.Size = UDim2.new(0, 90, 0, 30)
+            vu114.Font = Enum.Font.SourceSans
+            vu114.Text = "Macro"
+            vu114.TextColor3 = Color3.fromRGB(255, 255, 255)
+            vu114.TextSize = 25
+            local v115 = Instance.new("UICorner")
+            v115.CornerRadius = UDim.new(0, 6)
+            v115.Parent = vu114
+            local v116 = Instance.new("ImageLabel")
+            v116.Parent = vu114
+            v116.BackgroundTransparency = 1
+            v116.Size = UDim2.new(0, 29, 0, 30)
+            v116.Image = "http://www.roblox.com/asset/?id=111095683894090"
+            v116.ImageColor3 = Color3.fromRGB(0, 0, 0)
+            local v117 = game:GetService("UserInputService")
+            local vu118 = nil
+            local vu119 = nil
+            local vu120 = nil
+            local function vu123(p121)
+                local v122 = p121.Position - vu119
+                vu114.Position = UDim2.new(vu120.X.Scale, vu120.X.Offset + v122.X, vu120.Y.Scale, vu120.Y.Offset + v122.Y)
+            end
+            vu114.InputBegan:Connect(function(pu124)
+                if pu124.UserInputType == Enum.UserInputType.MouseButton1 or pu124.UserInputType == Enum.UserInputType.Touch then
+                    vu118 = true
+                    vu119 = pu124.Position
+                    vu120 = vu114.Position
+                    pu124.Changed:Connect(function()
+                        if pu124.UserInputState == Enum.UserInputState.End then
+                            vu118 = false
+                        end
+                    end)
+                end
+            end)
+            vu114.InputChanged:Connect(function(p125)
+                if p125.UserInputType == Enum.UserInputType.MouseMovement or p125.UserInputType == Enum.UserInputType.Touch then
+                    dragInput = p125
+                end
+            end)
+            v117.InputChanged:Connect(function(p126)
+                if vu118 and p126 == dragInput then
+                    vu123(p126)
+                end
+            end)
+            local vu127 = false
+            local function vu130()
+                local vu128 = vu112.Character
+                if vu128 then
+                    vu128 = vu112.Character:FindFirstChild("HumanoidRootPart")
+                end
+                if vu128 then
+                    game:GetService("RunService").RenderStepped:Connect(function()
+                        if vu127 then
+                            local v129 = workspace.CurrentCamera.CFrame.LookVector
+                            vu128.CFrame = CFrame.new(vu128.Position, vu128.Position + Vector3.new(v129.X, 0, v129.Z))
+                        end
+                    end)
+                end
+            end
+            vu114.MouseButton1Click:Connect(function()
+                vu127 = not vu127
+                vu130()
+            end)
+        end
+        vu131()
+        vu112.CharacterAdded:Connect(function()
+            vu131()
+        end)
+    end,
+    DoubleClick = false,
+    Tooltip = "Creates an on-screen button to toggle Macro"
+})
+v3:SetLibrary(v2)
+v4:SetLibrary(v2)
+v4:IgnoreThemeSettings()
+v4:SetIgnoreIndexes({
+    "CrosshairToggle",
+    "CrosshairMode"
+})
+v4:BuildConfigSection(v16["UI Settings"])
+v3:ApplyToTab(v16["UI Settings"])
+v2:Notify("serial.xyz loaded!")
