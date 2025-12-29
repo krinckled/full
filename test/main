@@ -1,4 +1,4 @@
-local v1 = "https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/"
+local v1 = "https://raw.githubusercontent.com/krinckled/full/refs/heads/main/test/libary"
 local v2 = loadstring(game:HttpGet(v1 .. "Library.lua"))()
 local v3 = loadstring(game:HttpGet(v1 .. "addons/ThemeManager.lua"))()
 local v4 = loadstring(game:HttpGet(v1 .. "addons/SaveManager.lua"))()
