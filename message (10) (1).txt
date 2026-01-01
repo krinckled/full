@@ -1,0 +1,3965 @@
+-- Load the Vape UI Library
+local UILib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/Vape.txt")()
+
+-- Services
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local StarterGui = game:GetService("StarterGui") 
+local NetworkClient = game:GetService("NetworkClient")
+local VirtualUser = game:GetService("VirtualUser")
+local TeleportService = game:GetService("TeleportService")
+local HTTPService = game:GetService("HttpService")
+local StatsService = game:GetService("Stats")
+
+-- Variables
+local player = Players.LocalPlayer
+local OrbsFolder = Workspace:FindFirstChild("Orbs")
+local LuckyBlocksFolder = Workspace:FindFirstChild("LuckyBlocks") and Workspace.LuckyBlocks:FindFirstChild("Real")
+
+-- Brew Variables
+local Brew = {
+    isReach = false,
+    curReach = "Spoof",
+    damageAmp = false,
+    reachMagnitude = Vector3.new(1, 0.800000011920929, 4),
+    reachType = "Box",
+    supportedExecutor = true,
+    selBox = false,
+    selBoxColor = Color3.fromRGB(0, 0, 0),
+    -- REMOVED: selBoxThickness (no longer needed)
+    _hitboxConnections = {},
+    _adornment = nil  -- Correct position (after comma)
+}
+local ZonesModel = Workspace:FindFirstChild("Zones")
+local grass = Workspace:FindFirstChild("Grass")
+local safeZone = Workspace:FindFirstChild("Safezone")
+local KOTH = Workspace:FindFirstChild("KOTH") and Workspace.KOTH:FindFirstChild("Main")
+local camera = Workspace.CurrentCamera
+
+-- Settings
+local settings = {
+    cbringEnabled = false,
+    cbringRange = 100,
+    autoFarmKOTHEnabled = false,
+    lagSwitchEnabled = false,
+    showCBring = false,
+    autoLookEnabled = false,
+    autoLookDistance = 8,
+    autoKillEnabled = false,
+    autoKillRange = 15,
+    autoClickerEnabled = false,
+    autoClickerSpeed = 0.01,
+    timeSpooferEnabled = false,
+    timeValue = 0,
+    killstreakEnabled = false,
+    killstreakValue = 0,
+    tankEnabled = false,
+    damageAmplifierEnabled = false,
+    damageMultiplierEnabled = false,
+    damageMultiplierValue = 3,
+    farmingOrbsEnabled = false,
+    farmingLuckyBlocksEnabled = false,
+    farmingTimeZonesEnabled = false,
+    cframeWalkspeedEnabled = false,
+    cframeSpeed = 0,
+    swordReachEnabled = false,
+    swordReachSize = 50,
+    spinEnabled = false,
+    spinSpeed = 20,
+    jumpPowerEnabled = false,
+    walkspeedEnabled = false,
+    tpKillEnabled = false,
+    tpKillRange = 15,
+    undergroundTPKillEnabled = false,
+    undergroundTPKillRange = 13,
+    carpetEnabled = false,
+    freeCamEnabled = false,
+    spectatePlayersEnabled = false,
+    hipHeightEnabled = false,
+    hipHeightValue = 0,
+    increaseOrbHitboxEnabled = false,
+    lockOnEnabled = false,
+    lockTargetPart = "Torso",
+    autoHitEnabled = false,
+    predictionEnabled = false,
+    autoJumpEnabled = false,
+    predictionOffset = 0.14,
+    autoJumpDistance = 6,
+    autoHitDistance = 8,
+    instantHitEnabled = false,
+    circleStrafeKillEnabled = false,
+    circleStrafeSpeed = 20,
+    circleStrafeRange = 12,
+    freezeModeEnabled = false,
+    orbHitboxSize = 2,
+    predictionOffsetOriginal = 0.5,
+    autoHitDistanceOriginal = 10,
+    autoJumpDistanceOriginal = 10,
+    circleStrafeSpeedOriginal = 50,
+    circleStrafeRangeOriginal = 12,
+    autoLookDistanceOriginal = 10,
+    tpKillRangeOriginal = 50,
+    undergroundTPKillRangeOriginal = 50,
+    bankBalanceEnabled = false,
+    bankBalanceValue = 0,
+    bestTimeEnabled = false,
+    bestTimeValue = 0,
+    deathsEnabled = false,
+    deathsValue = 0,
+    goldEnabled = false,
+    goldValue = 0,
+    keysEnabled = false,
+    layDownEnabled = false,
+    keysValue = 0,
+    killsEnabled = false,
+    killsValue = 0,
+}
+
+-- Non-persistent variables
+local invisGui = nil
+local carpetAnim = nil
+-- Variables (Put this where you have other settings)
+local activeConnections = {} -- Tracks all running connections (for cleanup)
+local shouldRunFlags = {    -- Tracks loops that should restart on respawn
+    autoSnipe = false,
+    autoSnipeSpecific = false,
+    autoCollectOrbs = false,
+    autoCollectLuckyBlocks = false,
+    autoCollectZones = false,
+    autoCollectKOTH = false,
+    autoKill = false,
+    autoLook = false,
+    autoHit = false,
+    autoJump = false,
+    circleStrafeKill = false,
+    flick = false,
+    freeCam = false,
+    undergroundTPKill = false,
+    tpKill = false
+}
+local activeConnections = {}
+local carpet = nil
+local carpetDied = nil
+local originalOrbSizes = {}
+local viewing = nil
+local layDownAnim = nil
+local layDownDied = nil
+local viewDied = nil
+local viewChanged = nil
+local autoCollectOrbsActive = false
+local currentOrbTween = nil
+local autoCollectZonesActive = false
+local currentZoneTween = nil
+local autoOpenKeyCaseEnabled = false
+local ScreenGui = nil
+local NotificationLabel = nil
+local currentWaypointIndex = 1
+local baseTweenSpeed = 8.5
+local fastSpeedMultiplier = 0
+local initialLiftAmount = 5
+local proximityDistance = 7
+local getgenvValues = {
+    HowFastDanSchneiderCatchesYou = 1,
+    HowMuchDanSchneiderTouchedYou = 15,
+    Daddy_Catches_You = false,
+    Circle = {
+        ["Size"] = 50,
+        ["Enabled"] = false,
+        ["Random FTI"] = false,
+        ["Whitelisted Limbs"] = {"Left Arm", "Right Arm", "Left Leg", "Right Leg", "Head", "Torso", "HumanoidRootPart"}
+    },
+    HowMuchDanSchneiderTouchedYouOriginal = 50
+}
+local freeCamConnection = nil
+local onMobile = not UserInputService.KeyboardEnabled
+local keysDown = {}
+local rotating = false
+local freeCamSpeed = 5
+local freeCamSens = 0.3
+local targetPlayer = nil
+local autoCollectKOTHActive = false
+local currentKOTHTween = nil
+local kothCircleAngle = 0
+local strafing = false
+local strafeRadius = settings.circleStrafeRange
+local strafeAngle = 0
+local strafeConnection = nil
+local targetedTPKillPlayer = nil
+local targetedUndergroundTPKillPlayer = nil
+local flickAngle = 30
+local flickSpeed = 7
+local flickSmoothness = 2
+local flicking = false
+local currentFlickConnection = nil
+local autoSnipeEnabled = false
+local floatHeight = 1.6
+local maxFollowDistance = 25
+local minimumTime = 0
+local shouldRunLoop = false
+local updateRate = 0.001
+local minX, maxX = -33.55, 33.55
+local minY, maxY = 0, 100
+local minZ, maxZ = -33.55, 33.55
+local fieldOfView = 70
+local autoCollectLuckyBlocksActive = nil
+local currentLuckyBlockTween = nil
+local undergroundTPKillConnection = nil
+local originalPosition = nil
+local tpKillConnection = nil
+local oneShotConnection = nil
+local mobileFlickEnabled = false
+local tpWalkSpeed = 0.15
+local tpWalkEnabled = false
+local specificSnipeTarget = nil
+local autoSnipeSpecificEnabled = false
+local shouldRunSpecificLoop = false
+-- Setup Notification GUI
+local function setupNotificationGui()
+    ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "EleriumNotification"
+    ScreenGui.Parent = player:WaitForChild("PlayerGui")
+    ScreenGui.ResetOnSpawn = false
+
+    NotificationLabel = Instance.new("TextLabel")
+    NotificationLabel.Size = UDim2.new(0, 300, 0, 100)
+    NotificationLabel.Position = UDim2.new(0.5, -150, 0.2, -50)
+    NotificationLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    NotificationLabel.BackgroundTransparency = 0.3
+    NotificationLabel.BorderSizePixel = 2
+    NotificationLabel.BorderColor3 = Color3.fromRGB(128, 0, 128)
+    NotificationLabel.Text = ""
+    NotificationLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NotificationLabel.TextScaled = true
+    NotificationLabel.Font = Enum.Font.SourceSansBold
+    NotificationLabel.Visible = false
+    NotificationLabel.Parent = ScreenGui
+end
+
+-- Hook into StarterGui notifications to detect key case
+local oldSetCore
+oldSetCore = hookfunction(StarterGui.SetCore, function(self, name, options)
+    if name == "SendNotification" and type(options) == "table" and options.Title and options.Text then
+        if options.Text:lower():find("you got a key") then
+            if ScreenGui and NotificationLabel then
+                NotificationLabel.Text = "Key Case Received!\n" .. options.Text
+                NotificationLabel.Visible = true
+                task.spawn(function()
+                    task.wait(5)
+                    if NotificationLabel then
+                        NotificationLabel.Visible = false
+                    end
+                end)
+            end
+        end
+    end
+    return oldSetCore(self, name, options)
+end)
+
+-- Initialize GUI on script start
+setupNotificationGui()
+
+-- Re-setup GUI on player respawn
+player.CharacterAdded:Connect(function()
+    if not ScreenGui or not ScreenGui.Parent then
+        setupNotificationGui()
+    end
+end)
+local autoDepositEnabled = false
+-- Case Opener Variables
+local selectedCase = nil
+local autoOpening = false
+local Cases = {
+    {Name = "Celestial Case", Description = "Contains heavenly swords with divine powers"},
+    {Name = "Kills Case", Description = "Rewards for your combat prowess"},
+    {Name = "Convictus Case", Description = "Swords with restrained power waiting to be unleashed"},
+    {Name = "Corrupted Case", Description = "Darkened blades with twisted abilities"},
+    {Name = "Spectral Case", Description = "Ghostly weapons that phase through defenses"},
+    {Name = "Abyss Case", Description = "Deep sea treasures with crushing pressure"},
+    {Name = "Bliss Case", Description = "Peaceful weapons with harmonious effects"},
+    {Name = "Cobalt Case", Description = "Metallic blue blades with sharp edges"},
+    {Name = "Kingslayer Case", Description = "Weapons fit for regicide"},
+    {Name = "Nebula Case", Description = "Cosmic swords with stellar energy"},
+    {Name = "Soul Case", Description = "Spirit-infused weapons with ethereal properties"},
+    {Name = "Infernal Case", Description = "Hellfire weapons that burn eternally"},
+    {Name = "Iridescent Case", Description = "Shimmering blades that change colors"},
+    {Name = "Polychrome Case", Description = "Multi-colored weapons with vibrant effects"},
+    {Name = "Ethereal Case", Description = "Otherworldly swords that defy physics"},
+    {Name = "Diablo Case", Description = "Demonic weapons with cursed powers"},
+    {Name = "Ultraviolet Case", Description = "Invisible blades that strike unseen"},
+    {Name = "Binary Case", Description = "Digital weapons with code-based effects"},
+    {Name = "Ignis Case", Description = "Fire-based swords that leave trails of flame"},
+    {Name = "Peacemaker Case", Description = "Weapons designed to end conflicts"},
+    {Name = "Red Case", Description = "Crimson weapons with enhanced aggression"},
+    {Name = "Shadow Case", Description = "Darkness-cloaked blades that move silently"},
+    {Name = "Verdite Case", Description = "Nature-infused weapons with plant growth"},
+    {Name = "Void Case", Description = "Null-space weapons that erase matter"},
+    {Name = "Blaze Case", Description = "Intense fire swords with combustion effects"},
+    {Name = "Ruby Case", Description = "Precious gemstone weapons with hard edges"},
+    {Name = "Crimson Case", Description = "Blood-red weapons with vampiric traits"},
+    {Name = "Radiant Case", Description = "Light-emitting swords that blind foes"},
+    {Name = "Prism Case", Description = "Crystal weapons that refract energy"},
+    {Name = "Frost Case", Description = "Ice-cold blades that freeze enemies"},
+    {Name = "Gladiator Case", Description = "Arena-tested weapons for combat"},
+    {Name = "Lotus Case", Description = "Elegant oriental weapons with floral motifs"},
+    {Name = "Toxin Case", Description = "Poisonous weapons that inflict status"},
+    {Name = "Enigma Case", Description = "Mysterious weapons with unknown powers"}
+}
+
+-- Brew Variables
+local Brew = {
+    AutoAim = false,
+    cJumppower = 50,
+    cWalkspeed = 16,
+    supportedExecutor = true,
+    originalPosition = nil,
+    setWalkSpeed = function(value)
+        local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = value
+        end
+    end,
+    setJumpPower = function(value)
+        local humanoidRootPart = player.Character and player.Character:FindFirstChildPart("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.JumpPower = value
+        end
+    end,
+    enableTeleport = function(range, targetName)
+        -- Placeholder
+    end,
+    disableTeleport = function()
+        -- Placeholder
+    end
+}
+
+-- Utility Functions
+local function isAntiCheatPresent()
+    return false
+end
+
+-- Updated getNearestPlayer function
+local function getNearestPlayer(maxDist)
+    local closestPlayer = nil
+    local shortestDistance = maxDist or math.huge
+    local myCharacter = player.Character
+    if not myCharacter or not myCharacter:FindFirstChild("HumanoidRootPart") then
+        return nil
+    end
+    local myPosition = myCharacter.HumanoidRootPart.Position
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            local targetHum = plr.Character:FindFirstChildOfClass("Humanoid")
+            local targetRoot = plr.Character:FindFirstChild("HumanoidRootPart")
+            if targetHum and targetHum.Health > 0 and targetRoot and not plr.Character:FindFirstChildOfClass("ForceField") then
+                local distance = (myPosition - targetRoot.Position).Magnitude
+                if distance <= shortestDistance then
+                    closestPlayer = plr
+                    shortestDistance = distance
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- Add the removeBankWalls function here
+local function removeBankWalls()
+    local bankWalls = Workspace:FindFirstChild("BankWalls")
+    if bankWalls then
+        bankWalls:Destroy()
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "BankWalls removed successfully!",
+            Duration = 3
+        })
+    else
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "BankWalls not found in Workspace!",
+            Duration = 3
+        })
+    end
+end
+
+-- New getTool function
+local function getTool()
+    local character = player.Character
+    if character then
+        return character:FindFirstChildOfClass("Tool")
+    end
+    return nil
+end
+
+local function r15(player)
+    local character = player.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    return humanoid and humanoid.RigType == Enum.HumanoidRigType.R15
+end
+
+local function StopFreecam()
+    if settings.freeCamEnabled then
+        settings.freeCamEnabled = false
+        if freeCamConnection then
+            freeCamConnection:Disconnect()
+            freeCamConnection = nil
+        end
+        camera.CameraType = Enum.CameraType.Custom
+        camera.CameraSubject = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+        rotating = false
+        keysDown = {}
+    end
+end
+
+-- Brew Reach System (v2.0 - Magnitude-Based)
+local Brew = {
+    isReach = false,
+    damageAmp = false,
+    reachMagnitude = Vector3.new(1, 0.8, 4),  -- Default reach
+    reachType = "Box",  -- Box/Linear/Wide
+    supportedExecutor = true,
+    _hitboxConnections = {}  -- Track active connections
+}
+
+-- Enhanced Tool Finder
+function Brew:getTool()
+    if not player.Character then return nil end
+    
+    -- Check equipped tools first
+    local equippedTool = player.Character:FindFirstChildOfClass("Tool")
+    if equippedTool then return equippedTool end
+    
+    -- Check backpack if nothing equipped
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        for _, item in ipairs(backpack:GetChildren()) do
+            if item:IsA("Tool") and item:FindFirstChild("Handle") then
+                return item
+            end
+        end
+    end
+    return nil
+end
+
+-- Hitbox Processor
+function Brew:getHitbox()
+    local tool = Brew:getTool()
+    if not tool then return nil end
+    
+    for _,v in pairs(tool:GetDescendants()) do
+        if v:IsA("BasePart") and v:FindFirstChildOfClass("TouchTransmitter") then
+            v.Massless = true
+            return v
+        end
+    end
+    return nil
+end
+
+-- Reach Activator
+function Brew:doReach()
+    if Brew.isReach then return end
+    
+    local hitbox = Brew:getHitbox()
+    if not hitbox then
+        warn("[Brew] No valid hitbox found")
+        return
+    end
+
+    -- Spoof size property
+    Brew:Spoof(hitbox, "Size", Vector3.new(1, 0.8, 4))
+    
+    -- Damage amplifier connection
+    if Brew.damageAmp then
+        Brew._hitboxConnections.damage = hitbox.Touched:Connect(function(part)
+            if part.Parent and part.Parent:FindFirstChildOfClass("Humanoid") then
+                for _, v in pairs(part.Parent:GetChildren()) do
+                    if v:IsA("BasePart") then
+                        task.spawn(function()
+                            firetouchinterest(hitbox, v, 0)
+                            task.wait()
+                            firetouchinterest(hitbox, v, 1)
+                        end)
+                    end
+                end
+            end
+        end)
+    end
+    
+    -- Size updater
+    Brew._hitboxConnections.size = game:GetService("RunService").Heartbeat:Connect(function()
+        if not Brew.isReach or not hitbox or not hitbox.Parent then
+            Brew:undoReach()
+            return
+        end
+        hitbox.Size = Brew.reachMagnitude
+    end)
+    
+    Brew.isReach = true
+end
+
+-- Reach Deactivator
+function Brew:undoReach()
+    if not Brew.isReach then return end
+    
+    -- Cleanup connections
+    for name, conn in pairs(Brew._hitboxConnections) do
+        if conn then conn:Disconnect() end
+    end
+    Brew._hitboxConnections = {}
+    
+    -- Reset hitbox
+    local hitbox = Brew:getHitbox()
+    if hitbox then
+        Brew:Spoof(hitbox, "Size", Vector3.new(1, 0.8, 4))
+        hitbox.Size = Vector3.new(1, 0.8, 4)
+    end
+    
+    Brew.isReach = false
+end
+
+function Brew:doSelBox()
+    if not Brew:getHitbox() then return end
+    
+    Brew:undoSelBox()  -- Clean up any existing adornment
+    
+    if Brew.reachType == "Sphere" then
+        -- Create a sphere outline visualization
+        local sphere = Instance.new("SelectionSphere")
+        sphere.Adornee = Brew:getHitbox()
+        sphere.Color3 = Brew.selBoxColor
+        sphere.SurfaceTransparency = 1.0  -- Make surface invisible
+        sphere.Name = "SphereVisualization"
+        sphere.Parent = Brew:getHitbox()
+        
+        Brew._adornment = sphere
+    else
+        -- Create selection box for other types
+        local box = Instance.new("SelectionBox")
+        box.Adornee = Brew:getHitbox()
+        box.LineThickness = 0.015  -- Fixed increased thickness
+        box.Color3 = Brew.selBoxColor
+        box.Name = "BoxSelectionBox"
+        box.Parent = Brew:getHitbox()
+        
+        Brew._adornment = box
+    end
+
+    Brew._hitboxConnections.selBox = game:GetService("RunService").Heartbeat:Connect(function()
+        if not Brew.selBox or not Brew:getHitbox() then
+            Brew:undoSelBox()
+            return
+        end
+        
+        if Brew._adornment then
+            if Brew.reachType == "Sphere" and Brew._adornment:IsA("SelectionSphere") then
+                -- Update sphere color only
+                Brew._adornment.Color3 = Brew.selBoxColor
+            elseif Brew._adornment:IsA("SelectionBox") then
+                Brew._adornment.Color3 = Brew.selBoxColor
+            end
+        end
+    end)
+    
+    Brew.selBox = true
+end
+
+
+function Brew:undoSelBox()
+    if Brew._adornment then
+        Brew._adornment:Destroy()
+        Brew._adornment = nil
+    end
+    
+    if Brew._hitboxConnections.selBox then
+        Brew._hitboxConnections.selBox:Disconnect()
+        Brew._hitboxConnections.selBox = nil
+    end
+    
+    Brew.selBox = false
+end
+
+-- Property Spoofer
+function Brew:Spoof(instance, property, value)
+    if not Brew.supportedExecutor then return end
+    
+    local original
+    original = hookmetamethod(game, "__index", function(self, key)
+        if not checkcaller() and self == instance and tostring(key) == property then
+            return value
+        end
+        return original(self, key)
+    end)
+end
+
+-- Character Handler for Reach and Visualizer
+player.CharacterAdded:Connect(function(character)
+    task.wait(1) -- Wait for character and tools to load
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end -- Ensure character is valid
+    
+    if Brew.isReach then
+        Brew:undoReach()
+        Brew:doReach()
+    end
+    if Brew.selBox then
+        Brew:doSelBox() -- Reapply visualizer if it was active
+    end
+end)
+
+-- Simple safezone check using Middle part
+local function isInSafezone(position)
+    local safezoneMiddle = Workspace:FindFirstChild("Safezone") and Workspace.Safezone:FindFirstChild("Middle")
+    if not safezoneMiddle then return false end
+    
+    -- Calculate distance from safezone center
+    local distance = (position - safezoneMiddle.Position).Magnitude
+    return distance <= 39 -- Standard safezone radius
+end
+
+local function enableSpecificTPKill()
+    if not targetedTPKillPlayer or not targetedTPKillPlayer.Character then
+        settings.tpKillEnabled = false
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "TP Kill: No valid target!",
+            Duration = 2
+        })
+        return nil
+    end
+    
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- Basic validity checks
+        if not settings.tpKillEnabled or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            if connection then connection:Disconnect() end
+            return
+        end
+        
+        local targetChar = targetedTPKillPlayer.Character
+        if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") then
+            return
+        end
+        
+        local hrp = player.Character.HumanoidRootPart
+        local targetHrp = targetChar.HumanoidRootPart
+        
+        -- Critical safezone check
+        if isInSafezone(targetHrp.Position) then
+            return -- Skip all processing if target is in safezone
+        end
+        
+        local distance = (hrp.Position - targetHrp.Position).Magnitude
+        
+        -- Active teleport logic (3-50 studs range)
+        if distance <= settings.tpKillRange and distance > 3 then
+            hrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 3) -- Teleport behind target
+            
+            -- Auto-attack if armed
+            local tool = player.Character:FindFirstChildOfClass("Tool")
+            if tool then
+                tool:Activate()
+            end
+        end
+    end)
+    
+    return connection
+end
+
+local function disableSpecificTPKill()
+    if tpKillConnection then
+        tpKillConnection:Disconnect()
+        tpKillConnection = nil
+    end
+end
+
+-- Function to rejoin the same server
+local function rejoinServer()
+    local success, errorMsg = pcall(function()
+        TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
+    end)
+    if not success then
+        warn("Rejoin failed: " .. tostring(errorMsg))
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Failed to rejoin server. Retrying...",
+            Duration = 3
+        })
+        task.wait(2) -- Wait before retry
+        pcall(function()
+            TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
+        end)
+    else
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Rejoining server...",
+            Duration = 3
+        })
+    end
+end
+
+-- Function to join the smallest server
+local function joinSmallestServer()
+    local success, servers = pcall(function()
+        return TeleportService:GetServerListAsync(game.PlaceId)
+    end)
+    if not success then
+        warn("Failed to get server list: " .. tostring(servers))
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Failed to fetch server list. Please try again.",
+            Duration = 3
+        })
+        return
+    end
+    local smallestServer = nil
+    local minPlayers = math.huge
+    for _, server in pairs(servers) do
+        if server.Playing < minPlayers then
+            smallestServer = server
+            minPlayers = server.Playing
+        end
+    end
+    if smallestServer then
+        local success, errorMsg = pcall(function()
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, smallestServer.Id, Players.LocalPlayer)
+        end)
+        if success then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Joining smallest server with " .. minPlayers .. " players...",
+                Duration = 3
+            })
+        else
+            warn("Teleport failed: " .. tostring(errorMsg))
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Failed to join smallest server. Please try again.",
+                Duration = 3
+            })
+        end
+    else
+        warn("No servers found.")
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "No servers found. Please try again.",
+            Duration = 3
+        })
+    end
+end
+
+
+local function changeSword(swordName)
+    if not swordName or swordName == "" then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Please enter a sword name!",
+            Duration = 3
+        })
+        return
+    end
+    local success, playerStats = pcall(function()
+        return player:FindFirstChild("PlayerStats")
+    end)
+    if not success or not playerStats then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Failed to find PlayerStats!",
+            Duration = 3
+        })
+        return
+    end
+    local playerSwords = playerStats:FindFirstChild("PlayerSwords")
+    if not playerSwords then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Failed to find PlayerSwords!",
+            Duration = 3
+        })
+        return
+    end
+    local originalSword = playerSwords:FindFirstChild("Default Sword")
+    if not originalSword then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Default Sword not found!",
+            Duration = 3
+        })
+        return
+    end
+    local success, result = pcall(function()
+        local newSword = originalSword:Clone()
+        newSword.Name = swordName
+        newSword.Parent = playerSwords
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Added sword: " .. swordName .. " to Inventory!",
+            Duration = 3
+        })
+    end)
+    if not success then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Error adding sword: " .. tostring(result),
+            Duration = 3
+        })
+    end
+end
+
+local function enableLagSwitch()
+    if isAntiCheatPresent() or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+        settings.lagSwitchEnabled = false
+        return
+    end
+    
+    pcall(function()
+        settings().Network.IncomingReplicationLag = 1000
+    end)
+end
+
+local function disableLagSwitch()
+    pcall(function()
+        settings().Network.IncomingReplicationLag = 0
+    end)
+end
+
+-- Case Opening Function
+local function openCase(caseName, amount)
+    if not caseName then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Error: No case selected!",
+            Duration = 3
+        })
+        return
+    end
+    
+    amount = math.clamp(tonumber(amount) or 1, 1, 100)
+    if amount > 100 then amount = 100 end
+    
+    StarterGui:SetCore("SendNotification", {
+        Title = "Elerium Hub",
+        Text = "Opening " .. amount .. " " .. caseName .. "(s)...",
+        Duration = 3
+    })
+    
+    local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Case")
+    local caseFolder = game:GetService("ReplicatedStorage"):WaitForChild("Cases")
+    
+    for i = 1, amount do
+        if not autoOpening and i > 1 then break end
+        local args = {caseFolder:WaitForChild(caseName)}
+        pcall(function()
+            remote:FireServer(unpack(args))
+        end)
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Opened " .. i .. "/" .. amount .. " " .. caseName .. "(s)",
+            Duration = 2
+        })
+        task.wait(0.2) -- Small delay between openings
+    end
+    
+    StarterGui:SetCore("SendNotification", {
+        Title = "Elerium Hub",
+        Text = "Completed opening " .. amount .. " " .. caseName .. "(s)",
+        Duration = 3
+    })
+end
+
+local function cleanupOnDestroy()
+    if currentOrbTween then currentOrbTween:Cancel() end
+    if currentZoneTween then currentZoneTween:Cancel() end
+    if currentLuckyBlockTween then currentLuckyBlockTween:Cancel() end
+    if currentKOTHTween then currentKOTHTween:Cancel() end
+    if kothCircleConnection then
+        kothCircleConnection:Disconnect()
+        kothCircleConnection = nil
+    end
+    if carpetDied then
+        carpetDied:Disconnect()
+        if carpet then carpet:Stop() end
+        if carpetAnim then carpetAnim:Destroy() end
+    end
+    if freeCamConnection then
+        freeCamConnection:Disconnect()
+        freeCamConnection = nil
+    end
+    if viewDied then
+        viewDied:Disconnect()
+        viewDied = nil
+    end
+    if viewChanged then
+        viewChanged:Disconnect()
+        viewChanged = nil
+    end
+    if oneShotConnection then
+        oneShotConnection:Disconnect()
+        oneShotConnection = nil
+    end
+    if strafeConnection then
+        strafeConnection:Disconnect()
+        strafeConnection = nil
+    end
+    if layDownAnim then
+        layDownAnim:Stop()
+        layDownAnim = nil
+    end
+    if layDownDied then
+        layDownDied:Disconnect()
+        layDownDied = nil
+    end 
+    if currentFlickConnection then
+        currentFlickConnection:Disconnect()
+        currentFlickConnection = nil
+    end
+    if undergroundTPKillConnection then
+        undergroundTPKillConnection:Disconnect()
+        undergroundTPKillConnection = nil
+    end
+    Brew:undoSelBox()
+    Brew:undoReach()
+    if camera and (settings.freeCamEnabled or settings.spectatePlayersEnabled) then
+        camera.CameraType = Enum.CameraType.Custom
+        camera.CameraSubject = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    end
+    if player.Character then
+        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+        if humanoid then
+            humanoid.AutoRotate = true
+            humanoid.WalkSpeed = 16
+            humanoid.JumpPower = 50
+            humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+            humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
+            humanoid.HipHeight = 0
+        end
+        if rootPart then
+            rootPart.Anchored = false
+        end
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanTouch = true
+            end
+        end
+    end
+    if OrbsFolder then
+        for _, orb in pairs(OrbsFolder:GetChildren()) do
+            local targetPart = orb:IsA("Model") and orb.PrimaryPart or orb:IsA("BasePart") and orb
+            if targetPart and originalOrbSizes[targetPart] then
+                targetPart.Size = originalOrbSizes[targetPart]
+            end
+        end
+    end
+    originalOrbSizes = {}
+    rotating = false
+    keysDown = {}
+    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+end
+
+local function getPlayerNames()
+    local playerNames = {}
+    
+    -- Verify Players service is available
+    if not Players then
+        warn("Players service not available!")
+        return playerNames
+    end
+    
+    local success, players = pcall(function()
+        return Players:GetPlayers()
+    end)
+    
+    if not success or not players then
+        warn("Failed to get players: " .. tostring(players))
+        return playerNames
+    end
+    
+    for _, plr in ipairs(players) do
+        if plr ~= player and plr.Name then
+            table.insert(playerNames, plr.Name)
+        end
+    end
+    
+    return playerNames
+end
+
+
+
+-- Updated Auto Snipe Logic
+local function isInSafezone(position)
+    local safezone = Workspace:FindFirstChild("Safezone")
+    local safezoneMiddle = safezone and safezone:FindFirstChild("Middle")
+    if not safezone or not safezoneMiddle then
+        return false
+    end
+    if safezone:IsA("BasePart") then
+        local relativePos = position - safezone.Position
+        local halfSize = safezone.Size / 2
+        return math.abs(relativePos.X) <= halfSize.X and
+               math.abs(relativePos.Y) <= halfSize.Y and
+               math.abs(relativePos.Z) <= halfSize.Z
+    elseif safezone:IsA("Model") then
+        local distance = (position - safezoneMiddle.Position).Magnitude
+        return distance <= 39
+    end
+    return false
+end
+
+local function canTeleport(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character then
+        return false
+    end
+    local targetHumanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+    local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    return targetHumanoid and targetHumanoid.Health > 0 and targetRoot and not targetPlayer.Character:FindFirstChildOfClass("ForceField")
+end
+
+local function getFirstValidPlayer()
+    local localPlayer = Players.LocalPlayer
+    local localHumanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not localHumanoidRootPart then
+        return nil
+    end
+    for _, targetPlayer in ipairs(Players:GetPlayers()) do
+        if targetPlayer ~= localPlayer and canTeleport(targetPlayer) then
+            local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local distance = (localHumanoidRootPart.Position - targetRoot.Position).Magnitude
+            if distance <= maxFollowDistance and not isInSafezone(targetRoot.Position) then
+                return targetPlayer
+            end
+        end
+    end
+    return nil
+end
+
+local function autoSnipeLoop()
+    shouldRunLoop = true
+    while autoSnipeEnabled and shouldRunLoop do
+        pcall(function()
+            local localPlayer = Players.LocalPlayer
+            local humanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                local targetPlayer = getFirstValidPlayer()
+                if targetPlayer then
+                    local targetHumanoidRootPart = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if targetHumanoidRootPart then
+                        local targetCFrame = targetHumanoidRootPart.CFrame
+                        local behindOffset = targetCFrame.LookVector * -2
+                        local targetPosition = targetCFrame.Position + behindOffset + Vector3.new(0, floatHeight, 0)
+                        local lookAtPosition = targetCFrame.Position
+                        local newCFrame = CFrame.new(targetPosition, lookAtPosition)
+                        humanoidRootPart.CFrame = newCFrame
+                        local tool = localPlayer.Character:FindFirstChildOfClass("Tool")
+                        if tool then
+                            tool:Activate()
+                        end
+                    end
+                end
+            end
+        end)
+        task.wait(updateRate)
+    end
+end
+
+local function autoSnipeSpecificLoop()
+    shouldRunSpecificLoop = true
+    local maxDistance = 20
+    while autoSnipeSpecificEnabled and shouldRunSpecificLoop do
+        pcall(function()
+            local localPlayer = Players.LocalPlayer
+            local humanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart and specificSnipeTarget and canTeleport(specificSnipeTarget) then
+                local targetHumanoidRootPart = specificSnipeTarget.Character:FindFirstChild("HumanoidRootPart")
+                if targetHumanoidRootPart and not isInSafezone(targetHumanoidRootPart.Position) then
+                    local distance = (humanoidRootPart.Position - targetHumanoidRootPart.Position).Magnitude
+                    if distance <= maxDistance then
+                        local targetCFrame = targetHumanoidRootPart.CFrame
+                        local behindOffset = targetCFrame.LookVector * -2
+                        local targetPosition = targetCFrame.Position + behindOffset + Vector3.new(0, floatHeight, 0)
+                        local lookAtPosition = targetCFrame.Position
+                        local newCFrame = CFrame.new(targetPosition, lookAtPosition)
+                        humanoidRootPart.CFrame = newCFrame
+                        local tool = localPlayer.Character:FindFirstChildOfClass("Tool")
+                        if tool then tool:Activate() end
+                    end
+                else
+                    autoSnipeSpecificEnabled = false
+                    shouldRunSpecificLoop = false
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Elerium Hub",
+                        Text = "Specific target not valid or out of range!",
+                        Duration = 3
+                    })
+                end
+            end
+        end)
+        task.wait(updateRate)
+    end
+end
+
+-- Carpet Logic
+local function enableCarpet()
+    if r15(player) then
+        settings.carpetEnabled = false
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Carpet not supported for R15 characters!",
+            Duration = 3
+        })
+        return
+    end
+    if not player.Character or not player.Character:FindFirstChildOfClass("Humanoid") then
+        settings.carpetEnabled = false
+        return
+    end
+    carpetAnim = Instance.new("Animation")
+    carpetAnim.AnimationId = "rbxassetid://282574440"
+    carpet = player.Character:FindFirstChildOfClass("Humanoid"):LoadAnimation(carpetAnim)
+    carpet:Play(0.1, 1, 1)
+    carpetDied = player.Character:FindFirstChildOfClass("Humanoid").Died:Connect(function()
+        if carpet then carpet:Stop() end
+        if carpetAnim then carpetAnim:Destroy() end
+        if carpetDied then carpetDied:Disconnect() end
+        settings.carpetEnabled = false
+    end)
+end
+
+local function disableCarpet()
+    if carpetDied then
+        carpetDied:Disconnect()
+        carpetDied = nil
+    end
+    if carpet then
+        carpet:Stop()
+        carpet = nil
+    end
+    if carpetAnim then
+        carpetAnim:Destroy()
+        carpetAnim = nil
+    end
+end
+
+-- Free Cam Logic
+local function enableFreeCam()
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+        settings.freeCamEnabled = false
+        return
+    end
+    if viewing and not settings.spectatePlayersEnabled then
+        viewing = nil
+        if viewDied then
+            viewDied:Disconnect()
+            viewDied = nil
+        end
+        if viewChanged then
+            viewChanged:Disconnect()
+            viewChanged = nil
+        end
+        camera.CameraSubject = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    end
+    local rootPart = player.Character.HumanoidRootPart
+    camera.CameraType = Enum.CameraType.Scriptable
+    camera.CFrame = rootPart.CFrame
+    local adjustedSpeed = freeCamSpeed / 10
+    local adjustedSens = freeCamSens
+    if onMobile then adjustedSens = adjustedSens * 2 end
+    local validKeys = {
+        "Enum.KeyCode.W",
+        "Enum.KeyCode.A",
+        "Enum.KeyCode.S",
+        "Enum.KeyCode.D"
+    }
+    local function renderStepped()
+        if rotating then
+            local delta = UserInputService:GetMouseDelta()
+            local cf = camera.CFrame
+            local yAngle = cf:ToEulerAngles(Enum.RotationOrder.YZX)
+            local newAmount = math.deg(yAngle) + delta.Y
+            if newAmount > 65 or newAmount < -65 then
+                if not (yAngle < 0 and delta.Y < 0) and not (yAngle > 0 and delta.Y > 0) then
+                    delta = Vector3.new(delta.X, 0)
+                end
+            end
+            cf = cf * CFrame.Angles(-math.rad(delta.Y), 0, 0)
+            cf = CFrame.Angles(0, -math.rad(delta.X), 0) * (cf - cf.Position) + cf.Position
+            cf = CFrame.lookAt(cf.Position, cf.Position + cf.LookVector)
+            if delta ~= Vector2.new(0, 0) then
+                camera.CFrame = camera.CFrame:Lerp(cf, adjustedSens)
+            end
+            UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
+        else
+            UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+        end
+        if keysDown["Enum.KeyCode.W"] then
+            camera.CFrame = camera.CFrame * CFrame.new(Vector3.new(0, 0, -adjustedSpeed))
+        end
+        if keysDown["Enum.KeyCode.A"] then
+            camera.CFrame = camera.CFrame * CFrame.new(Vector3.new(-adjustedSpeed, 0, 0))
+        end
+        if keysDown["Enum.KeyCode.S"] then
+            camera.CFrame = camera.CFrame * CFrame.new(Vector3.new(0, 0, adjustedSpeed))
+        end
+        if keysDown["Enum.KeyCode.D"] then
+            camera.CFrame = camera.CFrame * CFrame.new(Vector3.new(adjustedSpeed, 0, 0))
+        end
+    end
+    freeCamConnection = RunService.RenderStepped:Connect(renderStepped)
+    UserInputService.InputBegan:Connect(function(input)
+        if not settings.freeCamEnabled then return end
+        for _, key in pairs(validKeys) do
+            if key == tostring(input.KeyCode) then
+                keysDown[key] = true
+            end
+        end
+        if input.UserInputType == Enum.UserInputType.MouseButton2 or (input.UserInputType == Enum.UserInputType.Touch and UserInputService:GetMouseLocation().X > (camera.ViewportSize.X / 2)) then
+            rotating = true
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if not settings.freeCamEnabled then return end
+        for key, _ in pairs(keysDown) do
+            if key == tostring(input.KeyCode) then
+                keysDown[key] = false
+            end
+        end
+        if input.UserInputType == Enum.UserInputType.MouseButton2 or (input.UserInputType == Enum.UserInputType.Touch and UserInputService:GetMouseLocation().X > (camera.ViewportSize.X / 2)) then
+            rotating = false
+        end
+    end)
+end
+
+local function disableFreeCam()
+    if freeCamConnection then
+        freeCamConnection:Disconnect()
+        freeCamConnection = nil
+    end
+    camera.CameraType = Enum.CameraType.Custom
+    camera.CameraSubject = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+    rotating = false
+    keysDown = {}
+end
+
+local function spectatePlayer(playerName)
+    if not settings.spectatePlayersEnabled then return end
+    for _, target in ipairs(Players:GetPlayers()) do
+        if target.Name:lower():sub(1, #playerName) == playerName:lower() then
+            if target.Character and target.Character:FindFirstChildOfClass("Humanoid") then
+                viewing = target
+                camera.CameraType = Enum.CameraType.Custom
+                camera.CameraSubject = target.Character:FindFirstChildOfClass("Humanoid")
+                if viewDied then viewDied:Disconnect() viewDied = nil end
+                if viewChanged then viewChanged:Disconnect() viewChanged = nil end
+                viewDied = target.Character:FindFirstChildOfClass("Humanoid").Died:Connect(function()
+                    if settings.spectatePlayersEnabled then
+                        task.wait(1)
+                        if target.Character and target.Character:FindFirstChildOfClass("Humanoid") then
+                            camera.CameraSubject = target.Character:FindFirstChildOfClass("Humanoid")
+                        else
+                            viewing = nil
+                            camera.CameraSubject = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+                        end
+                    end
+                end)
+                viewChanged = camera:GetPropertyChangedSignal("CameraSubject"):Connect(function()
+                    if settings.spectatePlayersEnabled and viewing == target and target.Character then
+                        camera.CameraSubject = target.Character:FindFirstChildOfClass("Humanoid")
+                    end
+                end)
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "Spectating " .. target.Name,
+                    Duration = 3
+                })
+                return
+            end
+        end
+    end
+    StarterGui:SetCore("SendNotification", {
+        Title = "Elerium Hub",
+        Text = "Player not found or invalid!",
+        Duration = 3
+    })
+end
+
+-- Hip Height Logic
+local function setHipHeight(value)
+    if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        humanoid.HipHeight = value
+    end
+end
+
+-- Orb Hitbox Logic
+local function increaseOrbHitbox(enable)
+    if not OrbsFolder then
+        settings.increaseOrbHitboxEnabled = false
+        return
+    end
+    if enable then
+        for _, orb in pairs(OrbsFolder:GetChildren()) do
+            local targetPart = orb:IsA("Model") and orb.PrimaryPart or orb:IsA("BasePart") and orb
+            if targetPart and not originalOrbSizes[targetPart] then
+                originalOrbSizes[targetPart] = targetPart.Size
+                targetPart.Size = targetPart.Size * getgenvValues.Circle.Size
+            end
+        end
+    else
+        for _, orb in pairs(OrbsFolder:GetChildren()) do
+            local targetPart = orb:IsA("Model") and orb.PrimaryPart or orb:IsA("BasePart") and orb
+            if targetPart and originalOrbSizes[targetPart] then
+                targetPart.Size = originalOrbSizes[targetPart]
+            end
+        end
+        originalOrbSizes = {}
+    end
+end
+
+-- Replace the entire Orb Farming Functions section
+local function stopCurrentOrbTween()
+    if currentOrbTween then
+        currentOrbTween:Cancel()
+        currentOrbTween = nil
+    end
+end
+
+local function getNearestOrb()
+    if not OrbsFolder then return nil end
+    local character = player.Character
+    if not character then return nil end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+    local orbs = OrbsFolder:GetChildren()
+    local nearestPart = nil
+    local minDistance = math.huge
+    for _, orb in ipairs(orbs) do
+        local targetPart = nil
+        if orb:IsA("Model") and orb.PrimaryPart then
+            targetPart = orb.PrimaryPart
+        elseif orb:IsA("BasePart") then
+            targetPart = orb
+        end
+        if targetPart then
+            local distance = (hrp.Position - targetPart.Position).Magnitude
+            if distance < minDistance then
+                minDistance = distance
+                nearestPart = targetPart
+            end
+        end
+    end
+    return nearestPart
+end
+
+local function tweenToOrbPosition(position, distance)
+    local character = player.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    stopCurrentOrbTween()
+    local speed = 20 -- Standardized speed
+    local duration = distance / speed
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local targetCFrame = CFrame.new(Vector3.new(position.X, hrp.Position.Y, position.Z))
+    currentOrbTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+    currentOrbTween:Play()
+    StarterGui:SetCore("SendNotification", {
+        Title = "Elerium Hub",
+        Text = "Farming Orb at " .. tostring(position) .. "!",
+        Duration = 2
+    })
+end
+
+local function autoCollectOrbsLoop()
+    if not OrbsFolder then
+        settings.farmingOrbsEnabled = false
+        autoCollectOrbsActive = false
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "No Orbs folder found!",
+            Duration = 3
+        })
+        return
+    end
+    while autoCollectOrbsActive do
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            task.wait(1)
+        else
+            local nearestPart = getNearestOrb()
+            if nearestPart then
+                local position = nearestPart.Position
+                local distance = (player.Character.HumanoidRootPart.Position - position).Magnitude
+                tweenToOrbPosition(position, distance)
+                if currentOrbTween then
+                    currentOrbTween.Completed:Wait()
+                end
+            else
+                autoCollectOrbsActive = false
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "Farmed all orbs! Waiting for new spawns...",
+                    Duration = 3
+                })
+            end
+        end
+        task.wait(0.1)
+    end
+end
+
+local function stopCurrentLuckyBlockTween()
+    if currentLuckyBlockTween then
+        currentLuckyBlockTween:Cancel()
+        currentLuckyBlockTween = nil
+    end
+end
+
+local function getNearestLuckyBlock()
+    if not LuckyBlocksFolder then return nil end
+    local character = player.Character
+    if not character then return nil end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+    local luckyBlocks = LuckyBlocksFolder:GetChildren()
+    local nearestBlock = nil
+    local minDistance = math.huge
+    for _, block in ipairs(luckyBlocks) do
+        local targetPart = block:FindFirstChild("Block")
+        if targetPart and targetPart:IsA("BasePart") then
+            local distance = (hrp.Position - targetPart.Position).Magnitude
+            if distance < minDistance then
+                minDistance = distance
+                nearestBlock = targetPart
+            end
+        end
+    end
+    return nearestBlock
+end
+
+local function tweenToPosition(rootPart, position, speed)
+    stopCurrentLuckyBlockTween()
+    local distance = (rootPart.Position - position).Magnitude
+    local duration = distance / speed
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local targetCFrame = CFrame.new(Vector3.new(position.X, rootPart.Position.Y, position.Z))
+    currentLuckyBlockTween = TweenService:Create(rootPart, tweenInfo, {CFrame = targetCFrame})
+    currentLuckyBlockTween:Play()
+    StarterGui:SetCore("SendNotification", {
+        Title = "Elerium Hub",
+        Text = "Farming Lucky Block at " .. tostring(position) .. "!",
+        Duration = 2
+    })
+    currentLuckyBlockTween.Completed:Wait()
+end
+
+local function returnToSafeZone()
+    local character = player.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local safeZoneMiddle = Workspace:FindFirstChild("Safezone") and Workspace.Safezone:FindFirstChild("Middle")
+    if not safeZoneMiddle then
+        autoCollectLuckyBlocksActive = false
+        settings.farmingLuckyBlocksEnabled = false
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "No Safezone found!",
+            Duration = 3
+        })
+        return
+    end
+    local speed = 20 -- Standardized speed
+    local targetPosition = Vector3.new(safeZoneMiddle.Position.X, hrp.Position.Y, safeZoneMiddle.Position.Z)
+    tweenToPosition(hrp, targetPosition, speed)
+    StarterGui:SetCore("SendNotification", {
+        Title = "Elerium Hub",
+        Text = "Returned to Safezone after collecting Lucky Block!",
+        Duration = 2
+    })
+end
+
+local function autoCollectLuckyBlocksLoop()
+    if not LuckyBlocksFolder then
+        settings.farmingLuckyBlocksEnabled = false
+        autoCollectLuckyBlocksActive = false
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "No Lucky Blocks folder found!",
+            Duration = 3
+        })
+        return
+    end
+    while autoCollectLuckyBlocksActive do
+        local character = player.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then
+            task.wait(2)
+            continue
+        end
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        local nearestBlock = getNearestLuckyBlock()
+        if nearestBlock then
+            local speed = 20 -- Standardized speed
+            tweenToPosition(hrp, nearestBlock.Position, speed)
+            task.wait(0.5) -- Wait briefly to ensure collection
+            returnToSafeZone() -- Return to Safezone after collecting
+        else
+            returnToSafeZone()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Farmed all Lucky Blocks! Waiting for new spawns...",
+                Duration = 3
+            })
+            task.wait(2)
+        end
+    end
+end
+
+local function stopCurrentZoneTween()
+    if currentZoneTween then
+        currentZoneTween:Cancel()
+        currentZoneTween = nil
+    end
+end
+
+local function tweenToZoneCFrame(humanoidRootPart, targetCFrame, speed)
+    stopCurrentZoneTween()
+    local distance = (humanoidRootPart.Position - targetCFrame.Position).Magnitude
+    local duration = distance / speed
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    currentZoneTween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+    local success, err = pcall(function()
+        currentZoneTween:Play()
+    end)
+    if not success then
+        warn("Tween failed:", err)
+        currentZoneTween = nil
+    end
+end
+
+local function moveToSafeZone(humanoidRootPart)
+    if not safeZone then return end
+    local totalPosition = Vector3.new()
+    local spawnCount = 0
+    for _, child in pairs(safeZone:GetChildren()) do
+        if child:IsA("SpawnLocation") then
+            totalPosition = totalPosition + child.Position
+            spawnCount = spawnCount + 1
+        end
+    end
+    if spawnCount > 0 then
+        local centerPosition = totalPosition / spawnCount
+        local speed = 20 -- Standardized speed
+        local targetCFrame = CFrame.new(Vector3.new(centerPosition.X, humanoidRootPart.Position.Y, centerPosition.Z))
+        tweenToZoneCFrame(humanoidRootPart, targetCFrame, speed)
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Returning to Safezone!",
+            Duration = 2
+        })
+        if currentZoneTween then
+            currentZoneTween.Completed:Wait()
+        end
+    end
+end
+
+local function findTimeZones()
+    if not ZonesModel then return {} end
+    local zonesToVisit = {}
+    for _, child in pairs(ZonesModel:GetChildren()) do
+        if child:IsA("BasePart") and child.Name ~= "Epic" then -- Exclude KOTH (Epic) time zone
+            table.insert(zonesToVisit, child)
+        end
+    end
+    table.sort(zonesToVisit, function(a, b)
+        return tonumber(a.Name) and tonumber(b.Name) and tonumber(a.Name) < tonumber(b.Name) or a.Name < b.Name
+    end)
+    return zonesToVisit
+end
+
+local function moveToTimeZone(humanoidRootPart, zone)
+    if not zone or not zone:IsA("BasePart") or not zone.Parent == ZonesModel or zone.Name == "Epic" then
+        return false
+    end
+    local targetPosition = Vector3.new(zone.Position.X, humanoidRootPart.Position.Y, zone.Position.Z)
+    local speed = 20 -- Standardized speed
+    tweenToZoneCFrame(humanoidRootPart, CFrame.new(targetPosition), speed)
+    StarterGui:SetCore("SendNotification", {
+        Title = "Elerium Hub",
+        Text = "Farming Time Zone " .. zone.Name .. " at " .. tostring(targetPosition) .. "!",
+        Duration = 2
+    })
+    if currentZoneTween then
+        currentZoneTween.Completed:Wait()
+    end
+    while zone and zone.Parent == ZonesModel and zone.Name ~= "Epic" and autoCollectZonesActive do
+        task.wait(0.1)
+    end
+    return true
+end
+
+local function autoCollectZonesLoop()
+    if not ZonesModel then
+        settings.farmingTimeZonesEnabled = false
+        autoCollectZonesActive = false
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "No Time Zones found!",
+            Duration = 3
+        })
+        return
+    end
+    while autoCollectZonesActive do
+        local character = player.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then
+            task.wait(2)
+        else
+            local humanoidRootPart = character.HumanoidRootPart
+            local waypoints = findTimeZones()
+            if #waypoints > 0 then
+                if currentWaypointIndex > #waypoints then
+                    currentWaypointIndex = 1
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Elerium Hub",
+                        Text = "Farmed all Time Zones! Restarting cycle...",
+                        Duration = 3
+                    })
+                end
+                local targetWaypoint = waypoints[currentWaypointIndex]
+                if targetWaypoint and targetWaypoint.Parent and targetWaypoint.Name ~= "Epic" then
+                    if moveToTimeZone(humanoidRootPart, targetWaypoint) then
+                        task.wait(0.5)
+                        currentWaypointIndex = currentWaypointIndex + 1
+                    else
+                        task.wait(5)
+                    end
+                else
+                    currentWaypointIndex = 1
+                end
+            else
+                moveToSafeZone(humanoidRootPart)
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "No Time Zones available (excluding KOTH)! Waiting for new zones...",
+                    Duration = 3
+                })
+                task.wait(10)
+            end
+        end
+        task.wait(0.2)
+    end
+end
+
+local function stopCurrentKOTHTween()
+    if currentKOTHTween then
+        currentKOTHTween:Cancel()
+        currentKOTHTween = nil
+    end
+    if kothCircleConnection then
+        kothCircleConnection:Disconnect()
+        kothCircleConnection = nil
+    end
+end
+
+local function tweenToKOTHPosition(humanoidRootPart, position, speed)
+    stopCurrentKOTHTween()
+    local distance = (humanoidRootPart.Position - position).Magnitude
+    local duration = distance / speed
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local targetCFrame = CFrame.new(Vector3.new(position.X, humanoidRootPart.Position.Y, position.Z))
+    currentKOTHTween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+    currentKOTHTween:Play()
+    StarterGui:SetCore("SendNotification", {
+        Title = "Elerium Hub",
+        Text = "Moving to KOTH at " .. tostring(position) .. "!",
+        Duration = 2
+    })
+end
+
+local function startKOTHCircling()
+    if not KOTH then
+        settings.autoFarmKOTHEnabled = false
+        autoCollectKOTHActive = false
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "No KOTH found!",
+            Duration = 3
+        })
+        return
+    end
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then
+        return
+    end
+    local humanoidRootPart = character.HumanoidRootPart
+    local kothPosition = KOTH.Position
+    local distance = (humanoidRootPart.Position - kothPosition).Magnitude
+    local speed = 20 -- Standardized speed for initial tween
+    -- Tween to KOTH center if far away
+    if distance > 5 then
+        tweenToKOTHPosition(humanoidRootPart, kothPosition, speed)
+        if currentKOTHTween then
+            currentKOTHTween.Completed:Wait()
+        end
+    end
+    -- Start continuous circling
+    kothCircleAngle = 0
+    local radius = 10 -- Circle radius around KOTH, matching Circle Strafe Kill style
+    local circleSpeed = settings.circleStrafeSpeed -- Use Circle Strafe Kill speed for consistency
+    kothCircleConnection = RunService.RenderStepped:Connect(function(deltaTime)
+        if not autoCollectKOTHActive or not character or not character.Parent or not character:FindFirstChild("HumanoidRootPart") or not KOTH or not KOTH.Parent then
+            stopCurrentKOTHTween()
+            return
+        end
+        kothCircleAngle = kothCircleAngle + math.rad(circleSpeed) * deltaTime
+        local offset = Vector3.new(math.cos(kothCircleAngle) * radius, 0, math.sin(kothCircleAngle) * radius)
+        local targetPosition = kothPosition + offset
+        -- Smoothly move to the circular path
+        humanoidRootPart.CFrame = CFrame.new(Vector3.new(targetPosition.X, humanoidRootPart.Position.Y, targetPosition.Z), kothPosition)
+        -- Optional: Activate tool if equipped
+        local tool = character:FindFirstChildOfClass("Tool")
+        if tool then
+            tool:Activate()
+        end
+        -- Notify periodically to avoid spamming
+        if math.floor(kothCircleAngle % (2 * math.pi)) == 2 then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Circling KOTH at " .. tostring(kothPosition) .. "!",
+                Duration = 2
+            })
+        end
+    end)
+end
+
+local function autoCollectKOTHLoop()
+    if not KOTH then
+        settings.autoFarmKOTHEnabled = false
+        autoCollectKOTHActive = false
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "No KOTH found!",
+            Duration = 3
+        })
+        return
+    end
+    
+    while autoCollectKOTHActive do
+        local character = player.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then
+            task.wait(2)
+        else
+            local humanoidRootPart = character.HumanoidRootPart
+            local kothPosition = KOTH.Position
+            local radius = 5  -- Fixed radius for circling
+            local angle = 0
+            local speed = 2  -- Speed of rotation (radians per second)
+            
+            -- First move to the KOTH area if far away
+            local distanceToKOTH = (humanoidRootPart.Position - kothPosition).Magnitude
+            if distanceToKOTH > radius + 5 then
+                local targetPosition = kothPosition + Vector3.new(radius, 0, 0)
+                tweenToKOTHPosition(humanoidRootPart, targetPosition, 20)
+                if currentKOTHTween then
+                    currentKOTHTween.Completed:Wait()
+                end
+            end
+            
+            -- Start continuous circling
+            local lastUpdate = tick()
+            while autoCollectKOTHActive and character and character:FindFirstChild("HumanoidRootPart") and KOTH and KOTH.Parent do
+                local deltaTime = tick() - lastUpdate
+                lastUpdate = tick()
+                
+                angle = angle + speed * deltaTime
+                if angle > 0 * math.pi then
+                    angle = angle - 0 * math.pi
+                end
+                
+                -- Calculate circular path position
+                local offset = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+                local targetPosition = kothPosition + offset
+                
+                -- Face towards the KOTH center while moving
+                local lookAtCFrame = CFrame.new(targetPosition, kothPosition)
+                
+                -- Smooth movement using CFrame lerp
+                humanoidRootPart.CFrame = humanoidRootPart.CFrame:Lerp(lookAtCFrame, 0.2)
+                
+                -- Activate tool if equipped
+                local tool = character:FindFirstChildOfClass("Tool")
+                if tool then
+                    tool:Activate()
+                end
+                
+                task.wait()
+            end
+            
+            stopCurrentKOTHTween()
+        end
+        task.wait(0.1)
+    end
+end
+
+-- CBring Logic (Steal Limbs)
+RunService.Stepped:Connect(function()
+    if not settings.cbringEnabled then return end
+    pcall(function()
+        local character = player.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+        local tool = character:FindFirstChildOfClass("Tool")
+        if not tool then return end
+        local handle = tool:FindFirstChild("Handle")
+        if handle then
+            for _, v in pairs(Players:GetPlayers()) do
+                if v ~= player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
+                    if distance <= settings.cbringRange then
+                        for _, limb in pairs({"Left Arm", "Right Arm", "Left Leg", "Right Leg"}) do
+                            local part = v.Character:FindFirstChild(limb)
+                            if part then
+                                part:BreakJoints()
+                                part.Transparency = settings.showCBring and 0 or 1
+                                part.CanCollide = false
+                                part.CFrame = character.HumanoidRootPart.CFrame * CFrame.new(1, 0, -3.5)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+-- TP Kill Logic
+function Brew:GetChars(targetPlayerName)
+    local chars = {}
+    if targetPlayerName and targetedTPKillPlayer then
+        if targetedTPKillPlayer.Character then
+            chars[#chars + 1] = targetedTPKillPlayer.Character
+        end
+    else
+        for _, v in pairs(Players:GetPlayers()) do
+            if v and v ~= player then
+                chars[#chars + 1] = v.Character
+            end
+        end
+    end
+    return chars
+end
+
+function Brew:findNearestPlayer(Position, range, targetPlayerName)
+    local List = Brew:GetChars(targetPlayerName)
+    local Torso = nil
+    local Distance = range or 15
+    local Temp = nil
+    local Human = nil
+    local Temp2 = nil
+    for x = 1, #List do
+        Temp2 = List[x]
+        if Temp2 and Temp2:IsA("Model") and Temp2 ~= script.Parent then
+            Temp = Temp2:FindFirstChild("HumanoidRootPart")
+            Human = Temp2:FindFirstChild("Humanoid")
+            if Temp and Human and Human.Health > 0 then
+                if targetPlayerName and Temp2 == targetedTPKillPlayer.Character then
+                    local dist = (Temp.Position - Position).Magnitude
+                    if dist <= Distance then
+                        Torso = Temp
+                        Distance = dist
+                    end
+                elseif not targetPlayerName then
+                    local dist = (Temp.Position - Position).Magnitude
+                    if dist <= Distance then
+                        Torso = Temp
+                        Distance = dist
+                    end
+                end
+            end
+        end
+    end
+    return Torso
+end
+
+-- Player management system for UI (ADD THIS SECTION)
+local playerManagement = {
+    playerList = {},
+    dropdownReferences = {}
+}
+
+function playerManagement:updatePlayerList()
+    self.playerList = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player then
+            table.insert(self.playerList, plr.Name)
+        end
+    end
+end
+
+function playerManagement:refreshDropdowns()
+    self:updatePlayerList()
+    for _, dropdown in pairs(self.dropdownReferences) do
+        if dropdown and typeof(dropdown) == "table" and dropdown.Refresh then
+            dropdown:Refresh(self.playerList)
+        end
+    end
+end
+
+function playerManagement:getPlayerByName(name)
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr.Name == name then
+            return plr
+        end
+    end
+    return nil
+end
+
+-- Initialize player list
+playerManagement:updatePlayerList()
+
+-- Player join/leave events
+Players.PlayerAdded:Connect(function()
+    playerManagement:refreshDropdowns()
+end)
+
+function Brew:enableTeleport(range, targetPlayerName)
+    Brew.AutoAim = true
+    local Root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not Root then
+        Brew.AutoAim = false
+        return
+    end
+    local RootPos, MousePos = Root.Position, Brew:findNearestPlayer(Root.Position, range, targetPlayerName)
+    local characterAddedConnection
+    characterAddedConnection = player.CharacterAdded:Connect(function(a)
+        repeat task.wait() until a and a:FindFirstChildOfClass("Humanoid") and a:FindFirstChild("HumanoidRootPart")
+        Root = a:FindFirstChild("HumanoidRootPart")
+        if not Root then return end
+        RootPos, MousePos = Root.Position, Brew:findNearestPlayer(Root.Position, range, targetPlayerName)
+        if not Brew.AutoAim then
+            characterAddedConnection:Disconnect()
+        end
+    end)
+    local renderSteppedConnection
+    renderSteppedConnection = RunService.RenderStepped:Connect(function()
+        if Brew.AutoAim then
+            Root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if not Root then return end
+            RootPos, MousePos = Root.Position, Brew:findNearestPlayer(Root.Position, range, targetPlayerName)
+            pcall(function()
+                if MousePos and Root then
+                    Root.CFrame = CFrame.new(RootPos, Vector3.new(MousePos.Position.X, RootPos.Y, MousePos.Position.Z))
+                end
+            end)
+        else
+            renderSteppedConnection:Disconnect()
+        end
+    end)
+    task.spawn(function()
+        while true do
+            task.wait()
+            pcall(function()
+                if Brew.AutoAim and MousePos and Root then
+                    Root.CFrame = MousePos.CFrame * CFrame.new(0, 0, 3)
+                    pcall(function()
+                        local tool = player.Character:FindFirstChildOfClass("Tool")
+                        if tool then
+                            tool:Activate()
+                        end
+                    end)
+                end
+            end)
+            if not Brew.AutoAim then break end
+        end
+    end)
+end
+
+function Brew:disableTeleport()
+    Brew.AutoAim = false
+    settings.tpKillEnabled = false
+    settings.undergroundTPKillEnabled = false
+    settings.circleStrafeKillEnabled = false
+    targetedTPKillPlayer = nil
+    Brew.originalPosition = nil
+    stopStrafing()
+end
+
+-- Underground TP Kill Logic
+local function enableUndergroundTPKill(range, targetPlayerName)
+    if undergroundTPKillConnection then
+        undergroundTPKillConnection:Disconnect()
+        undergroundTPKillConnection = nil
+    end
+    local Root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not Root or not grass then
+        settings.undergroundTPKillEnabled = false
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Character or map (Grass) not found!",
+            Duration = 3
+        })
+        return
+    end
+    originalPosition = Root.Position
+    local RootPos, MousePos = Root.Position, Brew:findNearestPlayer(Root.Position, range, targetPlayerName)
+    undergroundTPKillConnection = RunService.RenderStepped:Connect(function()
+        if not settings.undergroundTPKillEnabled then return end
+        pcall(function()
+            Root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if not Root then return end
+            RootPos, MousePos = Root.Position, Brew:findNearestPlayer(Root.Position, range, targetPlayerName)
+            if MousePos then
+                local targetPos = MousePos.Position
+                local undergroundY = grass.Position.Y - (grass.Size.Y / 2) - 3
+                Root.CFrame = CFrame.new(Vector3.new(targetPos.X, undergroundY, targetPos.Z), Vector3.new(targetPos.X, RootPos.Y, targetPos.Z))
+                local tool = player.Character:FindFirstChildOfClass("Tool")
+                if tool then
+                    tool:Activate()
+                end
+            else
+                settings.undergroundTPKillEnabled = false
+                disableUndergroundTPKill()
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "No valid target found for Underground TP Kill!",
+                    Duration = 3
+                })
+            end
+        end)
+    end)
+    task.spawn(function()
+        while settings.undergroundTPKillEnabled do
+            task.wait()
+            pcall(function()
+                if MousePos and Root then
+                    local targetPos = MousePos.Position
+                    local undergroundY = grass.Position.Y - (grass.Size.Y / 2) - 3
+                    Root.CFrame = CFrame.new(Vector3.new(targetPos.X, undergroundY, targetPos.Z)) * CFrame.new(0, 0, 3)
+                    local tool = player.Character:FindFirstChildOfClass("Tool")
+                    if tool then
+                        tool:Activate()
+                    end
+                end
+            end)
+        end
+    end)
+    player.CharacterAdded:Connect(function(newCharacter)
+        if settings.undergroundTPKillEnabled then
+            task.wait(0.5)
+            local newRootPart = newCharacter:FindFirstChild("HumanoidRootPart")
+            if newRootPart then
+                originalPosition = newRootPart.Position
+                enableUndergroundTPKill(range, targetPlayerName)
+            end
+        end
+    end)
+end
+
+local function disableUndergroundTPKill()
+    if undergroundTPKillConnection then
+        undergroundTPKillConnection:Disconnect()
+        undergroundTPKillConnection = nil
+    end
+    targetedUndergroundTPKillPlayer = nil
+    local rootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if rootPart and originalPosition then
+        rootPart.CFrame = CFrame.new(originalPosition)
+    end
+    originalPosition = nil
+end
+
+-- Jump Power and Walkspeed Logic
+function Brew:Spoof(Instance, Property, Value)
+    if Brew.supportedExecutor then
+        local b
+        b = hookmetamethod(game, "__index", function(A, B)
+            if not checkcaller() then
+                if A == Instance then
+                    local filter = string.gsub(tostring(B), "\0", "")
+                    if filter == Property then
+                        return Value
+                    end
+                end
+            end
+            return b(A, B)
+        end)
+    end
+end
+
+function Brew:setJumpPower(jumpPower)
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        Brew:Spoof(player.Character:WaitForChild("Humanoid"), "JumpPower", 50)
+        player.Character:WaitForChild("Humanoid").JumpPower = jumpPower
+        Brew.cJumppower = jumpPower
+    end
+end
+
+function Brew:setWalkSpeed(speed)
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        Brew:Spoof(player.Character:WaitForChild("Humanoid"), "WalkSpeed", 16)
+        player.Character:WaitForChild("Humanoid").WalkSpeed = speed
+        Brew.cWalkspeed = speed
+    end
+end
+
+-- Tank Logic (hex.tank, no notifications)
+local function enableTank()
+    local character = player.Character
+    if not character or not character:FindFirstChildOfClass("Humanoid") then
+        settings.tankEnabled = false
+        return
+    end
+    local tankConnection
+    tankConnection = RunService.Stepped:Connect(function()
+        if not settings.tankEnabled or not character or character.Parent == nil then
+            if tankConnection then
+                tankConnection:Disconnect()
+                tankConnection = nil
+            end
+            return
+        end
+        pcall(function()
+            local hasSword = character:FindFirstChildOfClass("Tool") ~= nil
+            for _, part in ipairs(character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanTouch = not hasSword
+                end
+            end
+        end)
+    end)
+    player.CharacterAdded:Connect(function(newChar)
+        character = newChar
+        if not settings.tankEnabled then
+            if tankConnection then
+                tankConnection:Disconnect()
+                tankConnection = nil
+            end
+        end
+    end)
+end
+
+local function disableTank()
+    local character = player.Character
+    if character then
+        pcall(function()
+            for _, part in ipairs(character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanTouch = true
+                end
+            end
+        end)
+    end
+end
+
+-- Damage Amplifier Logic
+local function enableDamageAmplifier()
+    coroutine.wrap(function()
+        local interval = 0
+        local power = 1
+        while settings.damageAmplifierEnabled and player.Character and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 do
+            task.wait(interval)
+            local character = player.Character
+            if character and character:FindFirstChildOfClass("Tool") then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if not humanoid or humanoid.Health <= 0 then continue end
+                local tool = character:FindFirstChildOfClass("Tool")
+                local handle = tool:FindFirstChild("Handle")
+                if handle then
+                    for _ = 1, power do
+                        handle.CanTouch = false
+                        handle.CanTouch = true
+                    end
+                end
+            end
+        end
+    end)()
+end
+
+-- Damage Multiplier Logic
+local function applyDamageMultiplier(tool)
+    local damageValue = tool:FindFirstChild("Damage")
+    if damageValue and damageValue:IsA("NumberValue") then
+        local baseDamage = damageValue.Value
+        if settings.damageMultiplierEnabled then
+            damageValue.Value = baseDamage * settings.damageMultiplierValue
+        else
+            damageValue.Value = baseDamage
+        end
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    if settings.damageMultiplierEnabled then
+        local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+        if tool then
+            applyDamageMultiplier(tool)
+        end
+    end
+end)
+
+-- Auto Kill Player Bot Logic
+local autoKillConnection = nil
+local function getClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = settings.autoKillRange
+    local myCharacter = player.Character
+    if not myCharacter or not myCharacter:FindFirstChild("HumanoidRootPart") then
+        return nil
+    end
+    for _, v in pairs(Players:GetPlayers()) do
+        if v.Name ~= player.Name then
+            if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health ~= 0 and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Head") then
+                if not v.Character:FindFirstChildOfClass("ForceField") then
+                    local ray = Ray.new(v.Character.HumanoidRootPart.Position, Vector3.new(0, -100000, 0))
+                    local hit = Workspace:FindPartOnRay(ray, v.Character)
+                    if hit then
+                        local magnitude = (v.Character.HumanoidRootPart.Position - myCharacter.HumanoidRootPart.Position).Magnitude
+                        if magnitude < shortestDistance then
+                            closestPlayer = v
+                            shortestDistance = magnitude
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+local function enableAutoKill()
+    if autoKillConnection then
+        autoKillConnection:Disconnect()
+        autoKillConnection = nil
+    end
+    local character = player.Character
+    if not character or not character:FindFirstChildOfClass("Humanoid") then
+        settings.autoKillEnabled = false
+        return
+    end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+    autoKillConnection = RunService.RenderStepped:Connect(function()
+        if not settings.autoKillEnabled then return end
+        pcall(function()
+            local character = player.Character
+            if not character or not character:FindFirstChild("HumanoidRootPart") or not character:FindFirstChildOfClass("Humanoid") then
+                return
+            end
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            local rootPart = character.HumanoidRootPart
+            local tool = character:FindFirstChildOfClass("Tool")
+            if tool and tool:FindFirstChild("Handle") then
+                tool:Activate()
+                for _, v in pairs(Players:GetPlayers()) do
+                    if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 and v.Character:FindFirstChild("HumanoidRootPart") then
+                        local distance = player:DistanceFromCharacter(v.Character.HumanoidRootPart.Position)
+                        if distance <= settings.autoKillRange then
+                            for _, part in pairs(v.Character:GetChildren()) do
+                                if part:IsA("BasePart") then
+                                    firetouchinterest(tool.Handle, part, 0)
+                                    firetouchinterest(tool.Handle, part, 1)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            local target = getClosestPlayer()
+            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                local targetPart = target.Character.HumanoidRootPart
+                humanoid.AutoRotate = false
+                rootPart.CFrame = rootPart.CFrame:Lerp(
+                    CFrame.new(rootPart.Position, targetPart.Position) * CFrame.Angles(math.rad(0), math.rad(25), math.rad(0)),
+                    getgenvValues.HowFastDanSchneiderCatchesYou
+                )
+                humanoid:MoveTo(targetPart.CFrame * CFrame.new(-3, 0, 0).Position)
+                if target.Character.Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                    humanoid.Jump = true
+                end
+            else
+                humanoid.AutoRotate = true
+            end
+        end)
+    end)
+    player.CharacterAdded:Connect(function(newCharacter)
+        if settings.autoKillEnabled then
+            task.wait(0.5)
+            character = newCharacter
+            local humanoid = character:WaitForChild("Humanoid")
+            humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+            humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            enableAutoKill()
+        end
+    end)
+end
+
+local function disableAutoKill()
+    if autoKillConnection then
+        autoKillConnection:Disconnect()
+        autoKillConnection = nil
+    end
+    local character = player.Character
+    if character and character:FindFirstChildOfClass("Humanoid") then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        humanoid.AutoRotate = true
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
+    end
+end
+
+-- Variables for cooldowns
+local lastJumpTime = 0
+local jumpCooldown = 0.5 -- Cooldown in seconds for Auto Jump
+local lastHitTime = 0
+local hitCooldown = 0.1 -- Cooldown in seconds for Auto Hit
+
+-- Revised RenderStepped loop for Auto Jump, Auto Hit, and Body Lock
+RunService.RenderStepped:Connect(function(deltaTime)
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum or hum.Health <= 0 then
+        return
+    end
+
+    -- Determine the maximum relevant distance for all features
+    local maxDistance = math.max(settings.autoHitDistance, settings.autoJumpDistance, settings.autoLookDistance)
+    local target = getNearestPlayer(maxDistance)
+    local targetPart = target and target.Character and target.Character:FindFirstChild(settings.lockTargetPart)
+
+    -- Body Lock (Lock On)
+    if settings.lockOnEnabled and targetPart then
+        local tgtPos = targetPart.Position
+        -- Apply velocity prediction if enabled
+        if settings.predictionEnabled and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            local vel = target.Character.HumanoidRootPart.Velocity
+            tgtPos = tgtPos + vel * settings.predictionOffset
+        end
+        -- Smoothly rotate to face the target
+        local currentCFrame = hrp.CFrame
+        local lookCFrame = CFrame.new(currentCFrame.Position, Vector3.new(tgtPos.X, currentCFrame.Position.Y, tgtPos.Z))
+        hrp.CFrame = currentCFrame:Lerp(lookCFrame, 0.1) -- Reduced lerp factor for smoother rotation
+        hum.AutoRotate = false
+    elseif not settings.autoKillEnabled and not settings.autoLookEnabled then
+        hum.AutoRotate = true
+    end
+
+    -- Auto Look (independent of Lock On, for compatibility)
+    if settings.autoLookEnabled and targetPart then
+        local tgtPos = targetPart.Position
+        if settings.predictionEnabled and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            local vel = target.Character.HumanoidRootPart.Velocity
+            tgtPos = tgtPos + vel * settings.predictionOffset
+        end
+        local currentCFrame = hrp.CFrame
+        local lookCFrame = CFrame.new(currentCFrame.Position, Vector3.new(tgtPos.X, currentCFrame.Position.Y, tgtPos.Z))
+        hrp.CFrame = currentCFrame:Lerp(lookCFrame, 0.1)
+        hum.AutoRotate = false
+    end
+
+    -- Auto Hit
+    if settings.autoHitEnabled and targetPart then
+        local dist = (hrp.Position - targetPart.Position).Magnitude
+        local currentTime = tick()
+        if dist <= settings.autoHitDistance and currentTime - lastHitTime >= hitCooldown then
+            local tool = getTool()
+            if tool and tool:FindFirstChild("Handle") then
+                -- Perform a raycast to check line-of-sight
+                local rayOrigin = hrp.Position
+                local rayDirection = (targetPart.Position - rayOrigin).Unit * settings.autoHitDistance
+                local raycastParams = RaycastParams.new()
+                raycastParams.FilterDescendantsInstances = {char}
+                raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+                local rayResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+                if rayResult and rayResult.Instance and rayResult.Instance:IsDescendantOf(target.Character) then
+                    tool:Activate()
+                    lastHitTime = currentTime
+                    -- Notify for debugging (optional, can be removed)
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Elerium Hub",
+                        Text = "Auto Hit triggered on " .. target.Name,
+                        Duration = 1
+                    })
+                end
+            end
+        end
+    end
+
+    -- Auto Jump
+    if settings.autoJumpEnabled and targetPart then
+        local dist = (hrp.Position - targetPart.Position).Magnitude
+        local currentTime = tick()
+        if dist <= settings.autoJumpDistance and hum:GetState() ~= Enum.HumanoidStateType.Jumping 
+            and hum:GetState() ~= Enum.HumanoidStateType.Freefall 
+            and currentTime - lastJumpTime >= jumpCooldown then
+            -- Check for obstacles above with a raycast
+            local rayOrigin = hrp.Position
+            local rayDirection = Vector3.new(0, 15, 0) -- Increased to 15 studs for better clearance
+            local raycastParams = RaycastParams.new()
+            raycastParams.FilterDescendantsInstances = {char}
+            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+            local rayResult = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+            -- Relaxed vertical difference check
+            local verticalDiff = math.abs(targetPart.Position.Y - hrp.Position.Y)
+            if not rayResult and verticalDiff <= 15 then
+                hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                lastJumpTime = currentTime
+                -- Notify for debugging (optional, can be removed)
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "Auto Jump triggered",
+                    Duration = 1
+                })
+            end
+        end
+    end
+end)
+
+-- Flick Logic (Rayfield Shake logic)
+local function isShiftLockEnabled()
+    return UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter
+end
+
+local function startFlick(humanoidRootPart)
+    if currentFlickConnection then
+        currentFlickConnection:Disconnect()
+        currentFlickConnection = nil
+    end
+    currentFlickConnection = RunService.RenderStepped:Connect(function()
+        if not flicking or isShiftLockEnabled() then return end
+        local time = os.clock() * flickSpeed * 2 * math.pi
+        local offsetAngle = math.sin(time / flickSmoothness) * math.rad(flickAngle)
+        local baseCFrame = humanoidRootPart.CFrame
+        humanoidRootPart.CFrame = baseCFrame * CFrame.Angles(0, offsetAngle, 0)
+    end)
+end
+
+local function initializeFlick(character)
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart and flicking then
+        startFlick(humanoidRootPart)
+    end
+end
+
+-- Updated Auto Snipe Logic
+local function isInSafezone(position)
+    local safezone = Workspace:FindFirstChild("Safezone")
+    local safezoneMiddle = safezone and safezone:FindFirstChild("Middle")
+    if not safezone or not safezoneMiddle then
+        return false
+    end
+    local distance = (position - safezoneMiddle.Position).Magnitude
+    return distance <= 39
+end
+
+local function canTeleport(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character then
+        return false
+    end
+    local targetHumanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+    local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    return targetHumanoid and targetHumanoid.Health > 0 and targetRoot and not targetPlayer.Character:FindFirstChildOfClass("ForceField")
+end
+
+local function getFirstValidPlayer()
+    local localPlayer = Players.LocalPlayer
+    local localHumanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not localHumanoidRootPart then
+        return nil
+    end
+    
+    for _, targetPlayer in ipairs(Players:GetPlayers()) do
+        if targetPlayer ~= localPlayer and canTeleport(targetPlayer) then
+            local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local distance = (localHumanoidRootPart.Position - targetRoot.Position).Magnitude
+            if distance <= maxFollowDistance and not isInSafezone(targetRoot.Position) then
+                return targetPlayer
+            end
+        end
+    end
+    return nil
+end
+
+local function autoSnipeLoop()
+    shouldRunLoop = true
+    while autoSnipeEnabled and shouldRunLoop do
+        pcall(function()
+            local localPlayer = Players.LocalPlayer
+            local humanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                local targetPlayer = getFirstValidPlayer()
+                if targetPlayer then
+                    local targetHumanoidRootPart = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if targetHumanoidRootPart then
+                        local distance = (humanoidRootPart.Position - targetHumanoidRootPart.Position).Magnitude
+                        
+                        -- Only teleport if within max distance but not too close
+                        if distance <= maxFollowDistance and distance > 3 then
+                            local targetCFrame = targetHumanoidRootPart.CFrame
+                            local behindOffset = targetCFrame.LookVector * -2
+                            local targetPosition = targetCFrame.Position + behindOffset + Vector3.new(0, floatHeight, 0)
+                            local lookAtPosition = targetCFrame.Position
+                            local newCFrame = CFrame.new(targetPosition, lookAtPosition)
+                            humanoidRootPart.CFrame = newCFrame
+                            
+                            -- Activate tool if equipped
+                            local tool = localPlayer.Character:FindFirstChildOfClass("Tool")
+                            if tool then
+                                tool:Activate()
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+        task.wait(updateRate)
+    end
+end
+
+-- Updated Auto Snipe Specific Player Logic
+local function autoSnipeSpecificLoop()
+    shouldRunSpecificLoop = true
+    while autoSnipeSpecificEnabled and shouldRunSpecificLoop do
+        pcall(function()
+            local localPlayer = Players.LocalPlayer
+            local humanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart and specificSnipeTarget and specificSnipeTarget.Character then
+                local targetHumanoidRootPart = specificSnipeTarget.Character:FindFirstChild("HumanoidRootPart")
+                local targetHumanoid = specificSnipeTarget.Character:FindFirstChildOfClass("Humanoid")
+                
+                if targetHumanoidRootPart and targetHumanoid and targetHumanoid.Health > 0 
+                    and not isInSafezone(targetHumanoidRootPart.Position) then
+                    
+                    local distance = (humanoidRootPart.Position - targetHumanoidRootPart.Position).Magnitude
+                    
+                    -- Only teleport if within max distance but not too close
+                    if distance <= maxFollowDistance and distance > 3 then
+                        local targetCFrame = targetHumanoidRootPart.CFrame
+                        local behindOffset = targetCFrame.LookVector * -2
+                        local targetPosition = targetCFrame.Position + behindOffset + Vector3.new(0, floatHeight, 0)
+                        local lookAtPosition = targetCFrame.Position
+                        local newCFrame = CFrame.new(targetPosition, lookAtPosition)
+                        humanoidRootPart.CFrame = newCFrame
+                        
+                        -- Activate tool if equipped
+                        local tool = localPlayer.Character:FindFirstChildOfClass("Tool")
+                        if tool then
+                            tool:Activate()
+                        end
+                    end
+                else
+                    autoSnipeSpecificEnabled = false
+                    shouldRunSpecificLoop = false
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Elerium Hub",
+                        Text = "Specific target not valid for sniping!",
+                        Duration = 3
+                    })
+                end
+            end
+        end)
+        task.wait(updateRate)
+    end
+end
+
+
+-- Auto Deposit Logic (modified to remove notification)
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BankRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("BankRemote")
+local Safezone = workspace:WaitForChild("Safezone"):WaitForChild("Middle")
+local Grass = workspace:WaitForChild("Grass")
+local LocalPlayer = Players.LocalPlayer
+local PlayerStats = LocalPlayer:WaitForChild("PlayerStats")
+local TimeStat = PlayerStats:WaitForChild("Time")
+
+local isInSafezone = false
+local wasOutside = false
+
+local function isPlayerInSafezone()
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then
+        return false
+    end
+    
+    local rootPart = character.HumanoidRootPart
+    
+    if Safezone:IsA("BasePart") then
+        local distance = (rootPart.Position - Safezone.Position).Magnitude
+        return distance <= (Safezone.Size.Magnitude / 2)
+    else
+        for _, part in ipairs(Safezone:GetDescendants()) do
+            if part:IsA("BasePart") then
+                local distance = (rootPart.Position - part.Position).Magnitude
+                if distance <= (part.Size.Magnitude / 2) then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+end
+
+local function isPlayerInGrass()
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then
+        return false
+    end
+    
+    local rootPart = character.HumanoidRootPart
+    
+    if Grass:IsA("BasePart") then
+        local distance = (rootPart.Position - Grass.Position).Magnitude
+        return distance <= (Grass.Size.Magnitude / 2)
+    else
+        for _, part in ipairs(Grass:GetDescendants()) do
+            if part:IsA("BasePart") then
+                local distance = (rootPart.Position - part.Position).Magnitude
+                if distance <= (part.Size.Magnitude / 2) then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+end
+
+local function depositTime()
+    local timeAmount = TimeStat.Value
+    if timeAmount > 0 then
+        local args = {
+            "Deposit",
+            timeAmount
+        }
+        BankRemote:FireServer(unpack(args))
+        print("Deposited " .. timeAmount .. " time.") -- Notification removed
+    else
+        print("No time to deposit.")
+    end
+end
+
+local function checkSafezone()
+    while autoDepositEnabled do
+        local currentlyInSafezone = isPlayerInSafezone()
+        local currentlyInGrass = isPlayerInGrass()
+        
+        if currentlyInSafezone and not isInSafezone then
+            isInSafezone = true
+            if wasOutside then
+                depositTime()
+                wasOutside = false
+            end
+        elseif currentlyInGrass then
+            isInSafezone = false
+            wasOutside = true
+        elseif not currentlyInSafezone and not currentlyInGrass then
+            isInSafezone = false
+        end
+        
+        task.wait(0.001)
+    end
+end
+
+-- Create the main window
+local win = UILib:Window("Elerium Hub | Steal Time From Others", Color3.fromRGB(128, 0, 128), Enum.KeyCode.LeftControl)
+
+-- Notes Tab (kept as is, simple enough)
+local notesTab = win:Tab("Notes")
+notesTab:Label("Elerium Hub | Steal Time From Others")
+notesTab:Label("Version: v1.20 [Paid]")
+notesTab:Label("Toggle UI: LeftControl")
+notesTab:Label("Made by: Elerium / Emeraltzz")
+notesTab:Button("Copy Elerium Hub Discord Invite Link", function()
+    setclipboard("https://discord.gg/hUR34yj5eT")
+end)
+
+-- Sword Modification Tab (refactored into function)
+GUI = GUI or {}
+function GUI.createSwordModificationTab()
+    local tab = win:Tab("Sword Modification")
+    tab:Label("📜 Sword Adder Inventory [OP]")
+    tab:Textbox("Enter Sword Name", false, function(text)
+        if text and text ~= "" then
+            changeSword(text)
+        end
+    end)
+    tab:Toggle("Sword Reach [FTI]", false, function(state)
+        Brew.isReach = state
+        if state then
+            Brew:doReach()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Brew System",
+                Text = "Sword Reach: ON ("..Brew.reachType..")",
+                Duration = 3
+            })
+        else
+            Brew:undoReach()
+        end
+    end)
+    tab:Toggle("Hitbox Visualizer", false, function(state)
+        Brew.selBox = state
+        if state then
+            Brew:doSelBox()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Brew System",
+                Text = "Hitbox Visualizer: ON (" .. Brew.reachType .. ")",
+                Duration = 3
+            })
+        else
+            Brew:undoSelBox()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Brew System",
+                Text = "Hitbox Visualizer: OFF",
+                Duration = 3
+            })
+        end
+    end)
+    tab:Colorpicker("Visualizer Color", Color3.fromRGB(0, 0, 0), function(color)
+        Brew.selBoxColor = color
+    end)
+    tab:Textbox("Reach Distance (Any Number)", "4", function(text)
+        local value = tonumber(text) or 4
+        if value and value > 0 then
+            if Brew.reachType == "Box" then
+                Brew.reachMagnitude = Vector3.new(value, value, value)
+            elseif Brew.reachType == "Linear" then
+                Brew.reachMagnitude = Vector3.new(1, 0.8, value)
+            elseif Brew.reachType == "Wide" then
+                Brew.reachMagnitude = Vector3.new(value*0.3, value*0.3, value)
+            elseif Brew.reachType == "Sphere" then
+                Brew.reachMagnitude = Vector3.new(value, value, value)
+            end
+            if Brew.isReach then
+                Brew:undoReach()
+                task.wait(0.1)
+                Brew:doReach()
+            end
+        end
+    end)
+    tab:Dropdown("Reach Type", {"Box", "Linear", "Wide", "Sphere"}, function(option)
+        Brew.reachType = option
+        local lastMagnitude = Brew.reachMagnitude.Z
+        if option == "Box" then
+            Brew.reachMagnitude = Vector3.new(lastMagnitude, lastMagnitude, lastMagnitude)
+        elseif option == "Linear" then
+            Brew.reachMagnitude = Vector3.new(1, 0.8, lastMagnitude)
+        elseif option == "Wide" then
+            Brew.reachMagnitude = Vector3.new(lastMagnitude * 0.3, lastMagnitude * 0.3, lastMagnitude)
+        elseif option == "Sphere" then
+            Brew.reachMagnitude = Vector3.new(lastMagnitude, lastMagnitude, lastMagnitude)
+        end
+        if Brew.isReach then
+            Brew:undoReach()
+            task.wait(0.1)
+            Brew:doReach()
+        end
+        if Brew.selBox then
+            Brew:undoSelBox()
+            task.wait(0.1)
+            Brew:doSelBox()
+        end
+    end)
+    tab:Toggle("Damage Amplifier", false, function(state)
+        Brew.damageAmp = state
+        if Brew.isReach then
+            Brew:undoReach()
+            task.wait(0.1)
+            Brew:doReach()
+        end
+    end)
+    tab:Toggle("Auto Clicker", settings.autoClickerEnabled, function(value)
+        settings.autoClickerEnabled = value
+        if value then
+            settings.autoClickerSpeed = 0.01
+            task.spawn(function()
+                while settings.autoClickerEnabled and player.Character and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 do
+                    pcall(function()
+                        local character = player.Character
+                        if character then
+                            local tool = character:FindFirstChildOfClass("Tool")
+                            if tool then
+                                tool:Activate()
+                            end
+                        end
+                    end)
+                    task.wait(settings.autoClickerSpeed)
+                end
+            end)
+        end
+    end)
+    tab:Textbox("Speed Autoclicker (0.01-1)", tostring(settings.autoClickerSpeed), function(text)
+        if text and text ~= "" then
+            local value = tonumber(text)
+            if value >= 0.01 and value <= 1 then
+                settings.autoClickerSpeed = value
+            end
+        end
+    end)
+    tab:Toggle("Sword Reach [CBring]", settings.cbringEnabled, function(value)
+        settings.cbringEnabled = value
+    end)
+    tab:Textbox("Sword Reach [CBring] Range (Any Number)", tostring(settings.cbringRange), function(text)
+        if text and text ~= "" then
+            local value = tonumber(text)
+            if value then
+                settings.cbringRange = value
+            end
+        end
+    end)
+    tab:Toggle("Show CBring Limbs", settings.showCBring, function(value)
+        settings.showCBring = value
+    end)
+    tab:Toggle("Damage Multiplier", settings.damageMultiplierEnabled, function(value)
+        settings.damageMultiplierEnabled = value
+    end)
+    tab:Textbox("Damage Multiplier Value (0-3)", tostring(settings.damageMultiplierValue), function(text)
+        if text and text ~= "" then
+            local value = tonumber(text)
+            if value and value >= 0 and value <= 3 then
+                settings.damageMultiplierValue = value
+            end
+        end
+    end)
+    tab:Toggle("Instant Hit", settings.instantHitEnabled, function(value)
+        settings.instantHitEnabled = value
+        if oneShotConnection then
+            oneShotConnection:Disconnect()
+            oneShotConnection = nil
+        end
+        local function setupOneShot()
+            local char = player.Character or player.CharacterAdded:Wait()
+            local tool
+            repeat
+                tool = char:FindFirstChildOfClass("Tool")
+                task.wait()
+            until not settings.instantHitEnabled or (tool and tool:FindFirstChild("Handle Facade") and tool:FindFirstChild("Handle"))
+            if not settings.instantHitEnabled or not tool then return end
+            local handle = tool:FindFirstChild("Handle")
+            if not handle then return end
+            local hitCooldown = {}
+            oneShotConnection = handle.Touched:Connect(function(hit)
+                if not settings.instantHitEnabled then return end
+                local targetChar = hit and hit.Parent
+                if not targetChar or targetChar == char or hitCooldown[targetChar] then return end
+                local hum = targetChar:FindFirstChild("Humanoid")
+                if hum and hum.Health > 0 then
+                    hitCooldown[targetChar] = true
+                    tool:Activate()
+                    for _, part in ipairs(targetChar:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            firetouchinterest(handle, part, 0)
+                            firetouchinterest(handle, part, 1)
+                        end
+                    end
+                    task.delay(0, function()
+                        hitCooldown[targetChar] = nil
+                    end)
+                end
+            end)
+        end
+        if value then
+            setupOneShot()
+            player.CharacterAdded:Connect(function()
+                if settings.instantHitEnabled then
+                    if oneShotConnection then oneShotConnection:Disconnect() end
+                    setupOneShot()
+                end
+            end)
+        end
+    end)
+    tab:Toggle("Tank [Collision Bug]", settings.tankEnabled, function(value)
+        settings.tankEnabled = value
+        if value then
+            enableTank()
+        else
+            disableTank()
+        end
+    end)
+    tab:Button("Elerium Hub PVP Pack", function()
+        pcall(function()
+            local success, result = pcall(function()
+                return loadstring(game:HttpGet("https://pastefy.app/Q2ec1RPh/raw"))()
+            end)
+            if not success then
+                warn("Failed to load PVP Pack: " .. tostring(result))
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "Failed to load PVP Pack. Check the script URL.",
+                    Duration = 5
+                })
+            end
+        end)
+    end)
+    tab:Toggle("Auto Deposit Time", autoDepositEnabled, function(value)
+        autoDepositEnabled = value
+        if value then
+            task.spawn(checkSafezone)
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Auto Deposit Time Enabled!",
+                Duration = 3
+            })
+        else
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Auto Deposit Time Disabled!",
+                Duration = 3
+            })
+        end
+    end)
+    tab:Button("Remove Bank Walls", function()
+        removeBankWalls()
+    end)
+    return tab
+end
+GUI.SwordModificationTab = GUI.createSwordModificationTab()
+
+-- Flicks Tab (no Mobile Flick)
+local flicksTab = win:Tab("Flicks")
+flicksTab:Toggle("Flick Enabled", flicking, function(value)
+    flicking = value
+    if not flicking and currentFlickConnection then
+        currentFlickConnection:Disconnect()
+        currentFlickConnection = nil
+    end
+    if flicking and player.Character then
+        initializeFlick(player.Character)
+    end
+end)
+flicksTab:Textbox("Flick Speed (1 to 50)", tostring(flickSpeed), function(text)
+    local value = tonumber(text)
+    if value and value >= 1 and value <= 50 then
+        flickSpeed = value
+    end
+end)
+flicksTab:Textbox("Flick Smoothness (0.1 to 5)", tostring(flickSmoothness), function(text)
+    local value = tonumber(text)
+    if value and value >= 0.1 and value <= 5 then
+        flickSmoothness = value
+    end
+end)
+flicksTab:Textbox("Flick Amount (0 to 30)", tostring(flickAngle), function(text)
+    local value = tonumber(text)
+    if value and value >= 0 and value <= 30 then
+        flickAngle = value
+    end
+end)
+
+
+-- Get all player names for dropdown
+local playerNames = {}
+for _, player in ipairs(Players:GetPlayers()) do
+    if player ~= Players.LocalPlayer then
+        table.insert(playerNames, player.Name)
+    end
+end
+
+-- Create the Auto Snipe Tab with dynamic player list
+function GUI.createAutoSnipeTab()
+    local tab = win:Tab("Auto Snipe")
+    
+    tab:Label("Auto Snipe (Specific Target)")
+    local snipeDropdown = tab:Dropdown("Select Target", playerManagement.playerList, function(selected)
+        specificSnipeTarget = playerManagement:getPlayerByName(selected)
+        if specificSnipeTarget then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Snipe target set to: " .. selected,
+                Duration = 3
+            })
+        end
+    end)
+    table.insert(playerManagement.dropdownReferences, snipeDropdown)
+    
+    tab:Toggle("Enable Target Auto Snipe", false, function(value)
+        autoSnipeSpecificEnabled = value
+        if value then
+            if specificSnipeTarget then
+                task.spawn(autoSnipeSpecificLoop)
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "Auto Snipe Enabled for " .. specificSnipeTarget.Name .. "!",
+                    Duration = 3
+                })
+            else
+                autoSnipeSpecificEnabled = false
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "No target selected for Auto Snipe!",
+                    Duration = 3
+                })
+            end
+        else
+            shouldRunSpecificLoop = false
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Target Auto Snipe Disabled!",
+                Duration = 3
+            })
+        end
+    end)
+    
+    tab:Label("Auto Snipe (All Players)")
+    tab:Toggle("Enable All Players Auto Snipe", false, function(value)
+        autoSnipeEnabled = value
+        if autoSnipeEnabled then
+            task.spawn(autoSnipeLoop)
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Auto Snipe Enabled for all players!",
+                Duration = 3
+            })
+        else
+            shouldRunLoop = false
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Auto Snipe Disabled!",
+                Duration = 3
+            })
+        end
+    end)
+    
+    tab:Textbox("Teleport Height (-2 to 2)", tostring(floatHeight), function(text)
+        local value = tonumber(text)
+        if value and value >= -2 and value <= 2 then
+            floatHeight = value
+        end
+    end)
+    
+    tab:Textbox("Max Distance (5 to 30)", tostring(maxFollowDistance), function(text)
+        local value = tonumber(text)
+        if value and value >= 5 and value <= 30 then
+            maxFollowDistance = value
+        end
+    end)
+    tab:Textbox("Minimum Time (Any Number)", tostring(minimumTime), function(text)
+        local value = tonumber(text)
+        if value then
+            minimumTime = value
+        end
+    end)
+    return tab
+end
+GUI.AutoSnipeTab = GUI.createAutoSnipeTab()
+
+-- Visuals Tab (refactored into function with GUI registration)
+function GUI.createVisualsTab()
+    local tab = win:Tab("Visuals")
+    
+    -- Time Spoofer
+    tab:Toggle("Time Spoofer", settings.timeSpooferEnabled, function(value)
+        settings.timeSpooferEnabled = value
+        if value then
+            pcall(function()
+                local playerStats = player:FindFirstChild("PlayerStats")
+                local timeStat = playerStats and playerStats:FindFirstChild("Time")
+                if timeStat then
+                    timeStat.Value = settings.timeValue
+                end
+            end)
+        end
+    end)
+    
+    tab:Textbox("Time Value (Any Number)", false, function(text)
+        if text and text ~= "" then
+            local newTime = tonumber(text)
+            if newTime then
+                settings.timeValue = newTime
+                if settings.timeSpooferEnabled then
+                    pcall(function()
+                        local playerStats = player:FindFirstChild("PlayerStats")
+                        local timeStat = playerStats and playerStats:FindFirstChild("Time")
+                        if timeStat then
+                            timeStat.Value = settings.timeValue
+                        end
+                    end)
+                end
+            end
+        end
+    end)
+    
+    -- Killstreak Spoofer
+    tab:Toggle("Killstreak Spoofer", settings.killstreakEnabled, function(value)
+        settings.killstreakEnabled = value
+        if value then
+            pcall(function()
+                local playerStats = player:FindFirstChild("PlayerStats")
+                local killstreakStat = playerStats and playerStats:FindFirstChild("Killstreak")
+                if killstreakStat then
+                    killstreakStat.Value = settings.killstreakValue
+                end
+            end)
+        end
+    end)
+    
+    tab:Textbox("Killstreak Value (Any Number)", false, function(text)
+        if text and text ~= "" then
+            local newKillstreak = tonumber(text)
+            if newKillstreak then
+                settings.killstreakValue = newKillstreak
+                if settings.killstreakEnabled then
+                    pcall(function()
+                        local playerStats = player:FindFirstChild("PlayerStats")
+                        local killstreakStat = playerStats and playerStats:FindFirstChild("Killstreak")
+                        if killstreakStat then
+                            killstreakStat.Value = settings.killstreakValue
+                        end
+                    end)
+                end
+            end
+        end
+    end)
+    
+    -- Map Color Changer
+    tab:Colorpicker("Map Color", Color3.fromRGB(75, 151, 75), function(newColor)
+        if grass and grass:IsA("BasePart") then
+            grass.Color = newColor
+        end
+    end)
+    
+    -- Stats Spoofer Section
+    tab:Label("Stats Spoofer")
+    
+    local function spoofStat(statName, value)
+        pcall(function()
+            local playerStats = player:FindFirstChild("PlayerStats")
+            local stat = playerStats and playerStats:FindFirstChild(statName)
+            if stat then
+                stat.Value = value
+            end
+        end)
+    end
+    
+    local function addStatSpoofer(statName, displayName)
+        tab:Toggle(displayName .. " Spoofer", settings[statName.."Enabled"], function(value)
+            settings[statName.."Enabled"] = value
+            if value then
+                spoofStat(statName, settings[statName.."Value"])
+            end
+        end)
+        
+        tab:Textbox(displayName .. " Value", false, function(text)
+            if text and text ~= "" then
+                local newValue = tonumber(text)
+                if newValue then
+                    settings[statName.."Value"] = newValue
+                    if settings[statName.."Enabled"] then
+                        spoofStat(statName, newValue)
+                    end
+                end
+            end
+        end)
+    end
+    
+    -- Add all stat spoofers
+    addStatSpoofer("BankBalance", "Bank Balance")
+    addStatSpoofer("BestTime", "Best Time")
+    addStatSpoofer("Deaths", "Deaths")
+    addStatSpoofer("Gold", "Gold")
+    addStatSpoofer("Keys", "Keys")
+    addStatSpoofer("Kills", "Kills")
+    
+    return tab
+end
+
+-- Register the visuals tab
+GUI.VisualsTab = GUI.createVisualsTab()
+
+-- Movement Tab
+local movementTab = win:Tab("Movement")
+movementTab:Toggle("CFrame Walkspeed", settings.cframeWalkspeedEnabled, function(value)
+    settings.cframeWalkspeedEnabled = value
+    if value then
+        local connection
+        connection = RunService.RenderStepped:Connect(function()
+            if settings.cframeWalkspeedEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local moveDirection = player.Character.Humanoid.MoveDirection
+                if moveDirection.Magnitude > 0 then
+                    player.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame + moveDirection * settings.cframeSpeed
+                end
+            else
+                connection:Disconnect()
+            end
+        end)
+    end
+end)
+movementTab:Textbox("CFrame Speed (0 to 0.20)", tostring(settings.cframeSpeed), function(text)
+    local value = tonumber(text)
+    if value and value >= 0 and value <= 0.20 then
+        settings.cframeSpeed = value
+    end
+end)
+movementTab:Toggle("Walkspeed", settings.walkspeedEnabled, function(value)
+    settings.walkspeedEnabled = value
+    if value and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+        Brew:setWalkSpeed(Brew.cWalkspeed)
+    elseif not value and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+        Brew:setWalkSpeed(16)
+    end
+end)
+movementTab:Textbox("Walkspeed Value (16 to 30)", tostring(Brew.cWalkspeed), function(text)
+    local value = tonumber(text)
+    if value and value >= 16 and value <= 30 then
+        Brew.cWalkspeed = value
+        if settings.walkspeedEnabled then
+            Brew:setWalkSpeed(value)
+        end
+    end
+end)
+movementTab:Toggle("Jump Power", settings.jumpPowerEnabled, function(value)
+    settings.jumpPowerEnabled = value
+    if value and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+        Brew:setJumpPower(Brew.cJumppower)
+    elseif not value and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+        Brew:setJumpPower(50)
+    end
+end)
+movementTab:Textbox("Jump Power Value (50 to 70)", tostring(Brew.cJumppower), function(text)
+    local value = tonumber(text)
+    if value and value >= 50 and value <= 70 then
+        Brew.cJumppower = value
+        if settings.jumpPowerEnabled then
+            Brew:setJumpPower(value)
+        end
+    end
+end)
+movementTab:Toggle("TP Walk", tpWalkEnabled, function(value)
+    tpWalkEnabled = value
+    if value then
+        local connection
+        connection = RunService.RenderStepped:Connect(function()
+            if tpWalkEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid.MoveDirection.Magnitude > 0 then
+                    local targetCFrame = player.Character.HumanoidRootPart.CFrame + (humanoid.MoveDirection * tpWalkSpeed)
+                    player.Character.HumanoidRootPart.CFrame = targetCFrame
+                end
+            else
+                connection:Disconnect()
+            end
+        end)
+    end
+end)
+movementTab:Textbox("TP Walk Speed (0 to 0.20)", tostring(tpWalkSpeed), function(text)
+    local value = tonumber(text)
+    if value and value >= 0.1 and value <= 0.20 then
+        tpWalkSpeed = value
+    end
+end)
+
+local autoFarmsTab = win:Tab("Auto Farms")
+autoFarmsTab:Toggle("Auto Farm Orbs", settings.farmingOrbsEnabled, function(value)
+    settings.farmingOrbsEnabled = value
+    autoCollectOrbsActive = value
+    if value then
+        task.spawn(autoCollectOrbsLoop)
+    else
+        stopCurrentOrbTween()
+    end
+end)
+autoFarmsTab:Toggle("Auto Farm Lucky Blocks", settings.farmingLuckyBlocksEnabled, function(value)
+    settings.farmingLuckyBlocksEnabled = value
+    autoCollectLuckyBlocksActive = value
+    if value then
+        task.spawn(autoCollectLuckyBlocksLoop)
+    else
+        stopCurrentLuckyBlockTween()
+    end
+end)
+autoFarmsTab:Toggle("Auto Farm Time Zones", settings.farmingTimeZonesEnabled, function(value)
+    settings.farmingTimeZonesEnabled = value
+    autoCollectZonesActive = value
+    if value then
+        task.spawn(autoCollectZonesLoop)
+    else
+        stopCurrentZoneTween()
+    end
+end)
+autoFarmsTab:Toggle("Auto Farm KOTH [Circling Disables Reach]", settings.autoFarmKOTHEnabled, function(value)
+    settings.autoFarmKOTHEnabled = value
+    autoCollectKOTHActive = value
+    if value then
+        task.spawn(autoCollectKOTHLoop)
+    else
+        stopCurrentKOTHTween()
+    end
+end)
+autoFarmsTab:Toggle("Increase Orb Hitbox", settings.increaseOrbHitboxEnabled, function(value)
+    settings.increaseOrbHitboxEnabled = value
+    increaseOrbHitbox(value)
+end)
+autoFarmsTab:Toggle("Auto K/D Decreaser", false, function(value)
+    if value then
+        local character = player.Character
+        if not character or not character:FindFirstChild("Humanoid") or not character:FindFirstChild("HumanoidRootPart") then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Character not found! Auto K/D Decreaser disabled.",
+                Duration = 3
+            })
+            return
+        end
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        local safezone = Workspace:FindFirstChild("Safezone")
+        local safezoneMiddle = safezone and safezone:FindFirstChild("Middle")
+        if not safezone or not safezoneMiddle then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Safezone not found! Auto K/D Decreaser disabled.",
+                Duration = 3
+            })
+            return
+        end
+
+        -- Function to check if a position is inside the Safezone
+        local function isInSafezone(position)
+            if safezone:IsA("BasePart") then
+                local relativePos = position - safezone.Position
+                local halfSize = safezone.Size / 2
+                return math.abs(relativePos.X) <= halfSize.X and
+                       math.abs(relativePos.Y) <= halfSize.Y and
+                       math.abs(relativePos.Z) <= halfSize.Z
+            elseif safezone:IsA("Model") then
+                local distance = (position - safezoneMiddle.Position).Magnitude
+                return distance <= 39 -- Adjust based on Safezone size
+            end
+            return false
+        end
+
+        -- Step 1: Instantly teleport underground
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame * CFrame.new(0, -10, 0) -- Move 10 studs underground instantly
+
+        -- Step 2: Very fast tween forward (negative Z-axis)
+        local forwardTweenInfo = TweenInfo.new(
+            1, -- Faster duration (0.5 seconds)
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.Out,
+            0,
+            false,
+            0
+        )
+        while isInSafezone(humanoidRootPart.Position) do
+            local forwardGoal = {CFrame = humanoidRootPart.CFrame * CFrame.new(0, 0, -20)} -- Move forward 20 studs (faster)
+            local forwardTween = TweenService:Create(humanoidRootPart, forwardTweenInfo, forwardGoal)
+            forwardTween:Play()
+            forwardTween.Completed:Wait()
+        end
+
+        -- Step 3: Reset character (respawn)
+        humanoid:TakeDamage(humanoid.Health) -- Forces respawn
+
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Player has moved outside the Safezone and reset",
+            Duration = 3
+        })
+    end
+end)
+
+-- Camera Tab
+local cameraTab = win:Tab("Camera")
+cameraTab:Toggle("Free Cam [PC]", settings.freeCamEnabled, function(value)
+    settings.freeCamEnabled = value
+    if value then
+        enableFreeCam()
+    else
+        disableFreeCam()
+    end
+end)
+cameraTab:Toggle("Spectate Players", settings.spectatePlayersEnabled, function(value)
+    settings.spectatePlayersEnabled = value
+    if not value then
+        viewing = nil
+        if viewDied then
+            viewDied:Disconnect()
+            viewDied = nil
+        end
+        if viewChanged then
+            viewChanged:Disconnect()
+            viewChanged = nil
+        end
+        camera.CameraType = Enum.CameraType.Custom
+        camera.CameraSubject = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Stopped spectating",
+            Duration = 3
+        })
+    end
+end)
+cameraTab:Textbox("Spectate Player Name", "", function(text)
+    if text and text ~= "" and settings.spectatePlayersEnabled then
+        spectatePlayer(text)
+    end
+end)
+cameraTab:Textbox("Field of View (10 to 120)", tostring(fieldOfView), function(text)
+    local value = tonumber(text)
+    if value and value >= 10 and value <= 120 then
+        fieldOfView = value
+        camera.FieldOfView = value
+    end
+end)
+
+-- Player Modification Tab
+local playerModificationTab = win:Tab("Player Modification")
+playerModificationTab:Button("Invisible Mode", function()
+    loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))()
+end)
+playerModificationTab:Toggle("Freeze Mode", settings.freezeModeEnabled, function(value)
+    settings.freezeModeEnabled = value
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.Anchored = value
+    end
+end)
+playerModificationTab:Toggle("Carpet [Decreases Your Hitbox", settings.carpetEnabled, function(value)
+    settings.carpetEnabled = value
+    if value then
+        enableCarpet()
+    else
+        disableCarpet()
+    end
+end)
+playerModificationTab:Toggle("Lay Down [Carpet V2]", settings.layDownEnabled, function(value)
+    settings.layDownEnabled = value
+    if value then
+        -- Load and play the animation
+        local animation = Instance.new("Animation")
+        animation.AnimationId = "rbxassetid://181526230"
+        
+        local character = player.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                layDownAnim = humanoid:LoadAnimation(animation)
+                layDownAnim:Play()
+                layDownAnim.Looped = true
+                
+                -- Handle character death
+                if layDownDied then layDownDied:Disconnect() end
+                layDownDied = humanoid.Died:Connect(function()
+                    if layDownAnim then
+                        layDownAnim:Stop()
+                        layDownAnim = nil
+                    end
+                end)
+            end
+        end
+    elseif layDownAnim then
+        -- Stop the animation when disabled
+        layDownAnim:Stop()
+        layDownAnim = nil
+        if layDownDied then
+            layDownDied:Disconnect()
+            layDownDied = nil
+        end
+    end
+end)
+playerModificationTab:Toggle("Hip Height", settings.hipHeightEnabled, function(value)
+    settings.hipHeightEnabled = value
+    if value then
+        setHipHeight(settings.hipHeightValue)
+    elseif player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+        player.Character.Humanoid.HipHeight = 0
+    end
+end)
+playerModificationTab:Textbox("Hip Height Value (0 to 20)", tostring(settings.hipHeightValue), function(text)
+    local value = tonumber(text)
+    if value and value >= 0 and value <= 20 then
+        settings.hipHeightValue = value
+        if settings.hipHeightEnabled then
+            setHipHeight(value)
+        end
+    end
+end)
+playerModificationTab:Toggle("Spin Mode", settings.spinEnabled, function(value)
+    settings.spinEnabled = value
+    if value and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local spinConnection
+        spinConnection = RunService.RenderStepped:Connect(function(deltaTime)
+            if settings.spinEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(settings.spinSpeed * deltaTime * 60), 0)
+            else
+                spinConnection:Disconnect()
+            end
+        end)
+    end
+end)
+playerModificationTab:Textbox("Spin Speed (0 to 500)", tostring(settings.spinSpeed), function(text)
+    local value = tonumber(text)
+    if value and value >= 0 and value <= 500 then
+        settings.spinSpeed = value
+    end
+end)
+playerModificationTab:Toggle("Lag Switch [WIP]", settings.lagSwitchEnabled, function(value)
+    settings.lagSwitchEnabled = value
+    if value then
+        enableLagSwitch()
+    else
+        disableLagSwitch()
+    end
+end)
+
+-- Automatics Tab
+local automaticsTab = win:Tab("Automatics")
+
+automaticsTab:Toggle("Auto Kill Player Bot", settings.autoKillEnabled, function(value)
+    settings.autoKillEnabled = value
+    if value then
+        enableAutoKill()
+    else
+        disableAutoKill()
+    end
+end)
+automaticsTab:Textbox("Auto Kill Range (0 to 500)", tostring(settings.autoKillRange), function(text)
+    local value = tonumber(text)
+    if value and value >= 0 and value <= 0 then
+        settings.autoKillRange = value
+    end
+end)
+automaticsTab:Toggle("Auto Look Player", settings.autoLookEnabled, function(value)
+    settings.autoLookEnabled = value
+    if value then
+        task.spawn(function()
+            while settings.autoLookEnabled and player.Character and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 do
+                pcall(function()
+                    local character = player.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChildOfClass("Humanoid") then
+                        local humanoid = character:FindFirstChildOfClass("Humanoid")
+                        local rootPart = character.HumanoidRootPart
+                        
+                        local nearestPlayer = getNearestPlayer(settings.autoLookDistance)
+                        if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            local targetPosition = nearestPlayer.Character.HumanoidRootPart.Position
+                            local currentCFrame = rootPart.CFrame
+                            local lookCFrame = CFrame.lookAt(currentCFrame.Position, Vector3.new(targetPosition.X, currentCFrame.Position.Y, targetPosition.Z))
+                            rootPart.CFrame = currentCFrame:Lerp(lookCFrame, 0.2)
+                            humanoid.AutoRotate = false
+                        else
+                            humanoid.AutoRotate = true
+                        end
+                    end
+                end)
+                task.wait(0.01)
+            end
+            if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+                player.Character:FindFirstChildOfClass("Humanoid").AutoRotate = true
+            end
+        end)
+    else
+        if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+            player.Character:FindFirstChildOfClass("Humanoid").AutoRotate = true
+        end
+    end
+end)
+automaticsTab:Textbox("Auto Look Distance (1-100)", false, function(text)
+    if text and text ~= "" then
+        local value = tonumber(text)
+        if value and value >= 1 and value <= 100 then
+            settings.autoLookDistance = value
+        end
+    end
+end)
+automaticsTab:Toggle("Auto Hit", settings.autoHitEnabled, function(value)
+    settings.autoHitEnabled = value
+end)
+automaticsTab:Textbox("Auto Hit Distance (0 to 50)", tostring(settings.autoHitDistance), function(text)
+    local value = tonumber(text)
+    if value and value >= 0 and value <= 50 then
+        settings.autoHitDistance = value
+    end
+end)
+automaticsTab:Toggle("Auto Jump", settings.autoJumpEnabled, function(value)
+    settings.autoJumpEnabled = value
+end)
+automaticsTab:Textbox("Auto Jump Distance (0 to 50)", tostring(settings.autoJumpDistance), function(text)
+    local value = tonumber(text)
+    if value and value >= 0 and value <= 50 then
+        settings.autoJumpDistance = value
+    end
+end)
+automaticsTab:Toggle("Lock On", settings.lockOnEnabled, function(value)
+    settings.lockOnEnabled = value
+end)
+automaticsTab:Dropdown("Lock On Part", {"Head", "Torso", "HumanoidRootPart"}, function(value)
+    settings.lockTargetPart = value
+end)
+
+local openCaseTab = win:Tab("Open Case")
+openCaseTab:Label("💼 Case Opener")
+
+local caseNames = {}
+for i = 1, #Cases do
+    caseNames[i] = Cases[i].Name
+end
+
+local dropdown = openCaseTab:Dropdown("Select Case", caseNames, function(selected)
+    selectedCase = selected
+    StarterGui:SetCore("SendNotification", {
+        Title = "Elerium Hub",
+        Text = "Selected case: " .. selected,
+        Duration = 3
+    })
+end)
+
+openCaseTab:Button("Open Selected Case", function()
+    if selectedCase then
+        local caseInfo = nil
+        for _, case in ipairs(Cases) do
+            if case.Name == selectedCase then
+                caseInfo = case
+                break
+            end
+        end
+        if caseInfo then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Purchasing " .. caseInfo.Name .. ": " .. caseInfo.Description,
+                Duration = 3
+            })
+            openCase(caseInfo.Name)
+        else
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "Invalid case selected!",
+                Duration = 3
+            })
+        end
+    else
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "No case selected!",
+            Duration = 3
+        })
+    end
+end)
+
+openCaseTab:Toggle("Auto Open Key Case", autoOpenKeyCaseEnabled, function(value)
+    autoOpenKeyCaseEnabled = value
+    if value then
+        task.spawn(function()
+            while autoOpenKeyCaseEnabled do
+                pcall(function()
+                    local args = {
+                        game:GetService("ReplicatedStorage"):WaitForChild("Cases"):WaitForChild("Kills Case")
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Case"):FireServer(unpack(args))
+                end)
+                task.wait(0.2) -- Small delay to prevent server overload
+            end
+        end)
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Auto Open Key Case Enabled!",
+            Duration = 3
+        })
+    else
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "Auto Open Key Case Disabled!",
+            Duration = 3
+        })
+    end
+end)
+
+GUI = GUI or {} -- Global table to store tabs, avoiding local register
+function GUI.createTeleportKillsTab()
+    local tab = win:Tab("Teleport Kills")
+        tab:Label("TP Kill (All Players)")
+    tab:Toggle("Enable TP Kill All", settings.tpKillEnabled, function(value)
+        settings.tpKillEnabled = value
+        targetedTPKillPlayer = nil
+        if value then
+            Brew:enableTeleport(settings.tpKillRange, nil)
+        else
+            Brew:disableTeleport()
+        end
+    end)
+    tab:Textbox("TP Kill Range (0 to 50)", tostring(settings.tpKillRange), function(text)
+        local value = tonumber(text)
+        if value and value >= 0 and value <= 50 then
+            settings.tpKillRange = value
+            if settings.tpKillEnabled then
+                Brew:enableTeleport(value, targetedTPKillPlayer and targetedTPKillPlayer.Name or nil)
+            end
+        end
+    end)
+    tab:Label("TP Kill (Specific Player)")
+    local tpKillDropdown = tab:Dropdown("Select TP Kill Target", playerManagement.playerList, function(selected)
+        targetedTPKillPlayer = playerManagement:getPlayerByName(selected)
+        if targetedTPKillPlayer then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "TP Kill target set to: " .. selected,
+                Duration = 3
+            })
+        end
+    end)
+    table.insert(playerManagement.dropdownReferences, tpKillDropdown)
+    
+    tab:Toggle("Enable TP Kill Specific", false, function(value)
+        settings.tpKillEnabled = value
+        if value then
+            if targetedTPKillPlayer then
+                if tpKillConnection then
+                    tpKillConnection:Disconnect()
+                end
+                tpKillConnection = enableSpecificTPKill()
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "TP Kill enabled for " .. targetedTPKillPlayer.Name,
+                    Duration = 3
+                })
+            else
+                settings.tpKillEnabled = false
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "No target selected for TP Kill!",
+                    Duration = 3
+                })
+            end
+        else
+            if tpKillConnection then
+                tpKillConnection:Disconnect()
+                tpKillConnection = nil
+            end
+            StarterGui:SetCore("SendNotification", {
+                Title = "Elerium Hub",
+                Text = "TP Kill Disabled!",
+                Duration = 3
+            })
+        end
+    end)
+    
+    tab:Textbox("TP Kill Range (0 to 50)", tostring(settings.tpKillRange), function(text)
+        local value = tonumber(text)
+        if value and value >= 0 and value <= 50 then
+            settings.tpKillRange = value
+        end
+    end)
+    
+    return tab
+end
+GUI.TeleportKillsTab = GUI.createTeleportKillsTab()
+
+-- In Teleport Kills Tab after initial playerNames population:
+Players.PlayerAdded:Connect(function(plr)
+    if plr ~= player then
+        table.insert(playerNames, plr.Name)
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(plr)
+    for i, name in ipairs(playerNames) do
+        if name == plr.Name then
+            table.remove(playerNames, i)
+            break
+        end
+    end
+end)
+
+GUI = GUI or {} -- Global table to store tabs, avoiding local register
+function GUI.createSettingsTab()
+    local tab = win:Tab("Scripts & Settings")
+    tab:Button("Xyrez Script", function()
+        pcall(function()
+            local success, result = pcall(function()
+                return loadstring(game:HttpGet("https://raw.githubusercontent.com/MaxicsSoft/XyrezAutoRank/main/ReachForMobileUsers.lua"))()
+            end)
+            if success then
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "Xyrez Script loaded successfully!",
+                    Duration = 3
+                })
+            else
+                warn("Failed to load Xyrez Script: " .. tostring(result))
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "Failed to load Xyrez Script. Check the script URL.",
+                    Duration = 5
+                })
+            end
+        end)
+    end)
+    tab:Button("Animations Hub (FE)", function()
+        pcall(function()
+            local success, result = pcall(function()
+                return loadstring(game:HttpGet("https://pastebin.com/raw/1p6xnBNf", true))()
+            end)
+            if success then
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "Animations Hub (FE) loaded successfully!",
+                    Duration = 3
+                })
+            else
+                warn("Failed to load Animations Hub (FE): " .. tostring(result))
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Elerium Hub",
+                    Text = "Failed to load Animations Hub (FE). Check the script URL.",
+                    Duration = 5
+                })
+            end
+        end)
+    end)
+    tab:Button("Boost FPS [Removes Textures]", function()
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("Texture") or v:IsA("Decal") then
+                v:Destroy()
+            elseif v:IsA("MeshPart") then
+                v.TextureID = ""
+            elseif v:IsA("SpecialMesh") or v:IsA("Mesh") then
+                v.TextureId = ""
+            end
+        end
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") and v.Material ~= Enum.Material.SmoothPlastic then
+                v.Material = Enum.Material.SmoothPlastic
+            end
+        end
+        StarterGui:SetCore("SendNotification", {
+            Title = "Elerium Hub",
+            Text = "FPS Boost applied! Textures removed and materials set to SmoothPlastic.",
+            Duration = 3
+        })
+    end)
+    tab:Button("Rejoin Server", function()
+        rejoinServer()
+    end)
+    tab:Button("Join Smallest Server", function()
+        joinSmallestServer()
+    end)
+    tab:Button("Join Good Ping Server", function()
+        local HTTPService = game:GetService("HttpService")
+        local TeleportService = game:GetService("TeleportService")
+        local StatsService = game:GetService("Stats")
+
+        local function fetchServersData(placeId, limit)
+            local url = string.format("https://games.roblox.com/v1/games/%d/servers/Public?limit=%d", placeId, limit)
+            local success, response = pcall(function()
+                return HTTPService:JSONDecode(game:HttpGet(url))
+            end)
+
+            if success and response and response.data then
+                return response.data
+            end
+
+            return nil
+        end
+
+        local placeId = game.PlaceId
+        local serverLimit = 100
+        local servers = fetchServersData(placeId, serverLimit)
+
+        if not servers then
+            return
+        end
+
+        local lowestPingServer = servers[1]
+
+        for _, server in pairs(servers) do
+            if server["ping"] < lowestPingServer["ping"] and server.maxPlayers > server.playing then
+                lowestPingServer = server
+            end
+        end
+
+        local commonLoadTime = 5
+        task.wait(commonLoadTime)
+
+        local pingThreshold = 100
+        local serverStats = StatsService.Network.ServerStatsItem
+        local dataPing = serverStats["Data Ping"]:GetValueString()
+        local pingValue = tonumber(dataPing:match("(%d+)"))
+
+        if pingValue >= pingThreshold then
+            TeleportService:TeleportToPlaceInstance(placeId, lowestPingServer.id)
+        end
+    end)
+    return tab
+end
+GUI.SettingsTab = GUI.createSettingsTab()
+
+player.CharacterAdded:Connect(function(character)
+    local waitTime = 2 -- Exploit-safe wait time
+    local humanoid = character:WaitForChild("Humanoid", waitTime)
+    local rootPart = character:WaitForChild("HumanoidRootPart", waitTime)
+    if not humanoid or not rootPart then
+        warn("[Elerium Hub] Character not fully loaded for feature reapply")
+        return
+    end
+    print("[Elerium Hub] Character loaded, reapplying features")
+
+    -- Reapply Reach
+    if Brew.isReach then
+        print("[Elerium Hub] Reapplying reach")
+        pcall(function()
+            Brew:undoReach()
+            Brew:doReach()
+        end)
+    end
+
+    -- Reapply Visualizer
+    if Brew.selBox then
+        print("[Elerium Hub] Reapplying visualizer")
+        pcall(function()
+            Brew:doSelBox()
+        end)
+    end
+
+    -- Reapply Flick
+    if flicking then
+        print("[Elerium Hub] Reapplying flick")
+        pcall(function()
+            initializeFlick(character)
+        end)
+    end
+
+    -- Reapply Carpet
+    if settings.carpetEnabled then
+        print("[Elerium Hub] Reapplying carpet")
+        pcall(function()
+            enableCarpet()
+        end)
+    end
+
+    -- Reapply Hip Height
+    if settings.hipHeightEnabled then
+        print("[Elerium Hub] Reapplying hip height")
+        pcall(function()
+            setHipHeight(settings.hipHeightValue)
+        end)
+    end
+
+    -- Reapply Freeze Mode
+    if settings.freezeModeEnabled then
+        print("[Elerium Hub] Reapplying freeze mode")
+        pcall(function()
+            rootPart.Anchored = true
+        end)
+    end
+
+    -- Reapply Walkspeed
+    if settings.walkspeedEnabled then
+        print("[Elerium Hub] Reapplying walkspeed")
+        pcall(function()
+            Brew:setWalkSpeed(Brew.cWalkspeed)
+        end)
+    end
+
+    -- Reapply Jump Power
+    if settings.jumpPowerEnabled then
+        print("[Elerium Hub] Reapplying jump power")
+        pcall(function()
+            Brew:setJumpPower(Brew.cJumppower)
+        end)
+    end
+
+    -- Reapply Tank Mode
+    if settings.tankEnabled then
+        print("[Elerium Hub] Reapplying tank mode")
+        pcall(function()
+            enableTank()
+        end)
+    end
+end)
